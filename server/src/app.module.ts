@@ -19,6 +19,7 @@ import { DatabaseModule } from './database/database.module';
 import { RedisModule } from './providers/redis/redis.module';
 import { QueueModule } from './providers/queue/queue.module';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { CorrelationIdMiddleware } from './common/middleware/correlation.middleware';
@@ -70,8 +71,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation.middlew
     RedisModule,
     QueueModule,
     HealthModule,
-
-    // Business modules will be imported here as they are built.
+    AuthModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Logger, VersioningType } from '@nestjs/common';
 import helmet from 'helmet';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -39,6 +40,7 @@ async function bootstrap() {
   // Security
   app.use(helmet());
   app.use(compression());
+  app.use(cookieParser());
 
   app.enableCors({
     origin: corsOrigins,
@@ -48,6 +50,7 @@ async function bootstrap() {
       'Authorization',
       'x-request-id',
       'x-correlation-id',
+      'x-device-fingerprint',
     ],
     credentials: true,
     maxAge: 3600,

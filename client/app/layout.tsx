@@ -37,6 +37,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AppProviders } from "@/components/providers/AppProviders";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,7 +46,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${anton.variable} ${manrope.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }

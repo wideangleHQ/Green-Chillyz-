@@ -26,7 +26,16 @@ export const envValidationSchema = Joi.object({
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRES_IN: Joi.string().default('15m'),
   JWT_REFRESH_SECRET: Joi.string().required(),
-  JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
+  JWT_ISSUER: Joi.string().default('greenchillyz-api'),
+  JWT_AUDIENCE: Joi.string().default('greenchillyz-client'),
+  REFRESH_TOKEN_EXPIRY_DAYS: Joi.number().default(30),
+
+  // Supabase
+  SUPABASE_URL: Joi.string().uri().required(),
+  SUPABASE_JWT_SECRET: Joi.string().required(),
+
+  // Cookie
+  COOKIE_DOMAIN: Joi.string().default('localhost'),
 
   // Cloudflare R2
   R2_ACCOUNT_ID: Joi.string().allow('').default(''),

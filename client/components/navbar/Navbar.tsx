@@ -4,10 +4,11 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { CircleDollarSign, Menu, UserRound } from "lucide-react";
+import { CircleDollarSign, Menu, UserRound, LogOut } from "lucide-react";
 import { Drawer } from "@/components/ui/Drawer";
 import { DURATION, EASE_STANDARD } from "@/lib/motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useAuth } from "@/components/auth/AuthContext";
 
 const NAV_LINKS = [
   { href: "#story", label: "Story" },
@@ -41,6 +42,7 @@ export function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { scrollY } = useScroll();
   const reducedMotion = usePrefersReducedMotion();
+  const { user, isAuthenticated, openAuthModal, logout } = useAuth();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
@@ -94,13 +96,41 @@ export function Navbar() {
 
           <div className="flex items-center gap-2">
             <CoinsButton />
-            <Link
-              href="#rewards"
-              aria-label="Profile"
-              className="hidden size-11 items-center justify-center rounded-full border border-outline-variant text-on-surface transition-shadow duration-200 hover:shadow-hover lg:flex"
-            >
-              <UserRound aria-hidden="true" className="size-5" strokeWidth={2} />
-            </Link>
+            {isAuthenticated ? (
+              <div className="relative group hidden lg:block">
+                <button
+                  type="button"
+                  aria-label="Profile menu"
+                  className="flex size-11 items-center justify-center rounded-full border border-brand-green bg-brand-green/10 font-bold text-brand-green transition-all duration-200 hover:bg-brand-green hover:text-white cursor-pointer"
+                >
+                  {user?.fullName ? user.fullName.charAt(0).toUpperCase() : <UserRound className="size-5" />}
+                </button>
+                <div className="absolute right-0 top-12 hidden w-48 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-heavy backdrop-blur-md group-hover:block">
+                  <div className="px-3 py-2 border-b border-slate-100">
+                    <p className="text-xs font-bold text-slate-900 truncate">{user?.fullName}</p>
+                    <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => logout()}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="size-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openAuthModal("sign-in")}
+                aria-label="Sign In"
+                className="hidden size-11 items-center justify-center rounded-full border border-outline-variant text-on-surface transition-all duration-200 hover:border-brand-green hover:text-brand-green hover:shadow-hover lg:flex cursor-pointer"
+              >
+                <UserRound aria-hidden="true" className="size-5" strokeWidth={2} />
+              </button>
+            )}
+
             <button
               type="button"
               aria-label="Open menu"
@@ -127,6 +157,33 @@ export function Navbar() {
               </Link>
             </li>
           ))}
+          <li className="pt-2 border-t border-slate-200/60">
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  logout();
+                }}
+                className="flex min-h-11 w-full items-center gap-3 rounded-full px-4 text-nav-link text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="size-5" />
+                <span>Sign Out ({user?.fullName})</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  openAuthModal("sign-in");
+                }}
+                className="flex min-h-11 w-full items-center gap-3 rounded-full px-4 text-nav-link text-brand-green hover:bg-brand-green/10"
+              >
+                <UserRound className="size-5" />
+                <span>Sign In / Register</span>
+              </button>
+            )}
+          </li>
         </ul>
       </Drawer>
     </>
