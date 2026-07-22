@@ -1,0 +1,305 @@
+@import "tailwindcss";
+
+/*
+  Design tokens — sourced from docs/19_Design_Tokens.md (DESIGN.md values).
+  Never hardcode a raw value in a component; extend this file first.
+*/
+@theme {
+  /* Color tokens */
+  --color-primary: #006b2a;
+  --color-primary-container: #008737;
+  --color-on-primary: #ffffff;
+  --color-secondary: #1f6c3a;
+  --color-secondary-container: #a4f1b2;
+  --color-tertiary: #735c00;
+  --color-tertiary-container: #cca72f;
+  --color-gold: #d4af37;
+  --color-surface: #fff8f1;
+  --color-surface-container: #f4ede5;
+  --color-surface-container-highest: #e8e1da;
+  --color-outline: #6e7b6c;
+  --color-outline-variant: #bdcab9;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-surface: #1e1b17;
+  --color-on-surface-variant: #3e4a3d;
+  --color-inverse-surface: #33302a;
+  --color-inverse-on-surface: #f7efe7;
+
+  /* Brand colors */
+  --color-brand-green: #006b2a;
+  --color-brand-green-hover: #004d1e;
+  --color-brand-red: #c62828;
+  --color-brand-red-hover: #9e1c1c;
+
+  /* Typography tokens (Anton and Manrope loaded locally in layout.tsx) */
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-anton), Impact, sans-serif;
+
+  --text-display-hero: clamp(48px, 3.21vw + 2.35rem, 84px);
+  --text-display-hero--line-height: 1.1;
+  --text-display-hero--font-weight: 800;
+  --text-display-hero--letter-spacing: -0.04em;
+
+  --text-display-hero-mobile: clamp(48px, 3.21vw + 2.35rem, 84px);
+  --text-display-hero-mobile--line-height: 1.1;
+  --text-display-hero-mobile--font-weight: 800;
+  --text-display-hero-mobile--letter-spacing: -0.04em;
+
+  --text-display-hero-tablet: clamp(48px, 3.21vw + 2.35rem, 84px);
+  --text-display-hero-tablet--line-height: 1.1;
+  --text-display-hero-tablet--font-weight: 800;
+  --text-display-hero-tablet--letter-spacing: -0.04em;
+
+  --text-headline-lg: clamp(32px, 1.43vw + 1.71rem, 48px);
+  --text-headline-lg--line-height: 1.2;
+  --text-headline-lg--font-weight: 700;
+  --text-headline-lg--letter-spacing: -0.02em;
+
+  --text-headline-lg-mobile: clamp(32px, 1.43vw + 1.71rem, 48px);
+  --text-headline-lg-mobile--line-height: 1.2;
+  --text-headline-lg-mobile--font-weight: 700;
+  --text-headline-lg-mobile--letter-spacing: -0.02em;
+
+  --text-headline-lg-tablet: clamp(32px, 1.43vw + 1.71rem, 48px);
+  --text-headline-lg-tablet--line-height: 1.2;
+  --text-headline-lg-tablet--font-weight: 700;
+  --text-headline-lg-tablet--letter-spacing: -0.02em;
+
+  --text-headline-md: clamp(24px, 0.71vw + 1.36rem, 32px);
+  --text-headline-md--line-height: 1.3;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-lg: clamp(16px, 0.36vw + 0.93rem, 20px);
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: clamp(14px, 0.18vw + 0.84rem, 16px);
+  --text-body-md--line-height: 1.5;
+  --text-body-md--font-weight: 400;
+
+  --text-label-caps: clamp(11px, 0.09vw + 0.67rem, 12px);
+  --text-label-caps--line-height: 1;
+  --text-label-caps--font-weight: 500;
+  --text-label-caps--letter-spacing: 0.1em;
+
+  --text-nav-link: clamp(14px, 0.18vw + 0.84rem, 16px);
+  --text-nav-link--line-height: 1;
+  --text-nav-link--font-weight: 600;
+  --text-nav-link--letter-spacing: 0.02em;
+
+  /* Radius tokens — sharp corners never used */
+  --radius-sm: 0.5rem;
+  --radius-DEFAULT: 1rem;
+  --radius-md: 1.5rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+
+  /* Shadow tokens — multi-layer ambient only */
+  --shadow-soft:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-medium:
+    0 6px 10px -2px rgba(0, 0, 0, 0.06), 0 16px 24px -4px rgba(0, 0, 0, 0.12);
+  --shadow-heavy:
+    0 10px 20px -4px rgba(0, 0, 0, 0.1), 0 24px 48px -8px rgba(0, 0, 0, 0.18);
+  --shadow-floating:
+    0 2px 4px rgba(0, 0, 0, 0.04), 0 12px 24px -6px rgba(0, 0, 0, 0.1);
+  --shadow-glass:
+    0 4px 8px -2px rgba(0, 0, 0, 0.04), 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  --shadow-hover:
+    0 6px 10px -1px rgba(0, 107, 42, 0.08), 0 16px 28px -3px rgba(0, 107, 42, 0.16);
+
+  /* Blur tokens */
+  --blur-glass-sm: 16px; /* mobile glass ceiling */
+  --blur-glass-md: 24px;
+  --blur-glass-lg: 32px; /* desktop glass ceiling */
+  --blur-blob: 100px;
+
+  /* Motion tokens */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Breakpoints — extends the 3-tier system (18_Responsive_Design_System.md) */
+  --breakpoint-3xl: 120rem; /* ultra-wide */
+
+  /* Continuous ambient drift (linear easing permitted for drift only) */
+  --animate-kenburns: kenburns 24s linear infinite alternate;
+  --animate-blob-drift: blob-drift 30s linear infinite alternate;
+
+  @keyframes kenburns {
+    from {
+      transform: scale(1) translateY(0);
+    }
+    to {
+      transform: scale(1.08) translateY(-1.5%);
+    }
+  }
+  @keyframes blob-drift {
+    from {
+      transform: translate(0, 0);
+    }
+    to {
+      transform: translate(40px, -30px);
+    }
+  }
+}
+
+/* Glass panel — single canonical recipe (02_UI_Design_System.md):
+   16–32px backdrop blur, 60–80% white fill, 1px white border @20%.
+   Blur capped at 16px below tablet per 18_Responsive_Design_System.md. */
+@utility glass {
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(var(--blur-glass-sm));
+  -webkit-backdrop-filter: blur(var(--blur-glass-sm));
+  box-shadow: var(--shadow-glass);
+  @media (min-width: 768px) {
+    backdrop-filter: blur(var(--blur-glass-md));
+    -webkit-backdrop-filter: blur(var(--blur-glass-md));
+  }
+}
+
+/* Site container: 1440px cap; 20px mobile / 24px tablet / 80px desktop margins */
+@utility container-site {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: 20px;
+  @media (min-width: 768px) {
+    padding-inline: 24px;
+  }
+  @media (min-width: 1280px) {
+    padding-inline: 80px;
+  }
+}
+
+/* Section vertical rhythm: 64px+ mobile, ~88px tablet, 120px+ desktop */
+@utility section-pad {
+  padding-block: clamp(64px, 5vw + 3rem, 120px);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible focus ring everywhere — never removed without replacement */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Inputs signal premium interaction with a gold focus border */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-color: var(--color-gold);
+}
+
+::selection {
+  background-color: var(--color-secondary-container);
+  color: var(--color-on-surface);
+}
+
+/* Hero-to-About Premium Smooth Transition */
+.brand-story-bg-mask {
+  --transition-height: 20vh;
+  mask-image: linear-gradient(to bottom, transparent, black var(--transition-height));
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black var(--transition-height));
+}
+
+.brand-story-gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 10;
+  height: 20vh;
+  /* Multi-stop premium Apple-style ease gradient */
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.013) 8.1%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.049) 15.5%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.104) 22.5%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.175) 29%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.259) 35.3%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.352) 41.2%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.45) 47.1%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.55) 52.9%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.648) 58.8%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.741) 64.7%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.825) 71%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.896) 77.5%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.951) 84.5%,
+    rgba(var(--story-bg-rgb, 255, 255, 255), 0.987) 91.9%,
+    var(--story-bg-color, #ffffff) 100%
+  );
+}
+
+@media (min-width: 768px) {
+  .brand-story-bg-mask {
+    --transition-height: 25vh;
+  }
+  .brand-story-gradient-overlay {
+    height: 25vh;
+  }
+}
+
+@media (min-width: 1024px) {
+  .brand-story-bg-mask {
+    --transition-height: 30vh;
+  }
+  .brand-story-gradient-overlay {
+    height: 30vh;
+  }
+}
+
+/* Infinite Marquee Wall Animations (60 FPS GPU Accelerated) */
+@keyframes marquee-left {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-right {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-marquee-left {
+  animation: marquee-left 45s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right {
+  animation: marquee-right 45s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-left-mobile {
+  animation: marquee-left 55s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right-mobile {
+  animation: marquee-right 55s linear infinite;
+  will-change: transform;
+}
+
