@@ -1,0 +1,30 @@
+dist/
+node_modules/
+.env
+.env.development
+.env.staging
+.env.production
+*.js.map
+*.d.ts
+!vitest.config.ts
+
+# Prisma
+prisma/migrations/*
+!prisma/migrations/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Logs
+logs/
+*.log
