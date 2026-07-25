@@ -1,12 +1,54 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, ArrowUpRight, Clock, Sparkles, X } from "lucide-react";
 import Image from "next/image";
-import { OUTLETS, OUTLET_COUNT } from "@/lib/content";
+import { useActiveStores } from "@/hooks/useStores";
+import { getBrandTheme, getFullAddress } from "@/types/store";
+import type { Store, BrandTheme } from "@/types/store";
+
+const FALLBACK_IMAGE = "/assets/brand-story/brand_story_green.png";
+
+const BRAND_COLORS: Record<BrandTheme, string> = {
+  green: "#006B2A",
+  yellow: "#D4A31C",
+  gold: "#C9A227",
+};
+
+function getStoreImage(store: Store, broken?: Set<string>): string {
+  if (broken?.has(store.id)) return FALLBACK_IMAGE;
+  return store.thumbnailImage || store.coverImage || FALLBACK_IMAGE;
+}
+
+function StoreSkeleton() {
+  return (
+    <section
+      id="locations"
+      aria-labelledby="locations-heading"
+      className="relative w-full min-h-screen lg:h-screen lg:max-h-screen bg-[#FFF8F1] p-[39px] mt-16 md:mt-24 overflow-hidden flex flex-col justify-between"
+    >
+      <div className="relative z-10 w-full shrink-0 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-on-surface/10">
+        <div className="flex flex-col gap-1.5">
+          <div className="h-4 w-40 bg-stone-200/60 rounded animate-pulse" />
+          <div className="h-10 w-72 bg-stone-200/60 rounded animate-pulse mt-2" />
+        </div>
+      </div>
+      <div className="relative z-10 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4 min-h-0 overflow-hidden">
+        <div className="lg:col-span-5 flex flex-col gap-3">
+          <div className="h-11 w-full bg-stone-200/60 rounded-full animate-pulse" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-28 w-full bg-stone-200/60 rounded-[20px] animate-pulse" />
+          ))}
+        </div>
+        <div className="lg:col-span-7 h-full min-h-[280px] bg-stone-200/60 rounded-[36px] animate-pulse" />
+      </div>
+    </section>
+  );
+}
 
 export function LocationsSection() {
+  const { data: stores = [], isLoading, isError } = useActiveStores();
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [selected, setSelected] = useState(0);
@@ -14,25 +56,27 @@ export function LocationsSection() {
   const listRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
-  // 250ms debounced search
+  const handleImageError = useCallback((storeId: string) => {
+    setBrokenImages((prev) => new Set(prev).add(storeId));
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(query), 250);
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Filter outlets by name, address, or brand
-  const filteredOutlets = useMemo(
+  const filteredStores = useMemo(
     () =>
-      OUTLETS.filter((o) =>
-        `${o.name} ${o.address} ${o.brand}`
+      stores.filter((s) =>
+        `${s.name} ${s.addressLine1} ${s.city} ${s.brandName}`
           .toLowerCase()
           .includes(debounced.toLowerCase())
       ),
-    [debounced]
+    [stores, debounced]
   );
 
-  // Track scroll position for fade masks
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
@@ -51,11 +95,25 @@ export function LocationsSection() {
       el.removeEventListener("scroll", updateScroll);
       observer.disconnect();
     };
-  }, [filteredOutlets]);
+  }, [filteredStores]);
 
-  // Use hovered outlet if available, else active selected outlet
   const displayIndex = hoveredIndex !== null ? hoveredIndex : selected;
-  const activeOutlet = OUTLETS[displayIndex] || OUTLETS[0];
+  const activeStore = stores[displayIndex] || stores[0];
+
+  if (isLoading) return <StoreSkeleton />;
+
+  if (isError || !stores.length) {
+    return (
+      <section
+        id="locations"
+        className="relative w-full bg-[#FFF8F1] p-[39px] mt-16 md:mt-24 flex items-center justify-center min-h-[400px]"
+      >
+        <p className="text-sm font-sans text-on-surface-variant">
+          No locations available at the moment.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -71,7 +129,7 @@ export function LocationsSection() {
       {/* Soft Ambient Radial Glow */}
       <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.85)_0%,transparent_70%)]" />
 
-      {/* Header Area (Anton Reserved for Section Heading Only) */}
+      {/* Header Area */}
       <div className="relative z-10 w-full shrink-0 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-on-surface/10">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
@@ -80,7 +138,7 @@ export function LocationsSection() {
               <span className="relative inline-flex size-3 rounded-full bg-brand-green" />
             </span>
             <span className="text-xs font-sans font-bold uppercase tracking-wider text-brand-green">
-              {OUTLET_COUNT} Locations &amp; Growing
+              {stores.length} Locations &amp; Growing
             </span>
           </div>
           <h2
@@ -95,9 +153,9 @@ export function LocationsSection() {
         </p>
       </div>
 
-      {/* Split Content Area (Fixed within 100vh) */}
+      {/* Split Content Area */}
       <div className="relative z-10 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4 min-h-0 overflow-hidden">
-        {/* LEFT COLUMN: Sticky Search & Independently Scrollable Outlet List (40% / 5 Cols) */}
+        {/* LEFT COLUMN: Sticky Search & Scrollable Store List */}
         <div className="lg:col-span-5 flex flex-col h-full min-h-0 relative">
           {/* Sticky Search Bar */}
           <div className="shrink-0 pb-3">
@@ -123,9 +181,8 @@ export function LocationsSection() {
             </div>
           </div>
 
-          {/* Independently Scrollable Outlet List with Fade Masks */}
+          {/* Scrollable Store List with Fade Masks */}
           <div className="relative flex-1 min-h-0">
-            {/* Top fade mask */}
             <div
               className="pointer-events-none absolute top-0 left-0 right-0 h-6 z-10 transition-opacity duration-300"
               style={{
@@ -133,8 +190,6 @@ export function LocationsSection() {
                 opacity: canScrollUp ? 1 : 0,
               }}
             />
-
-            {/* Bottom fade mask */}
             <div
               className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 z-10 transition-opacity duration-300"
               style={{
@@ -152,26 +207,21 @@ export function LocationsSection() {
                 WebkitOverflowScrolling: "touch",
               }}
             >
-              {filteredOutlets.length === 0 ? (
+              {filteredStores.length === 0 ? (
                 <div className="p-6 rounded-[20px] bg-white/60 backdrop-blur-md border border-white/60 text-center text-xs md:text-sm font-sans text-on-surface-variant">
-                  No outlets found matching &quot;{query}&quot;. Try searching for &quot;Indiranagar&quot; or &quot;Koramangala&quot;.
+                  No outlets found matching &quot;{query}&quot;. Try a different search term.
                 </div>
               ) : (
-                filteredOutlets.map((outlet) => {
-                  const index = OUTLETS.indexOf(outlet);
+                filteredStores.map((store) => {
+                  const index = stores.indexOf(store);
                   const isSelected = index === selected;
                   const isHovered = index === hoveredIndex;
-
-                  const themeColor =
-                    outlet.brandTheme === "green"
-                      ? "#006B2A"
-                      : outlet.brandTheme === "yellow"
-                      ? "#D4A31C"
-                      : "#C9A227";
+                  const theme = getBrandTheme(store.brandName);
+                  const themeColor = BRAND_COLORS[theme];
 
                   return (
                     <motion.button
-                      key={outlet.name}
+                      key={store.id}
                       type="button"
                       onClick={() => setSelected(index)}
                       onMouseEnter={() => setHoveredIndex(index)}
@@ -187,7 +237,6 @@ export function LocationsSection() {
                         borderColor: isSelected ? themeColor : undefined,
                       }}
                     >
-                      {/* Selected Active Indicator Strip */}
                       {isSelected && (
                         <motion.div
                           layoutId="activeOutletIndicator"
@@ -196,17 +245,15 @@ export function LocationsSection() {
                         />
                       )}
 
-                      {/* Top Row: Outlet Name (Manrope ExtraBold 800) & Brand Chip */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-base md:text-lg font-sans font-extrabold text-on-surface tracking-tight flex items-center gap-2">
                           <MapPin
                             className="size-4 shrink-0"
                             style={{ color: isSelected || isHovered ? themeColor : "#1E1B17" }}
                           />
-                          <span>{outlet.name}</span>
+                          <span>{store.name}</span>
                         </div>
 
-                        {/* Brand Badge */}
                         <span
                           className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider shrink-0"
                           style={{
@@ -215,26 +262,21 @@ export function LocationsSection() {
                             border: `1px solid ${themeColor}30`,
                           }}
                         >
-                          {outlet.brand}
+                          {store.brandName}
                         </span>
                       </div>
 
-                      {/* Address Line (Manrope Regular) */}
                       <p className="text-xs font-sans text-on-surface-variant line-clamp-1">
-                        {outlet.address}
+                        {getFullAddress(store)}
                       </p>
 
-                      {/* Details Row: Hours, Distance, Status, Directions (Manrope Medium & Bold) */}
                       <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-on-surface/5 text-[11px] font-sans text-on-surface-variant">
                         <div className="flex items-center gap-3">
                           <span className="flex items-center gap-1 font-sans font-medium">
-                            <Clock className="size-3 text-on-surface-variant/70" />
-                            {outlet.hours}
+                            <MapPin className="size-3 text-on-surface-variant/70" />
+                            {store.city}
                           </span>
-                          <span className="font-sans font-bold text-on-surface">
-                            {outlet.distance} away
-                          </span>
-                          {outlet.isOpen && (
+                          {store.isOpenNow !== undefined && store.isOpenNow && (
                             <span className="inline-flex items-center gap-1 font-sans font-bold text-emerald-600">
                               <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                               Open Now
@@ -242,10 +284,18 @@ export function LocationsSection() {
                           )}
                         </div>
 
-                        {/* Directions CTA (Manrope Medium) */}
-                        <span className="inline-flex items-center gap-1 font-sans font-medium text-brand-green group-hover:translate-x-1 transition-transform">
+                        <a
+                          href={
+                            store.googleMapsLink ||
+                            `https://maps.google.com/?q=${encodeURIComponent(store.name + " " + getFullAddress(store))}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 font-sans font-medium text-brand-green group-hover:translate-x-1 transition-transform"
+                        >
                           Directions <ArrowUpRight className="size-3" />
-                        </span>
+                        </a>
                       </div>
                     </motion.button>
                   );
@@ -255,12 +305,11 @@ export function LocationsSection() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Large Location Image Showcase (60% / 7 Cols on Desktop) */}
+        {/* RIGHT COLUMN: Large Location Image Showcase */}
         <div className="lg:col-span-7 h-full min-h-[280px] lg:min-h-0 rounded-[28px] md:rounded-[36px] overflow-hidden relative border border-white/80 shadow-soft bg-stone-100 flex flex-col justify-end p-6">
-          {/* Dynamic Location Image Showcase with Crossfade & Soft Zoom */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeOutlet.name}
+              key={activeStore.id}
               initial={{ opacity: 0, scale: 1.04 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.04 }}
@@ -268,23 +317,22 @@ export function LocationsSection() {
               className="absolute inset-0 w-full h-full"
             >
               <Image
-                src={activeOutlet.image}
-                alt={activeOutlet.name}
+                src={getStoreImage(activeStore, brokenImages)}
+                alt={activeStore.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 60vw"
                 className="object-cover transition-transform duration-700 hover:scale-105"
                 priority
+                onError={() => handleImageError(activeStore.id)}
               />
-              {/* Soft Ambient Gradient Overlay for Text Legibility */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             </motion.div>
           </AnimatePresence>
 
-          {/* Bottom Floating Glassmorphism Overlay Content */}
           <div className="relative z-10 w-full">
             <AnimatePresence mode="wait">
               <motion.div
-                key={activeOutlet.name}
+                key={activeStore.id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
@@ -294,26 +342,25 @@ export function LocationsSection() {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider bg-white/20 text-white backdrop-blur-sm border border-white/30">
-                      {activeOutlet.brand}
+                      {activeStore.brandName}
                     </span>
                     <span className="text-xs font-sans text-emerald-400 font-bold flex items-center gap-1">
-                      <Sparkles className="size-3" /> Flagship Dining Experience
+                      <Sparkles className="size-3" /> {activeStore.isFeatured ? "Featured Location" : "Dining Experience"}
                     </span>
                   </div>
-                  {/* Outlet Name in Manrope ExtraBold 800 */}
                   <div className="text-lg md:text-2xl font-sans font-extrabold text-white tracking-tight">
-                    {activeOutlet.name}
+                    {activeStore.name}
                   </div>
                   <p className="text-xs font-sans text-white/80 line-clamp-1">
-                    {activeOutlet.address} • Open {activeOutlet.hours} • {activeOutlet.distance} away
+                    {getFullAddress(activeStore)} &bull; {activeStore.city}, {activeStore.state}
                   </p>
                 </div>
 
-                {/* Explore Outlet CTA Button (Manrope SemiBold) */}
                 <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(
-                    activeOutlet.name + " " + activeOutlet.address
-                  )}`}
+                  href={
+                    activeStore.googleMapsLink ||
+                    `https://maps.google.com/?q=${encodeURIComponent(activeStore.name + " " + getFullAddress(activeStore))}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group inline-flex items-center justify-center gap-2 rounded-full bg-white text-on-surface px-5 py-2.5 text-xs font-sans font-semibold uppercase tracking-wider shadow-md hover:bg-brand-green hover:text-white transition-all duration-300 shrink-0"

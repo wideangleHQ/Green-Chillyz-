@@ -3,17 +3,40 @@ import type { ApiErrorShape } from '@/types/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
-/**
- * Shared Axios instance for all auth API calls.
- * - withCredentials: true → sends HttpOnly cookies (gc_access_token, gc_refresh_token)
- * - No tokens in localStorage/sessionStorage ever.
- */
 export const api = axios.create({
   baseURL: `${API_BASE}/api/v1`,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15_000,
 });
+
+interface WrappedResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data: T;
+  meta: unknown;
+  timestamp: string;
+}
+
+function isWrappedResponse(data: unknown): data is WrappedResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'success' in data &&
+    'timestamp' in data &&
+    'data' in data
+  );
+}
+
+api.interceptors.response.use(
+  (response) => {
+    if (isWrappedResponse(response.data)) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
+  undefined,
+);
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -29,19 +52,12 @@ function processQueue(error: unknown) {
   failedQueue = [];
 }
 
-/**
- * Response interceptor:
- * On 401 → silently attempt ONE refresh, then retry the original request.
- * If refresh also fails → clear user state via event, stop retrying.
- */
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Only intercept 401s that haven't already been retried
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Don't retry refresh or logout endpoints
       const url = originalRequest.url || '';
       if (url.includes('/auth/refresh') || url.includes('/auth/logout')) {
         return Promise.reject(error);
@@ -62,7 +78,6 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        // Dispatch a custom event so AuthContext can clear state
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('gc:session-expired'));
         }
@@ -73,16 +88,13 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
-/**
- * Extract a human-readable error message from an Axios error.
- * Handles NestJS validation pipe array messages.
- */
 export function extractApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as ApiErrorShape | undefined;
+    const raw = error.response?.data;
+    const data = (isWrappedResponse(raw) ? raw : raw) as ApiErrorShape | undefined;
     if (data?.message) {
       return Array.isArray(data.message) ? data.message.join('. ') : data.message;
     }

@@ -1,70 +1,6 @@
-import { OutletLocation, Offer } from "@/types/offers";
-
-export const MOCK_OUTLETS: OutletLocation[] = [
-  {
-    id: "out-whitefield",
-    outletName: "GreenChillyz Whitefield",
-    brand: "GreenChillyz",
-    latitude: 12.9698,
-    longitude: 77.7499,
-    city: "Bangalore",
-    area: "Whitefield",
-    address: "ITPL Main Rd, Opp. Pattandur Agrahara Gate, Whitefield",
-  },
-  {
-    id: "out-indiranagar",
-    outletName: "GreenChillyz Indiranagar",
-    brand: "GreenChillyz",
-    latitude: 12.9784,
-    longitude: 77.6408,
-    city: "Bangalore",
-    area: "Indiranagar",
-    address: "100 Feet Rd, Above Starbucks, 12th Main, Indiranagar",
-  },
-  {
-    id: "out-koramangala",
-    outletName: "YellowChillyz Koramangala",
-    brand: "YellowChillyz",
-    latitude: 12.9352,
-    longitude: 77.6245,
-    city: "Bangalore",
-    area: "Koramangala",
-    address: "5th Block, 80 Feet Rd, Near Jyoti Nivas College Circle",
-  },
-  {
-    id: "out-ubcity",
-    outletName: "GoldenChillyz UB City",
-    brand: "GoldenChillyz",
-    latitude: 12.9716,
-    longitude: 77.5956,
-    city: "Bangalore",
-    area: "UB City",
-    address: "24 Vittal Mallya Rd, Level 2, Collection at UB City",
-  },
-  {
-    id: "out-jayanagar",
-    outletName: "YellowChillyz Jayanagar",
-    brand: "YellowChillyz",
-    latitude: 12.925,
-    longitude: 77.5938,
-    city: "Bangalore",
-    area: "Jayanagar",
-    address: "4th Block, 11th Main Rd, Near Maiya's, Jayanagar",
-  },
-  {
-    id: "out-hsr",
-    outletName: "GreenChillyz HSR Layout",
-    brand: "GreenChillyz",
-    latitude: 12.9121,
-    longitude: 77.6446,
-    city: "Bangalore",
-    area: "HSR Layout",
-    address: "27th Main Rd, Sector 1, HSR Layout",
-  },
-];
+import { Offer } from "@/types/offers";
 
 export const MOCK_OFFERS: Offer[] = [
-  // Whitefield Offers
   {
     offerId: "off-wf-1",
     outletId: "out-whitefield",
@@ -116,8 +52,6 @@ export const MOCK_OFFERS: Offer[] = [
     priority: 3,
     active: true,
   },
-
-  // Indiranagar Offers
   {
     offerId: "off-ind-1",
     outletId: "out-indiranagar",
@@ -152,8 +86,6 @@ export const MOCK_OFFERS: Offer[] = [
     priority: 2,
     active: true,
   },
-
-  // Koramangala Offers
   {
     offerId: "off-kor-1",
     outletId: "out-koramangala",
@@ -171,8 +103,6 @@ export const MOCK_OFFERS: Offer[] = [
     priority: 1,
     active: true,
   },
-
-  // UB City Offers
   {
     offerId: "off-ub-1",
     outletId: "out-ubcity",
@@ -190,8 +120,6 @@ export const MOCK_OFFERS: Offer[] = [
     priority: 1,
     active: true,
   },
-
-  // Jayanagar Offers
   {
     offerId: "off-jay-1",
     outletId: "out-jayanagar",
@@ -209,8 +137,6 @@ export const MOCK_OFFERS: Offer[] = [
     priority: 1,
     active: true,
   },
-
-  // HSR Layout Offers
   {
     offerId: "off-hsr-1",
     outletId: "out-hsr-1",

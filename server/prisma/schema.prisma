@@ -28,6 +28,64 @@ enum OtpPurpose {
   LOGIN
 }
 
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum StoreManagerRole {
+  MANAGER
+  SUPERVISOR
+  STAFF
+}
+
+enum AnnouncementPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+  REFUND
+  EXPIRE
+  ADJUSTMENT
+}
+
+enum TransactionSource {
+  ORDER_CASHBACK
+  REFERRAL_BONUS
+  SIGNUP_BONUS
+  REVIEW_REWARD
+  PROMO_CODE
+  ADMIN_ADJUSTMENT
+  ORDER_PAYMENT
+  EXPIRATION
+  REFUND
+  LOYALTY_TIER
+  GAME_REWARD
+  BIRTHDAY_REWARD
+  ANNIVERSARY_REWARD
+  STORE_VISIT
+  CHECK_IN_REWARD
+  CAMPAIGN_REWARD
+  SYSTEM_REWARD
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
 // ─── Brand ──────────────────────────────────────────────
 
 model Brand {
@@ -51,34 +109,65 @@ model Brand {
 // ─── Store ──────────────────────────────────────────────
 
 model Store {
-  id           String    @id @default(uuid()) @db.Uuid
-  brandId      String    @map("brand_id") @db.Uuid
-  name         String    @db.VarChar(150)
-  slug         String    @unique @db.VarChar(150)
-  code         String    @unique @db.VarChar(20)
-  addressLine1 String    @map("address_line1") @db.VarChar(250)
-  addressLine2 String?   @map("address_line2") @db.VarChar(250)
-  city         String    @db.VarChar(100)
-  state        String    @db.VarChar(100)
-  pincode      String    @db.VarChar(10)
-  latitude     Decimal   @db.Decimal(10, 8)
-  longitude    Decimal   @db.Decimal(11, 8)
-  phone        String?   @db.VarChar(20)
-  email        String?   @db.VarChar(255)
-  openingTime  String?   @map("opening_time") @db.VarChar(10)
-  closingTime  String?   @map("closing_time") @db.VarChar(10)
-  isActive     Boolean   @default(true) @map("is_active")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id               String    @id @default(uuid()) @db.Uuid
+  brandId          String    @map("brand_id") @db.Uuid
+  name             String    @db.VarChar(150)
+  slug             String    @unique @db.VarChar(150)
+  code             String    @unique @db.VarChar(20)
+  description      String?   @db.Text
+  shortDescription String?   @map("short_description") @db.VarChar(300)
+  email            String?   @unique @db.VarChar(255)
+  phone            String?   @unique @db.VarChar(20)
+  alternatePhone   String?   @map("alternate_phone") @db.VarChar(20)
+  website          String?   @db.VarChar(500)
+  addressLine1     String    @map("address_line1") @db.VarChar(250)
+  addressLine2     String?   @map("address_line2") @db.VarChar(250)
+  city             String    @db.VarChar(100)
+  state            String    @db.VarChar(100)
+  country          String    @default("India") @db.VarChar(100)
+  postalCode       String    @map("postal_code") @db.VarChar(10)
+  latitude         Decimal   @db.Decimal(10, 8)
+  longitude        Decimal   @db.Decimal(11, 8)
+  googleMapsLink   String?   @map("google_maps_link") @db.VarChar(500)
+  placeId          String?   @map("place_id") @db.VarChar(255)
+  thumbnailImage   String?   @map("thumbnail_image") @db.VarChar(500)
+  coverImage       String?   @map("cover_image") @db.VarChar(500)
+  logo             String?   @db.VarChar(500)
+  isActive         Boolean   @default(true) @map("is_active")
+  isFeatured       Boolean   @default(false) @map("is_featured")
+  supportsDelivery Boolean   @default(false) @map("supports_delivery")
+  supportsTakeaway Boolean   @default(false) @map("supports_takeaway")
+  supportsDineIn   Boolean   @default(true) @map("supports_dine_in")
+  averageRating    Decimal   @default(0) @map("average_rating") @db.Decimal(3, 2)
+  totalReviews     Int       @default(0) @map("total_reviews")
+  createdBy        String?   @map("created_by") @db.Uuid
+  updatedBy        String?   @map("updated_by") @db.Uuid
+  deletedBy        String?   @map("deleted_by") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
 
   brand                        Brand                  @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  createdByUser                User?                  @relation("StoreCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByUser                User?                  @relation("StoreUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  deletedByUser                User?                  @relation("StoreDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  gallery                      StoreGallery[]
+  timings                      StoreTiming[]
+  holidays                     StoreHoliday[]
+  facilities                   StoreFacility[]
+  managers                     StoreManager[]
+  announcements                StoreAnnouncement[]
   staffProfiles                StaffProfile[]
   customerProfiles             CustomerProfile[]
   userRoles                    UserRole[]
   customerStoreHistoryPrevious CustomerStoreHistory[] @relation("PreviousStore")
   customerStoreHistoryNew      CustomerStoreHistory[] @relation("NewStore")
 
+  @@index([slug], name: "idx_stores_slug")
+  @@index([city], name: "idx_stores_city")
+  @@index([state], name: "idx_stores_state")
+  @@index([isActive], name: "idx_stores_active")
+  @@index([isFeatured, isActive], name: "idx_stores_featured")
   @@index([brandId, isActive], name: "idx_stores_brand_active")
   @@index([latitude, longitude], name: "idx_stores_location")
   @@map("stores")
@@ -87,13 +176,15 @@ model Store {
 // ─── User ───────────────────────────────────────────────
 
 model User {
-  id          String    @id @default(uuid()) @db.Uuid
-  supabaseUid String    @unique @map("supabase_uid") @db.VarChar(255)
-  email       String    @unique @db.VarChar(255)
-  phone       String?   @unique @db.VarChar(20)
-  fullName    String    @map("full_name") @db.VarChar(200)
-  avatarUrl   String?   @map("avatar_url") @db.VarChar(500)
-  isActive    Boolean   @default(true) @map("is_active")
+  id           String    @id @default(uuid()) @db.Uuid
+  supabaseUid  String?   @unique @map("supabase_uid") @db.VarChar(255)
+  email        String    @unique @db.VarChar(255)
+  username     String?   @unique @db.VarChar(50)
+  passwordHash String?   @map("password_hash") @db.VarChar(255)
+  phone        String?   @unique @db.VarChar(20)
+  fullName     String    @map("full_name") @db.VarChar(200)
+  avatarUrl    String?   @map("avatar_url") @db.VarChar(500)
+  isActive     Boolean   @default(true) @map("is_active")
   lastLoginAt DateTime? @map("last_login_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -108,6 +199,14 @@ model User {
   devices         UserDevice[]
   loginHistory    LoginHistory[]
   otps            Otp[]
+  createdStores   Store[]                @relation("StoreCreator")
+  updatedStores   Store[]                @relation("StoreUpdater")
+  deletedStores   Store[]                @relation("StoreDeleter")
+  storeManagers   StoreManager[]
+  wallet          Wallet?
+  initiatedTransactions WalletTransaction[] @relation("TransactionInitiator")
+  rewardHistory   RewardHistory[]
+  gameSessions    GameSession[]
 
   @@map("users")
 }
@@ -312,6 +411,105 @@ model LoginHistory {
   @@map("login_history")
 }
 
+// ─── Store Gallery ──────────────────────────────────────
+
+model StoreGallery {
+  id           String   @id @default(uuid()) @db.Uuid
+  storeId      String   @map("store_id") @db.Uuid
+  image        String   @db.VarChar(500)
+  alt          String?  @db.VarChar(255)
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, displayOrder], name: "idx_store_gallery_order")
+  @@map("store_gallery")
+}
+
+// ─── Store Timings ──────────────────────────────────────
+
+model StoreTiming {
+  id        String    @id @default(uuid()) @db.Uuid
+  storeId   String    @map("store_id") @db.Uuid
+  dayOfWeek DayOfWeek @map("day_of_week")
+  opensAt   String    @map("opens_at") @db.VarChar(5)
+  closesAt  String    @map("closes_at") @db.VarChar(5)
+  isClosed  Boolean   @default(false) @map("is_closed")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, dayOfWeek], name: "uq_store_timing_day")
+  @@map("store_timings")
+}
+
+// ─── Store Holidays ─────────────────────────────────────
+
+model StoreHoliday {
+  id       String   @id @default(uuid()) @db.Uuid
+  storeId  String   @map("store_id") @db.Uuid
+  date     DateTime @db.Date
+  reason   String?  @db.VarChar(255)
+  isClosed Boolean  @default(true) @map("is_closed")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, date], name: "uq_store_holiday_date")
+  @@index([storeId, date], name: "idx_store_holidays_date")
+  @@map("store_holidays")
+}
+
+// ─── Store Facilities ───────────────────────────────────
+
+model StoreFacility {
+  id        String   @id @default(uuid()) @db.Uuid
+  storeId   String   @map("store_id") @db.Uuid
+  name      String   @db.VarChar(100)
+  icon      String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, name], name: "uq_store_facility_name")
+  @@map("store_facilities")
+}
+
+// ─── Store Managers ─────────────────────────────────────
+
+model StoreManager {
+  id        String           @id @default(uuid()) @db.Uuid
+  storeId   String           @map("store_id") @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  role      StoreManagerRole @default(STAFF)
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([storeId, userId], name: "uq_store_manager_user")
+  @@index([storeId], name: "idx_store_managers_store")
+  @@map("store_managers")
+}
+
+// ─── Store Announcements ────────────────────────────────
+
+model StoreAnnouncement {
+  id          String               @id @default(uuid()) @db.Uuid
+  storeId     String               @map("store_id") @db.Uuid
+  title       String               @db.VarChar(200)
+  description String?              @db.Text
+  startDate   DateTime             @map("start_date")
+  endDate     DateTime             @map("end_date")
+  priority    AnnouncementPriority @default(MEDIUM)
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId, startDate, endDate], name: "idx_store_announcements_active")
+  @@map("store_announcements")
+}
+
 // ─── OTP ────────────────────────────────────────────────
 
 model Otp {
@@ -330,4 +528,233 @@ model Otp {
 
   @@index([identifier, purpose, createdAt(sort: Desc)], name: "idx_otps_identifier")
   @@map("otps")
+}
+
+// ─── Wallet ─────────────────────────────────────────────
+
+model Wallet {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @map("user_id") @db.Uuid
+  balance         Decimal  @default(0) @db.Decimal(12, 2)
+  pendingBalance  Decimal  @default(0) @map("pending_balance") @db.Decimal(12, 2)
+  lifetimeEarned  Decimal  @default(0) @map("lifetime_earned") @db.Decimal(12, 2)
+  lifetimeSpent   Decimal  @default(0) @map("lifetime_spent") @db.Decimal(12, 2)
+  lifetimeExpired Decimal  @default(0) @map("lifetime_expired") @db.Decimal(12, 2)
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  transactions WalletTransaction[]
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id             String            @id @default(uuid()) @db.Uuid
+  walletId       String            @map("wallet_id") @db.Uuid
+  type           TransactionType
+  source         TransactionSource
+  status         TransactionStatus @default(COMPLETED)
+  amount         Decimal           @db.Decimal(12, 2)
+  balanceBefore  Decimal           @map("balance_before") @db.Decimal(12, 2)
+  balanceAfter   Decimal           @map("balance_after") @db.Decimal(12, 2)
+  description    String            @db.VarChar(500)
+  idempotencyKey String?           @unique @map("idempotency_key") @db.VarChar(255)
+  referenceId    String?           @map("reference_id") @db.VarChar(255)
+  referenceType  String?           @map("reference_type") @db.VarChar(50)
+  expiresAt      DateTime?         @map("expires_at")
+  expiredAt      DateTime?         @map("expired_at")
+  ipAddress      String?           @map("ip_address") @db.VarChar(45)
+  deviceInfo     String?           @map("device_info") @db.VarChar(255)
+  createdBy      String?           @map("created_by") @db.Uuid
+  metadata       Json?             @db.JsonB
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  wallet    Wallet @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  initiator User?  @relation("TransactionInitiator", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([walletId, createdAt(sort: Desc)], name: "idx_wallet_txn_wallet_date")
+  @@index([walletId, type], name: "idx_wallet_txn_type")
+  @@index([walletId, source], name: "idx_wallet_txn_source")
+  @@index([walletId, status], name: "idx_wallet_txn_status")
+  @@index([expiresAt], name: "idx_wallet_txn_expires")
+  @@index([referenceId, referenceType], name: "idx_wallet_txn_reference")
+  @@map("wallet_transactions")
+}
+
+// ─── Reward Engine ──────────────────────────────────────
+
+enum RewardEventType {
+  GAME_COMPLETED
+  REFERRAL_COMPLETED
+  PURCHASE_COMPLETED
+  FIRST_PURCHASE
+  BIRTHDAY
+  ANNIVERSARY
+  LOYALTY_UPGRADE
+  STORE_VISIT
+  CHECK_IN
+  ADMIN_BONUS
+  CAMPAIGN
+  SYSTEM
+  CUSTOM_EVENT
+}
+
+enum RewardSourceType {
+  GAME
+  REFERRAL
+  PURCHASE
+  LOYALTY
+  CAMPAIGN
+  ADMIN
+  SYSTEM
+  BONUS
+  STORE
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+  ARCHIVED
+}
+
+model RewardCampaign {
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String         @db.VarChar(200)
+  slug          String         @unique @db.VarChar(200)
+  description   String?        @db.Text
+  eventType     RewardEventType @map("event_type")
+  source        RewardSourceType
+  status        CampaignStatus @default(DRAFT)
+  baseCoins     Int            @map("base_coins")
+  multiplier    Decimal        @default(1.0) @db.Decimal(5, 2)
+  bonusCoins    Int            @default(0) @map("bonus_coins")
+  maxClaims     Int?           @map("max_claims")
+  dailyLimit    Int?           @map("daily_limit")
+  totalBudget   Decimal?       @map("total_budget") @db.Decimal(12, 2)
+  spentBudget   Decimal        @default(0) @map("spent_budget") @db.Decimal(12, 2)
+  coinExpiryDays Int?          @map("coin_expiry_days")
+  storeIds      String[]       @map("store_ids") @db.Uuid
+  brandIds      String[]       @map("brand_ids") @db.Uuid
+  minPurchase   Decimal?       @map("min_purchase") @db.Decimal(12, 2)
+  metadata      Json?          @db.JsonB
+  startsAt      DateTime       @map("starts_at")
+  endsAt        DateTime       @map("ends_at")
+  createdBy     String?        @map("created_by") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  rules   RewardRule[]
+  history RewardHistory[]
+
+  @@index([status, startsAt, endsAt], name: "idx_campaign_active")
+  @@index([eventType, status], name: "idx_campaign_event")
+  @@map("reward_campaigns")
+}
+
+model RewardRule {
+  id         String          @id @default(uuid()) @db.Uuid
+  campaignId String          @map("campaign_id") @db.Uuid
+  ruleType   String          @db.VarChar(50)
+  operator   String          @db.VarChar(20)
+  value      String          @db.VarChar(255)
+  priority   Int             @default(0)
+  isActive   Boolean         @default(true) @map("is_active")
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  campaign RewardCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, isActive], name: "idx_reward_rule_campaign")
+  @@map("reward_rules")
+}
+
+model RewardHistory {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  campaignId     String?          @map("campaign_id") @db.Uuid
+  eventType      RewardEventType  @map("event_type")
+  source         RewardSourceType
+  rewardGranted  Boolean          @map("reward_granted")
+  coins          Int              @default(0)
+  multiplier     Decimal          @default(1.0) @db.Decimal(5, 2)
+  reason         String           @db.VarChar(500)
+  referenceId    String?          @map("reference_id") @db.VarChar(255)
+  referenceType  String?          @map("reference_type") @db.VarChar(50)
+  ruleApplied    String?          @map("rule_applied") @db.VarChar(255)
+  expiresAt      DateTime?        @map("expires_at")
+  ipAddress      String?          @map("ip_address") @db.VarChar(45)
+  deviceInfo     String?          @map("device_info") @db.VarChar(255)
+  metadata       Json?            @db.JsonB
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  campaign RewardCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)], name: "idx_reward_history_user")
+  @@index([userId, eventType, createdAt(sort: Desc)], name: "idx_reward_history_event")
+  @@index([campaignId], name: "idx_reward_history_campaign")
+  @@map("reward_history")
+}
+
+// ─── Games Platform ─────────────────────────────────────
+
+enum GameSessionStatus {
+  CREATED
+  STARTED
+  PLAYING
+  COMPLETED
+  FAILED
+  EXPIRED
+  ABANDONED
+  REWARDED
+}
+
+model Game {
+  id                  String   @id @default(uuid()) @db.Uuid
+  name                String   @db.VarChar(100)
+  slug                String   @unique @db.VarChar(100)
+  description         String?  @db.Text
+  isActive            Boolean  @default(true) @map("is_active")
+  dailyLimit          Int      @default(0) @map("daily_limit")
+  cooldown            Int      @default(0) @map("cooldown") // In seconds
+  minLevel            Int      @default(0) @map("min_level")
+  maxRewards          Decimal? @map("max_rewards") @db.Decimal(12, 2)
+  rewardType          String?  @map("reward_type") // e.g. "COINS"
+  rewardConfig        Json?    @map("reward_config") @db.JsonB
+  storeEligibility    String[] @map("store_eligibility") @db.Uuid
+  campaignEligibility String[] @map("campaign_eligibility") @db.Uuid
+  metadata            Json?    @db.JsonB
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  sessions GameSession[]
+
+  @@map("games")
+}
+
+model GameSession {
+  id             String            @id @default(uuid()) @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  gameId         String            @map("game_id") @db.Uuid
+  status         GameSessionStatus @default(CREATED)
+  startedAt      DateTime?         @map("started_at")
+  endedAt        DateTime?         @map("ended_at")
+  device         String?           @db.VarChar(150)
+  browser        String?           @db.VarChar(100)
+  ipAddress      String?           @map("ip_address") @db.VarChar(45)
+  score          Int               @default(0)
+  rewardDecision Json?             @map("reward_decision") @db.JsonB
+  metadata       Json?             @db.JsonB
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status], name: "idx_game_sessions_user_status")
+  @@index([gameId, status], name: "idx_game_sessions_game_status")
+  @@map("game_sessions")
 }

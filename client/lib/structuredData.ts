@@ -1,12 +1,6 @@
-import { OUTLETS } from "@/lib/content";
+import type { Store } from "@/types/store";
 
-/*
-  Structured data per 14_SEO_and_Metadata.md: Organization for the Group,
-  LocalBusiness per outlet. Review/AggregateRating markup is intentionally
-  omitted — homepage reviews are illustrative copy pending Group-sourced
-  verifiable reviews (never fabricate ratings markup).
-*/
-export function buildStructuredData() {
+export function buildStructuredData(stores?: Store[]) {
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -22,16 +16,21 @@ export function buildStructuredData() {
           { "@type": "Brand", name: "GoldenChillyz" },
         ],
       },
-      ...OUTLETS.map((outlet) => ({
+      ...(stores || []).map((store) => ({
         "@type": "Restaurant",
-        name: outlet.name,
+        name: store.name,
         address: {
           "@type": "PostalAddress",
-          streetAddress: outlet.address,
-          addressLocality: "Bengaluru",
-          addressCountry: "IN",
+          streetAddress: store.addressLine1,
+          addressLocality: store.city,
+          addressRegion: store.state,
+          addressCountry: store.country,
         },
-        openingHours: outlet.hours,
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: store.latitude,
+          longitude: store.longitude,
+        },
         parentOrganization: {
           "@id": "https://greenchillyz.com/#organization",
         },

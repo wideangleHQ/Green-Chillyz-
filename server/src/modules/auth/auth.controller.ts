@@ -21,7 +21,7 @@ import { DeviceService } from './services/device.service';
 import { OtpService } from './services/otp.service';
 import { TokenService } from './services/token.service';
 import { SessionService } from './services/session.service';
-import { GoogleAuthDto, RequestOtpDto, VerifyOtpDto, UpdateProfileDto } from './dto';
+import { GoogleAuthDto, RegisterDto, LoginDto, RequestOtpDto, VerifyOtpDto, UpdateProfileDto } from './dto';
 import { JwtPayload } from './interfaces';
 
 @ApiTags('Auth')
@@ -34,6 +34,67 @@ export class AuthController {
     private readonly tokenService: TokenService,
     private readonly sessionService: SessionService,
   ) {}
+
+  @Public()
+  @Post('register')
+  @ApiOperation({ summary: 'Register with email and password' })
+  async register(
+    @Body() dto: RegisterDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const ipAddress = this.extractIp(req);
+    const userAgent = req.headers['user-agent'];
+    const fingerprint =
+      (req.headers['x-device-fingerprint'] as string) ?? null;
+
+    const result = await this.authService.register(
+      {
+        fullName: dto.fullName,
+        username: dto.username,
+        email: dto.email,
+        password: dto.password,
+      },
+      ipAddress,
+      userAgent,
+      fingerprint,
+    );
+
+    this.authService.setAuthCookies(res, result.tokens);
+
+    return {
+      user: result.user,
+      message: 'Registration successful',
+    };
+  }
+
+  @Public()
+  @Post('login')
+  @ApiOperation({ summary: 'Login with email/username and password' })
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const ipAddress = this.extractIp(req);
+    const userAgent = req.headers['user-agent'];
+    const fingerprint =
+      (req.headers['x-device-fingerprint'] as string) ?? null;
+
+    const result = await this.authService.loginWithCredentials(
+      dto.identifier,
+      dto.password,
+      ipAddress,
+      userAgent,
+      fingerprint,
+    );
+
+    this.authService.setAuthCookies(res, result.tokens);
+
+    return {
+      user: result.user,
+    };
+  }
 
   @Public()
   @Post('google')
@@ -74,7 +135,6 @@ export class AuthController {
     const rawRefreshToken = req.cookies?.[refreshCookieName];
 
     if (!rawRefreshToken) {
-      this.authService.clearAuthCookies(res);
       return { message: 'No refresh token provided' };
     }
 

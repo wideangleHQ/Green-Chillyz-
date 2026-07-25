@@ -2,9 +2,17 @@ import {
   Injectable,
   Logger,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../../database/prisma.service';
+import {
+  UserRegisteredEvent,
+  RegistrationProvider,
+} from '../../customer-bootstrap/events';
+import { BOOTSTRAP_EVENTS } from '../../customer-bootstrap/constants';
 import { SupabaseService } from './supabase.service';
 import { TokenService } from './token.service';
 import { SessionService } from './session.service';
@@ -26,7 +34,170 @@ export class AuthService {
     private readonly sessionService: SessionService,
     private readonly deviceService: DeviceService,
     private readonly loginHistoryService: LoginHistoryService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
+
+  private readonly BCRYPT_ROUNDS = 12;
+
+  async register(
+    data: { fullName: string; username: string; email: string; password: string },
+    ipAddress: string,
+    userAgent: string | undefined,
+    fingerprint: string | null,
+  ): Promise<GoogleAuthResult & { tokens: AuthTokens }> {
+    const existingByEmail = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existingByEmail) {
+      throw new ConflictException(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+
+    const existingByUsername = await this.prisma.user.findUnique({
+      where: { username: data.username },
+    });
+    if (existingByUsername) {
+      throw new ConflictException(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, this.BCRYPT_ROUNDS);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.username,
+        fullName: data.fullName,
+        passwordHash,
+      },
+    });
+
+    const customerRole = await this.prisma.role.findUnique({
+      where: { name: 'customer' },
+    });
+    if (customerRole) {
+      await this.prisma.userRole.create({
+        data: { userId: user.id, roleId: customerRole.id },
+      });
+    }
+
+    await this.publishUserRegistered(user.id, user.email, 'credentials', ipAddress);
+
+    const parsedUA = this.deviceService.parseUserAgent(userAgent);
+    const device = await this.deviceService.findOrCreateDevice(user.id, {
+      ...parsedUA,
+      ipAddress,
+      fingerprint,
+    });
+
+    const sessionId = await this.sessionService.createSession(
+      user.id,
+      device.id,
+      ipAddress,
+    );
+
+    const tokens = await this.tokenService.generateTokenPair(
+      user.id,
+      sessionId,
+      ipAddress,
+      userAgent ?? null,
+      device.id,
+    );
+
+    await this.loginHistoryService.record({
+      userId: user.id,
+      deviceId: device.id,
+      ipAddress,
+      userAgent: userAgent ?? null,
+      browser: parsedUA.browser,
+      os: parsedUA.os,
+      platform: parsedUA.platform,
+      authProvider: 'credentials',
+      wasSuccessful: true,
+      failureReason: null,
+    });
+
+    const authUser = await this.buildUserResponse(user.id);
+    return { user: authUser, isNewUser: true, tokens };
+  }
+
+  async loginWithCredentials(
+    identifier: string,
+    password: string,
+    ipAddress: string,
+    userAgent: string | undefined,
+    fingerprint: string | null,
+  ): Promise<{ user: AuthUserResponse; tokens: AuthTokens }> {
+    const isEmail = identifier.includes('@');
+    const user = await this.prisma.user.findUnique({
+      where: isEmail ? { email: identifier } : { username: identifier },
+    });
+
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedException(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      await this.loginHistoryService.record({
+        userId: user.id,
+        deviceId: null,
+        ipAddress,
+        userAgent: userAgent ?? null,
+        browser: null,
+        os: null,
+        platform: null,
+        authProvider: 'credentials',
+        wasSuccessful: false,
+        failureReason: 'Invalid password',
+      });
+      throw new UnauthorizedException(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+
+    if (!user.isActive || user.deletedAt) {
+      throw new UnauthorizedException(AUTH_ERRORS.USER_DEACTIVATED);
+    }
+
+    const parsedUA = this.deviceService.parseUserAgent(userAgent);
+    const device = await this.deviceService.findOrCreateDevice(user.id, {
+      ...parsedUA,
+      ipAddress,
+      fingerprint,
+    });
+
+    const sessionId = await this.sessionService.createSession(
+      user.id,
+      device.id,
+      ipAddress,
+    );
+
+    const tokens = await this.tokenService.generateTokenPair(
+      user.id,
+      sessionId,
+      ipAddress,
+      userAgent ?? null,
+      device.id,
+    );
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    await this.loginHistoryService.record({
+      userId: user.id,
+      deviceId: device.id,
+      ipAddress,
+      userAgent: userAgent ?? null,
+      browser: parsedUA.browser,
+      os: parsedUA.os,
+      platform: parsedUA.platform,
+      authProvider: 'credentials',
+      wasSuccessful: true,
+      failureReason: null,
+    });
+
+    const authUser = await this.buildUserResponse(user.id);
+    return { user: authUser, tokens };
+  }
 
   async authenticateWithGoogle(
     supabaseAccessToken: string,
@@ -80,6 +251,8 @@ export class AuthService {
             data: { userId: user.id, roleId: customerRole.id },
           });
         }
+
+        await this.publishUserRegistered(user.id, user.email, 'google', ipAddress);
       }
     }
 
@@ -280,6 +453,31 @@ export class AuthService {
       domain: cookieDomain,
       path: '/api/v1/auth/refresh',
     });
+  }
+
+  /**
+   * Publishes the UserRegistered domain event. Awaited so the customer's
+   * resources (wallet, profile, …) are provisioned before registration
+   * returns, yet a provisioning failure never fails an otherwise valid
+   * registration — subscribers own their error handling.
+   */
+  private async publishUserRegistered(
+    userId: string,
+    email: string,
+    provider: RegistrationProvider,
+    ipAddress: string,
+  ): Promise<void> {
+    try {
+      await this.eventEmitter.emitAsync(
+        BOOTSTRAP_EVENTS.USER_REGISTERED,
+        new UserRegisteredEvent(userId, email, provider, new Date(), ipAddress),
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Customer bootstrap failed for user ${userId}: ${message}`,
+      );
+    }
   }
 
   private async buildUserResponse(userId: string): Promise<AuthUserResponse> {

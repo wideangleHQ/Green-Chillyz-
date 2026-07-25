@@ -6,6 +6,7 @@ import { useLocationOffers } from "@/hooks/useLocationOffers";
 import { OfferCard } from "./OfferCard";
 import { OutletSelectorModal } from "./OutletSelectorModal";
 import { OfferCategory } from "@/types/offers";
+import { formatDistance } from "@/types/store";
 
 const CATEGORIES: { label: string; value: OfferCategory }[] = [
   { label: "All Deals", value: "all" },
@@ -78,7 +79,7 @@ export function OffersSection() {
                   </span>
                   {distanceKm !== null && (
                     <span className="text-[11px] font-sans font-semibold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200 ml-1">
-                      {distanceKm} km away
+                      {formatDistance(distanceKm)}
                     </span>
                   )}
                 </div>

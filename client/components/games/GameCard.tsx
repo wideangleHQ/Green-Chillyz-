@@ -9,9 +9,10 @@ import { GameData } from "./gamesData";
 interface GameCardProps {
   game: GameData;
   isActive: boolean;
+  onPlay?: (gameId: string) => void;
 }
 
-export const GameCard = memo(function GameCard({ game, isActive }: GameCardProps) {
+export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -131,10 +132,16 @@ export const GameCard = memo(function GameCard({ game, isActive }: GameCardProps
 
         {/* Floating Bottom Action Button */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30">
-          <div className={`flex items-center gap-2 rounded-full bg-brand-green px-5 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-white shadow-md transition-all duration-300 ${isActive ? "group-hover:bg-brand-green-hover group-hover:scale-105" : ""}`}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isActive && onPlay) onPlay(game.id);
+            }}
+            className={`flex items-center gap-2 rounded-full bg-brand-green px-5 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-white shadow-md transition-all duration-300 border-none cursor-pointer ${isActive ? "group-hover:bg-brand-green-hover group-hover:scale-105" : ""}`}
+          >
             <span>Play Now</span>
             <ArrowUpRight className={`size-3.5 transition-transform duration-300 ${isActive ? "group-hover:translate-x-0.5 group-hover:-translate-y-0.5" : ""}`} />
-          </div>
+          </button>
         </div>
       </div>
 

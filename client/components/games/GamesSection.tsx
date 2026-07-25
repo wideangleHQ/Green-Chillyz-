@@ -1,17 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Star, CircleDollarSign, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { GameCard } from "./GameCard";
 import { GAMES_DATA } from "./gamesData";
+import { GameOverlay } from "./GameOverlay";
+
+const GAME_ID_TO_SLUG: Record<string, string> = {
+  "spin-win": "spin-wheel",
+};
 
 export function GamesSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [activePlayGame, setActivePlayGame] = useState<string | null>(null);
   const touchStartX = useRef(0);
 
   const nextSlide = useCallback(() => {
@@ -166,6 +172,7 @@ export function GamesSection() {
                     <GameCard
                       game={game}
                       isActive={isActive}
+                      onPlay={(id) => setActivePlayGame(id)}
                     />
                   </motion.div>
                 );
@@ -184,6 +191,14 @@ export function GamesSection() {
           </button>
         </div>
       </div>
+      <AnimatePresence>
+        {activePlayGame && (
+          <GameOverlay
+            gameSlug={GAME_ID_TO_SLUG[activePlayGame] || activePlayGame}
+            onClose={() => setActivePlayGame(null)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
