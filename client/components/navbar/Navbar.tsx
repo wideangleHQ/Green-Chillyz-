@@ -9,27 +9,38 @@ import { Drawer } from "@/components/ui/Drawer";
 import { DURATION, EASE_STANDARD } from "@/lib/motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useAuth } from "@/components/auth/AuthContext";
+import { WalletQuickView } from "@/components/wallet/WalletQuickView";
+import { NotificationBell, NotificationDrawer } from "@/components/notifications";
+import { useWalletSummary } from "@/hooks/useWallet";
+import { formatCoins } from "@/types/wallet";
 
 const NAV_LINKS = [
-  { href: "#story", label: "Story" },
-  { href: "#menu", label: "Menu" },
-  { href: "#games", label: "Games" },
-  { href: "#rewards", label: "Rewards" },
-  { href: "#locations", label: "Locations" },
-  { href: "#franchise", label: "Franchise" },
+  { href: "/#story", label: "Story" },
+  { href: "/menu", label: "Menu" },
+  { href: "/games", label: "Games" },
+  { href: "/#rewards", label: "Rewards" },
+  { href: "/#locations", label: "Locations" },
+  { href: "/#franchise", label: "Franchise" },
 ];
 
 /* Coins entry point is a core retention hook — visible at every tier
    (18_Responsive_Design_System.md). */
-function CoinsButton() {
+interface CoinsButtonProps {
+  onClick: () => void;
+  balance?: number;
+}
+
+function CoinsButton({ onClick, balance }: CoinsButtonProps) {
   return (
-    <Link
-      href="#rewards"
-      className="flex min-h-11 items-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2 text-sm font-heading uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:shadow-hover"
+    <button
+      type="button"
+      suppressHydrationWarning
+      onClick={onClick}
+      className="flex min-h-11 items-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2 text-sm font-heading uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:shadow-hover cursor-pointer border-none"
     >
       <CircleDollarSign aria-hidden="true" className="size-5" strokeWidth={2} />
-      Coins
-    </Link>
+      <span suppressHydrationWarning>{balance !== undefined ? `${formatCoins(balance)} CC` : "Coins"}</span>
+    </button>
   );
 }
 
@@ -40,9 +51,13 @@ function CoinsButton() {
 export function Navbar() {
   const [hidden, setHidden] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { scrollY } = useScroll();
-  const reducedMotion = usePrefersReducedMotion();
+  const scaleMotion = usePrefersReducedMotion();
+  const reducedMotion = scaleMotion;
   const { user, isAuthenticated, openAuthModal, logout } = useAuth();
+  const { data: walletSummary } = useWalletSummary(isAuthenticated);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
@@ -65,7 +80,7 @@ export function Navbar() {
           className="glass flex w-full max-w-5xl items-center justify-between gap-4 rounded-full py-2 pl-4 pr-2 shadow-floating"
         >
           <Link
-            href="#top"
+            href="/#top"
             className="flex min-h-11 items-center gap-2"
             aria-label="GreenChillyz home"
           >
@@ -95,15 +110,31 @@ export function Navbar() {
           </ul>
 
           <div className="flex items-center gap-2">
-            <CoinsButton />
+            <CoinsButton
+              onClick={() => {
+                if (isAuthenticated) {
+                  setWalletOpen(true);
+                } else {
+                  openAuthModal("sign-in");
+                }
+              }}
+              balance={isAuthenticated && walletSummary ? walletSummary.balance : undefined}
+            />
+            {isAuthenticated && (
+              <NotificationBell
+                onClick={() => setNotificationsOpen(true)}
+                enabled={isAuthenticated}
+              />
+            )}
             {isAuthenticated ? (
               <div className="relative group hidden lg:block">
                 <button
                   type="button"
+                  suppressHydrationWarning
                   aria-label="Profile menu"
                   className="flex size-11 items-center justify-center rounded-full border border-brand-green bg-brand-green/10 font-bold text-brand-green transition-all duration-200 hover:bg-brand-green hover:text-white cursor-pointer"
                 >
-                  {user?.fullName ? user.fullName.charAt(0).toUpperCase() : <UserRound className="size-5" />}
+                  <span suppressHydrationWarning>{user?.fullName ? user.fullName.charAt(0).toUpperCase() : <UserRound className="size-5" />}</span>
                 </button>
                 <div className="absolute right-0 top-12 hidden w-48 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-heavy backdrop-blur-md group-hover:block">
                   <div className="px-3 py-2 border-b border-slate-100">
@@ -112,6 +143,7 @@ export function Navbar() {
                   </div>
                   <button
                     type="button"
+                    suppressHydrationWarning
                     onClick={() => logout()}
                     className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                   >
@@ -123,6 +155,7 @@ export function Navbar() {
             ) : (
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => openAuthModal("sign-in")}
                 aria-label="Sign In"
                 className="hidden size-11 items-center justify-center rounded-full border border-outline-variant text-on-surface transition-all duration-200 hover:border-brand-green hover:text-brand-green hover:shadow-hover lg:flex cursor-pointer"
@@ -133,6 +166,7 @@ export function Navbar() {
 
             <button
               type="button"
+              suppressHydrationWarning
               aria-label="Open menu"
               aria-expanded={drawerOpen}
               onClick={() => setDrawerOpen(true)}
@@ -161,6 +195,7 @@ export function Navbar() {
             {isAuthenticated ? (
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => {
                   setDrawerOpen(false);
                   logout();
@@ -168,11 +203,12 @@ export function Navbar() {
                 className="flex min-h-11 w-full items-center gap-3 rounded-full px-4 text-nav-link text-red-600 hover:bg-red-50"
               >
                 <LogOut className="size-5" />
-                <span>Sign Out ({user?.fullName})</span>
+                <span suppressHydrationWarning>Sign Out ({user?.fullName})</span>
               </button>
             ) : (
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => {
                   setDrawerOpen(false);
                   openAuthModal("sign-in");
@@ -186,6 +222,11 @@ export function Navbar() {
           </li>
         </ul>
       </Drawer>
+      <WalletQuickView isOpen={walletOpen} onClose={() => setWalletOpen(false)} />
+      <NotificationDrawer
+        isOpen={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+      />
     </>
   );
 }

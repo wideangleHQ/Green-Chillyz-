@@ -176,7 +176,7 @@ export function GameOverlay({ gameSlug, onClose }: GameOverlayProps) {
                 <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-brand-green bg-brand-green/10 px-2.5 py-1 rounded-full border border-brand-green/20">
                   {game.rewardType || "COINS"} Reward Game
                 </span>
-                <h4 className="font-heading text-lg font-bold text-on-surface uppercase tracking-tight mt-2.5">
+                <h4 className="font-sans text-lg font-bold text-on-surface uppercase tracking-tight mt-2.5">
                   {game.name}
                 </h4>
                 <p className="text-xs font-sans text-stone-500 leading-normal mt-1">

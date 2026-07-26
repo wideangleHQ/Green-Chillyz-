@@ -77,6 +77,7 @@ enum TransactionSource {
   CHECK_IN_REWARD
   CAMPAIGN_REWARD
   SYSTEM_REWARD
+  REWARD_REDEMPTION
 }
 
 enum TransactionStatus {
@@ -101,7 +102,8 @@ model Brand {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  stores Store[]
+  stores  Store[]
+  rewards Reward[]
 
   @@map("brands")
 }
@@ -147,10 +149,10 @@ model Store {
   updatedAt        DateTime  @updatedAt @map("updated_at")
   deletedAt        DateTime? @map("deleted_at")
 
-  brand                        Brand                  @relation(fields: [brandId], references: [id], onDelete: Restrict)
-  createdByUser                User?                  @relation("StoreCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  updatedByUser                User?                  @relation("StoreUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
-  deletedByUser                User?                  @relation("StoreDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  brand                        Brand                     @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  createdByUser                User?                     @relation("StoreCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updatedByUser                User?                     @relation("StoreUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  deletedByUser                User?                     @relation("StoreDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
   gallery                      StoreGallery[]
   timings                      StoreTiming[]
   holidays                     StoreHoliday[]
@@ -160,8 +162,12 @@ model Store {
   staffProfiles                StaffProfile[]
   customerProfiles             CustomerProfile[]
   userRoles                    UserRole[]
-  customerStoreHistoryPrevious CustomerStoreHistory[] @relation("PreviousStore")
-  customerStoreHistoryNew      CustomerStoreHistory[] @relation("NewStore")
+  customerStoreHistoryPrevious CustomerStoreHistory[]    @relation("PreviousStore")
+  customerStoreHistoryNew      CustomerStoreHistory[]    @relation("NewStore")
+  rewardAvailability           RewardStoreAvailability[]
+  rewardRedemptions            RewardRedemption[]
+  rewardVouchers               RewardVoucher[]
+  auditLogs                    AuditLog[]
 
   @@index([slug], name: "idx_stores_slug")
   @@index([city], name: "idx_stores_city")
@@ -185,28 +191,34 @@ model User {
   fullName     String    @map("full_name") @db.VarChar(200)
   avatarUrl    String?   @map("avatar_url") @db.VarChar(500)
   isActive     Boolean   @default(true) @map("is_active")
-  lastLoginAt DateTime? @map("last_login_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
 
-  customerProfile CustomerProfile?
-  staffProfile    StaffProfile?
-  userRoles       UserRole[]             @relation("UserRoleAssignee")
-  assignedRoles   UserRole[]             @relation("RoleAssigner")
-  storeTransfers  CustomerStoreHistory[] @relation("StoreTransferrer")
-  refreshTokens   RefreshToken[]
-  devices         UserDevice[]
-  loginHistory    LoginHistory[]
-  otps            Otp[]
-  createdStores   Store[]                @relation("StoreCreator")
-  updatedStores   Store[]                @relation("StoreUpdater")
-  deletedStores   Store[]                @relation("StoreDeleter")
-  storeManagers   StoreManager[]
-  wallet          Wallet?
-  initiatedTransactions WalletTransaction[] @relation("TransactionInitiator")
-  rewardHistory   RewardHistory[]
-  gameSessions    GameSession[]
+  customerProfile        CustomerProfile?
+  staffProfile           StaffProfile?
+  userRoles              UserRole[]              @relation("UserRoleAssignee")
+  assignedRoles          UserRole[]              @relation("RoleAssigner")
+  storeTransfers         CustomerStoreHistory[]  @relation("StoreTransferrer")
+  refreshTokens          RefreshToken[]
+  devices                UserDevice[]
+  loginHistory           LoginHistory[]
+  otps                   Otp[]
+  createdStores          Store[]                 @relation("StoreCreator")
+  updatedStores          Store[]                 @relation("StoreUpdater")
+  deletedStores          Store[]                 @relation("StoreDeleter")
+  storeManagers          StoreManager[]
+  wallet                 Wallet?
+  initiatedTransactions  WalletTransaction[]     @relation("TransactionInitiator")
+  rewardHistory          RewardHistory[]
+  gameSessions           GameSession[]
+  rewardRedemptions      RewardRedemption[]
+  rewardVouchers         RewardVoucher[]
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+  auditLogs              AuditLog[]              @relation("AuditActor")
+  auditEmployeeLogs      AuditLog[]              @relation("AuditEmployee")
 
   @@map("users")
 }
@@ -622,30 +634,30 @@ enum CampaignStatus {
 }
 
 model RewardCampaign {
-  id            String         @id @default(uuid()) @db.Uuid
-  name          String         @db.VarChar(200)
-  slug          String         @unique @db.VarChar(200)
-  description   String?        @db.Text
-  eventType     RewardEventType @map("event_type")
-  source        RewardSourceType
-  status        CampaignStatus @default(DRAFT)
-  baseCoins     Int            @map("base_coins")
-  multiplier    Decimal        @default(1.0) @db.Decimal(5, 2)
-  bonusCoins    Int            @default(0) @map("bonus_coins")
-  maxClaims     Int?           @map("max_claims")
-  dailyLimit    Int?           @map("daily_limit")
-  totalBudget   Decimal?       @map("total_budget") @db.Decimal(12, 2)
-  spentBudget   Decimal        @default(0) @map("spent_budget") @db.Decimal(12, 2)
-  coinExpiryDays Int?          @map("coin_expiry_days")
-  storeIds      String[]       @map("store_ids") @db.Uuid
-  brandIds      String[]       @map("brand_ids") @db.Uuid
-  minPurchase   Decimal?       @map("min_purchase") @db.Decimal(12, 2)
-  metadata      Json?          @db.JsonB
-  startsAt      DateTime       @map("starts_at")
-  endsAt        DateTime       @map("ends_at")
-  createdBy     String?        @map("created_by") @db.Uuid
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
+  id             String           @id @default(uuid()) @db.Uuid
+  name           String           @db.VarChar(200)
+  slug           String           @unique @db.VarChar(200)
+  description    String?          @db.Text
+  eventType      RewardEventType  @map("event_type")
+  source         RewardSourceType
+  status         CampaignStatus   @default(DRAFT)
+  baseCoins      Int              @map("base_coins")
+  multiplier     Decimal          @default(1.0) @db.Decimal(5, 2)
+  bonusCoins     Int              @default(0) @map("bonus_coins")
+  maxClaims      Int?             @map("max_claims")
+  dailyLimit     Int?             @map("daily_limit")
+  totalBudget    Decimal?         @map("total_budget") @db.Decimal(12, 2)
+  spentBudget    Decimal          @default(0) @map("spent_budget") @db.Decimal(12, 2)
+  coinExpiryDays Int?             @map("coin_expiry_days")
+  storeIds       String[]         @map("store_ids") @db.Uuid
+  brandIds       String[]         @map("brand_ids") @db.Uuid
+  minPurchase    Decimal?         @map("min_purchase") @db.Decimal(12, 2)
+  metadata       Json?            @db.JsonB
+  startsAt       DateTime         @map("starts_at")
+  endsAt         DateTime         @map("ends_at")
+  createdBy      String?          @map("created_by") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
 
   rules   RewardRule[]
   history RewardHistory[]
@@ -656,14 +668,14 @@ model RewardCampaign {
 }
 
 model RewardRule {
-  id         String          @id @default(uuid()) @db.Uuid
-  campaignId String          @map("campaign_id") @db.Uuid
-  ruleType   String          @db.VarChar(50)
-  operator   String          @db.VarChar(20)
-  value      String          @db.VarChar(255)
-  priority   Int             @default(0)
-  isActive   Boolean         @default(true) @map("is_active")
-  createdAt  DateTime        @default(now()) @map("created_at")
+  id         String   @id @default(uuid()) @db.Uuid
+  campaignId String   @map("campaign_id") @db.Uuid
+  ruleType   String   @db.VarChar(50)
+  operator   String   @db.VarChar(20)
+  value      String   @db.VarChar(255)
+  priority   Int      @default(0)
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   campaign RewardCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
@@ -672,23 +684,23 @@ model RewardRule {
 }
 
 model RewardHistory {
-  id             String           @id @default(uuid()) @db.Uuid
-  userId         String           @map("user_id") @db.Uuid
-  campaignId     String?          @map("campaign_id") @db.Uuid
-  eventType      RewardEventType  @map("event_type")
-  source         RewardSourceType
-  rewardGranted  Boolean          @map("reward_granted")
-  coins          Int              @default(0)
-  multiplier     Decimal          @default(1.0) @db.Decimal(5, 2)
-  reason         String           @db.VarChar(500)
-  referenceId    String?          @map("reference_id") @db.VarChar(255)
-  referenceType  String?          @map("reference_type") @db.VarChar(50)
-  ruleApplied    String?          @map("rule_applied") @db.VarChar(255)
-  expiresAt      DateTime?        @map("expires_at")
-  ipAddress      String?          @map("ip_address") @db.VarChar(45)
-  deviceInfo     String?          @map("device_info") @db.VarChar(255)
-  metadata       Json?            @db.JsonB
-  createdAt      DateTime         @default(now()) @map("created_at")
+  id            String           @id @default(uuid()) @db.Uuid
+  userId        String           @map("user_id") @db.Uuid
+  campaignId    String?          @map("campaign_id") @db.Uuid
+  eventType     RewardEventType  @map("event_type")
+  source        RewardSourceType
+  rewardGranted Boolean          @map("reward_granted")
+  coins         Int              @default(0)
+  multiplier    Decimal          @default(1.0) @db.Decimal(5, 2)
+  reason        String           @db.VarChar(500)
+  referenceId   String?          @map("reference_id") @db.VarChar(255)
+  referenceType String?          @map("reference_type") @db.VarChar(50)
+  ruleApplied   String?          @map("rule_applied") @db.VarChar(255)
+  expiresAt     DateTime?        @map("expires_at")
+  ipAddress     String?          @map("ip_address") @db.VarChar(45)
+  deviceInfo    String?          @map("device_info") @db.VarChar(255)
+  metadata      Json?            @db.JsonB
+  createdAt     DateTime         @default(now()) @map("created_at")
 
   user     User            @relation(fields: [userId], references: [id], onDelete: Restrict)
   campaign RewardCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
@@ -757,4 +769,422 @@ model GameSession {
   @@index([userId, status], name: "idx_game_sessions_user_status")
   @@index([gameId, status], name: "idx_game_sessions_game_status")
   @@map("game_sessions")
+}
+
+// ─── Rewards Catalog & Redemption ───────────────────────
+
+enum RewardType {
+  FREE_ITEM
+  DISCOUNT
+  BUY_ONE_GET_ONE
+  CASHBACK
+  COUPON
+  PARTNER
+  GIFT
+  FESTIVAL
+  LIMITED_TIME
+  CUSTOM
+}
+
+enum RewardStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  PAUSED
+  SOLD_OUT
+  ARCHIVED
+}
+
+enum RewardAvailability {
+  GLOBAL
+  BRAND_SPECIFIC
+  STORE_SPECIFIC
+  CAMPAIGN_SPECIFIC
+  LOCATION_SPECIFIC
+}
+
+enum RedemptionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum VoucherStatus {
+  ACTIVE
+  USED
+  EXPIRED
+  CANCELLED
+  INVALID
+}
+
+model RewardCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(120)
+  description String?  @db.Text
+  icon        String?  @db.VarChar(100)
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  rewards Reward[]
+
+  @@index([isActive, sortOrder], name: "idx_reward_categories_active")
+  @@map("reward_categories")
+}
+
+model Reward {
+  id                 String             @id @default(uuid()) @db.Uuid
+  title              String             @db.VarChar(200)
+  slug               String             @unique @db.VarChar(220)
+  description        String?            @db.Text
+  shortDescription   String?            @map("short_description") @db.VarChar(300)
+  image              String?            @db.VarChar(500)
+  bannerImage        String?            @map("banner_image") @db.VarChar(500)
+  categoryId         String?            @map("category_id") @db.Uuid
+  brandId            String?            @map("brand_id") @db.Uuid
+  coinCost           Int                @map("coin_cost")
+  cashAmount         Decimal?           @map("cash_amount") @db.Decimal(12, 2)
+  rewardType         RewardType         @default(FREE_ITEM) @map("reward_type")
+  availability       RewardAvailability @default(GLOBAL)
+  status             RewardStatus       @default(DRAFT)
+  priority           Int                @default(0)
+  isFeatured         Boolean            @default(false) @map("is_featured")
+  stock              Int?
+  dailyLimit         Int?               @map("daily_limit")
+  userLimit          Int?               @map("user_limit")
+  minimumLoyaltyTier String?            @map("minimum_loyalty_tier") @db.VarChar(50)
+  campaignId         String?            @map("campaign_id") @db.Uuid
+  voucherValidDays   Int                @default(30) @map("voucher_valid_days")
+  validFrom          DateTime?          @map("valid_from")
+  validUntil         DateTime?          @map("valid_until")
+  terms              String?            @db.Text
+  totalRedemptions   Int                @default(0) @map("total_redemptions")
+  totalViews         Int                @default(0) @map("total_views")
+  metadata           Json?              @db.JsonB
+  createdBy          String?            @map("created_by") @db.Uuid
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  category    RewardCategory?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  brand       Brand?                    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  storeLinks  RewardStoreAvailability[]
+  redemptions RewardRedemption[]
+  vouchers    RewardVoucher[]
+
+  @@index([status, isFeatured, priority(sort: Desc)], name: "idx_rewards_status_featured")
+  @@index([categoryId, status], name: "idx_rewards_category")
+  @@index([brandId, status], name: "idx_rewards_brand")
+  @@index([status, validFrom, validUntil], name: "idx_rewards_window")
+  @@map("rewards")
+}
+
+model RewardStoreAvailability {
+  id        String   @id @default(uuid()) @db.Uuid
+  rewardId  String   @map("reward_id") @db.Uuid
+  storeId   String   @map("store_id") @db.Uuid
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  store  Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([rewardId, storeId], name: "uq_reward_store")
+  @@index([storeId, isActive], name: "idx_reward_store_availability_store")
+  @@map("reward_store_availability")
+}
+
+model RewardRedemption {
+  id             String           @id @default(uuid()) @db.Uuid
+  rewardId       String           @map("reward_id") @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  storeId        String?          @map("store_id") @db.Uuid
+  status         RedemptionStatus @default(PENDING)
+  coinsSpent     Int              @map("coins_spent")
+  walletTxnId    String?          @map("wallet_txn_id") @db.Uuid
+  idempotencyKey String           @unique @map("idempotency_key") @db.VarChar(255)
+  failureReason  String?          @map("failure_reason") @db.VarChar(500)
+  ipAddress      String?          @map("ip_address") @db.VarChar(45)
+  deviceInfo     String?          @map("device_info") @db.VarChar(255)
+  metadata       Json?            @db.JsonB
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  reward  Reward         @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  store   Store?         @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  voucher RewardVoucher?
+
+  @@index([userId, createdAt(sort: Desc)], name: "idx_reward_redemptions_user")
+  @@index([rewardId, status], name: "idx_reward_redemptions_reward")
+  @@index([userId, rewardId, createdAt], name: "idx_reward_redemptions_user_reward")
+  @@map("reward_redemptions")
+}
+
+model RewardVoucher {
+  id           String        @id @default(uuid()) @db.Uuid
+  redemptionId String        @unique @map("redemption_id") @db.Uuid
+  rewardId     String        @map("reward_id") @db.Uuid
+  userId       String        @map("user_id") @db.Uuid
+  storeId      String?       @map("store_id") @db.Uuid
+  code         String        @unique @db.VarChar(32)
+  signature    String        @db.VarChar(128)
+  status       VoucherStatus @default(ACTIVE)
+  expiresAt    DateTime      @map("expires_at")
+  redeemedAt   DateTime?     @map("redeemed_at")
+  redeemedBy   String?       @map("redeemed_by") @db.Uuid
+  cancelledAt  DateTime?     @map("cancelled_at")
+  metadata     Json?         @db.JsonB
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  redemption RewardRedemption @relation(fields: [redemptionId], references: [id], onDelete: Restrict)
+  reward     Reward           @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  store      Store?           @relation(fields: [storeId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status, expiresAt], name: "idx_reward_vouchers_user_status")
+  @@index([status, expiresAt], name: "idx_reward_vouchers_expiry")
+  @@map("reward_vouchers")
+}
+
+model RewardAnalyticsEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  rewardId  String?  @map("reward_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  eventType String   @map("event_type") @db.VarChar(50)
+  metadata  Json?    @db.JsonB
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([rewardId, eventType, createdAt], name: "idx_reward_analytics_reward")
+  @@index([eventType, createdAt], name: "idx_reward_analytics_type")
+  @@map("reward_analytics_events")
+}
+
+// ─── Notification Platform ──────────────────────────────
+
+enum NotificationType {
+  SYSTEM
+  WALLET
+  GAME
+  REWARD
+  REDEMPTION
+  REFERRAL
+  LOYALTY
+  STORE
+  CAMPAIGN
+  MARKETING
+  SECURITY
+  ORDER
+  CUSTOM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+  DELETED
+}
+
+enum NotificationChannel {
+  IN_APP
+  PUSH
+  EMAIL
+  WHATSAPP
+  SMS
+  WEBHOOK
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  SKIPPED
+}
+
+model Notification {
+  id          String               @id @default(uuid()) @db.Uuid
+  userId      String               @map("user_id") @db.Uuid
+  title       String               @db.VarChar(200)
+  message     String               @db.Text
+  type        NotificationType     @default(SYSTEM)
+  priority    NotificationPriority @default(NORMAL)
+  channel     NotificationChannel  @default(IN_APP)
+  status      NotificationStatus   @default(UNREAD)
+  icon        String?              @db.VarChar(100)
+  image       String?              @db.VarChar(500)
+  actionLabel String?              @map("action_label") @db.VarChar(80)
+  actionUrl   String?              @map("action_url") @db.VarChar(500)
+  deepLink    String?              @map("deep_link") @db.VarChar(500)
+  templateKey String?              @map("template_key") @db.VarChar(100)
+  groupKey    String?              @map("group_key") @db.VarChar(150)
+  dedupeKey   String?              @unique @map("dedupe_key") @db.VarChar(255)
+  referenceId String?              @map("reference_id") @db.VarChar(255)
+  clickedAt   DateTime?            @map("clicked_at")
+  metadata    Json?                @db.JsonB
+  readAt      DateTime?            @map("read_at")
+  expiresAt   DateTime?            @map("expires_at")
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+
+  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveryLogs NotificationDeliveryLog[]
+
+  @@index([userId, status, createdAt(sort: Desc)], name: "idx_notifications_user_status")
+  @@index([userId, type, createdAt(sort: Desc)], name: "idx_notifications_user_type")
+  @@index([status, expiresAt], name: "idx_notifications_expiry")
+  @@map("notifications")
+}
+
+model NotificationTemplate {
+  id            String                @id @default(uuid()) @db.Uuid
+  key           String                @unique @db.VarChar(100)
+  name          String                @db.VarChar(150)
+  description   String?               @db.Text
+  type          NotificationType      @default(SYSTEM)
+  priority      NotificationPriority  @default(NORMAL)
+  titleTemplate String                @map("title_template") @db.VarChar(300)
+  bodyTemplate  String                @map("body_template") @db.Text
+  icon          String?               @db.VarChar(100)
+  actionLabel   String?               @map("action_label") @db.VarChar(80)
+  actionUrl     String?               @map("action_url") @db.VarChar(500)
+  channels      NotificationChannel[]
+  expiryDays    Int?                  @map("expiry_days")
+  isActive      Boolean               @default(true) @map("is_active")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+
+  @@index([isActive, type], name: "idx_notification_templates_active")
+  @@map("notification_templates")
+}
+
+model NotificationPreference {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+
+  // Per-category opt-in (applies across every channel).
+  wallet       Boolean @default(true)
+  games        Boolean @default(true)
+  rewards      Boolean @default(true)
+  marketing    Boolean @default(true)
+  campaigns    Boolean @default(true)
+  storeUpdates Boolean @default(true) @map("store_updates")
+  referral     Boolean @default(true)
+  security     Boolean @default(true)
+  system       Boolean @default(true)
+
+  // Per-channel master switches; future channels read these without a migration.
+  inAppEnabled    Boolean @default(true) @map("in_app_enabled")
+  pushEnabled     Boolean @default(false) @map("push_enabled")
+  emailEnabled    Boolean @default(false) @map("email_enabled")
+  whatsappEnabled Boolean @default(false) @map("whatsapp_enabled")
+  smsEnabled      Boolean @default(false) @map("sms_enabled")
+
+  quietHoursStart Int?     @map("quiet_hours_start")
+  quietHoursEnd   Int?     @map("quiet_hours_end")
+  metadata        Json?    @db.JsonB
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model NotificationDeliveryLog {
+  id             String              @id @default(uuid()) @db.Uuid
+  notificationId String?             @map("notification_id") @db.Uuid
+  userId         String              @map("user_id") @db.Uuid
+  channel        NotificationChannel
+  status         DeliveryStatus      @default(PENDING)
+  templateKey    String?             @map("template_key") @db.VarChar(100)
+  failureReason  String?             @map("failure_reason") @db.VarChar(500)
+  attemptedAt    DateTime            @default(now()) @map("attempted_at")
+  deliveredAt    DateTime?           @map("delivered_at")
+  metadata       Json?               @db.JsonB
+
+  notification Notification? @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, channel, attemptedAt(sort: Desc)], name: "idx_notification_delivery_user")
+  @@index([channel, status], name: "idx_notification_delivery_channel_status")
+  @@map("notification_delivery_logs")
+}
+
+// ─── Audit & Activity Platform ──────────────────────────
+
+enum AuditActorType {
+  CUSTOMER
+  EMPLOYEE
+  STORE_MANAGER
+  CORPORATE_ADMIN
+  SUPER_ADMIN
+  SYSTEM
+  BACKGROUND_JOB
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  HIGH
+  CRITICAL
+}
+
+/// Immutable, append-only business audit trail.
+///
+/// Deliberately denormalised: entity/event/metadata live inline rather than in
+/// side tables. Audit reads are overwhelmingly filtered scans over a single
+/// time-ordered stream, so joins would cost on every query while buying no
+/// scalability. Structured metadata stays queryable through JSONB.
+///
+/// No updatedAt column — rows are never modified.
+model AuditLog {
+  id            String         @id @default(uuid()) @db.Uuid
+  eventType     String         @map("event_type") @db.VarChar(80)
+  entityType    String         @map("entity_type") @db.VarChar(60)
+  entityId      String?        @map("entity_id") @db.VarChar(255)
+  action        String         @db.VarChar(80)
+  actorType     AuditActorType @default(SYSTEM) @map("actor_type")
+  actorRole     String?        @map("actor_role") @db.VarChar(60)
+  userId        String?        @map("user_id") @db.Uuid
+  employeeId    String?        @map("employee_id") @db.Uuid
+  storeId       String?        @map("store_id") @db.Uuid
+  severity      AuditSeverity  @default(INFO)
+  oldValue      Json?          @map("old_value") @db.JsonB
+  newValue      Json?          @map("new_value") @db.JsonB
+  metadata      Json?          @db.JsonB
+  ipAddress     String?        @map("ip_address") @db.VarChar(45)
+  device        String?        @db.VarChar(255)
+  userAgent     String?        @map("user_agent") @db.VarChar(500)
+  requestId     String?        @map("request_id") @db.VarChar(100)
+  correlationId String?        @map("correlation_id") @db.VarChar(100)
+  /// Collapses a redelivered domain event onto one row.
+  dedupeKey     String?        @unique @map("dedupe_key") @db.VarChar(255)
+  createdAt     DateTime       @default(now()) @map("created_at")
+
+  user     User?  @relation("AuditActor", fields: [userId], references: [id], onDelete: SetNull)
+  employee User?  @relation("AuditEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  store    Store? @relation(fields: [storeId], references: [id], onDelete: SetNull)
+
+  // Cursor pagination and every dashboard timeline read this ordering.
+  @@index([createdAt(sort: Desc), id], name: "idx_audit_logs_timeline")
+  @@index([userId, createdAt(sort: Desc)], name: "idx_audit_logs_user")
+  @@index([employeeId, createdAt(sort: Desc)], name: "idx_audit_logs_employee")
+  @@index([storeId, createdAt(sort: Desc)], name: "idx_audit_logs_store")
+  @@index([entityType, entityId, createdAt(sort: Desc)], name: "idx_audit_logs_entity")
+  @@index([eventType, createdAt(sort: Desc)], name: "idx_audit_logs_event")
+  @@index([severity, createdAt(sort: Desc)], name: "idx_audit_logs_severity")
+  @@index([actorType, createdAt(sort: Desc)], name: "idx_audit_logs_actor")
+  @@index([correlationId], name: "idx_audit_logs_correlation")
+  @@index([requestId], name: "idx_audit_logs_request")
+  @@map("audit_logs")
 }

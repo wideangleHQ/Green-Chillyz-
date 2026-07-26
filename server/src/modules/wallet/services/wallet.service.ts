@@ -5,6 +5,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma, TransactionType, TransactionStatus } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
 import { WalletCacheService } from './wallet-cache.service';
@@ -18,6 +19,12 @@ import {
 import { WALLET_ERRORS } from '../constants';
 import { PaginatedResponse } from '../../../common/interfaces';
 import { paginate } from '../../../common/pagination/paginator';
+import { NOTIFICATION_EVENTS } from '../../notification/constants';
+import {
+  WalletCreditedEvent,
+  WalletDebitedEvent,
+  CoinsExpiredEvent,
+} from '../../notification/events';
 
 @Injectable()
 export class WalletService {
@@ -26,6 +33,7 @@ export class WalletService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: WalletCacheService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async getOrCreateWallet(userId: string): Promise<WalletResponse> {
@@ -202,6 +210,20 @@ export class WalletService {
     await this.cache.invalidate(dto.userId);
     this.logger.log(`Credit ${dto.amount} to user ${dto.userId} | source=${dto.source}`);
 
+    // Fire-and-forget domain event. The wallet knows nothing about
+    // notifications; subscribers decide what (if anything) to send.
+    this.eventEmitter.emit(
+      NOTIFICATION_EVENTS.WALLET_CREDITED,
+      new WalletCreditedEvent(
+        dto.userId,
+        dto.amount,
+        result.newBalance,
+        dto.source,
+        dto.description,
+        result.transaction.id,
+      ),
+    );
+
     return {
       transaction: this.toTransactionResponse(result.transaction),
       newBalance: result.newBalance,
@@ -275,6 +297,18 @@ export class WalletService {
     await this.cache.invalidate(dto.userId);
     this.logger.log(`Debit ${dto.amount} from user ${dto.userId} | source=${dto.source}`);
 
+    this.eventEmitter.emit(
+      NOTIFICATION_EVENTS.WALLET_DEBITED,
+      new WalletDebitedEvent(
+        dto.userId,
+        dto.amount,
+        result.newBalance,
+        dto.source,
+        dto.description,
+        result.transaction.id,
+      ),
+    );
+
     return {
       transaction: this.toTransactionResponse(result.transaction),
       newBalance: result.newBalance,
@@ -342,6 +376,9 @@ export class WalletService {
 
     let expiredCount = 0;
     const affectedUserIds = new Set<string>();
+    // Coins can expire in several batches per user; aggregate so the
+    // user receives one notification rather than one per batch.
+    const expiredByUser = new Map<string, { amount: number; newBalance: number }>();
 
     for (const txn of expiredTxns) {
       await this.prisma.$transaction(async (tx) => {
@@ -386,6 +423,12 @@ export class WalletService {
             description: `Expired coins from: ${txn.description}`,
           },
         });
+
+        const prior = expiredByUser.get(txn.wallet.userId);
+        expiredByUser.set(txn.wallet.userId, {
+          amount: (prior?.amount ?? 0) + expireAmount,
+          newBalance,
+        });
       });
 
       affectedUserIds.add(txn.wallet.userId);
@@ -394,6 +437,13 @@ export class WalletService {
 
     for (const uid of affectedUserIds) {
       await this.cache.invalidate(uid);
+    }
+
+    for (const [userId, summary] of expiredByUser) {
+      this.eventEmitter.emit(
+        NOTIFICATION_EVENTS.COINS_EXPIRED,
+        new CoinsExpiredEvent(userId, summary.amount, summary.newBalance),
+      );
     }
 
     this.logger.log(`Expired ${expiredCount} coin batches for ${affectedUserIds.size} users`);

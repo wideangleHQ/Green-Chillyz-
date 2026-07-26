@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 
 interface BrandData {
@@ -176,7 +177,7 @@ export function BrandStorySection() {
             </div>
 
             {/* Learn More Button */}
-            <a
+            <Link
               href="/menu"
               id="learn-more-about-btn"
               className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-heading uppercase tracking-wider transition-all duration-500 hover:-translate-y-0.5 hover:shadow-soft cursor-pointer border"
@@ -194,8 +195,8 @@ export function BrandStorySection() {
               }}
             >
               Learn More
-              <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </a>
+              <ArrowUpRight className="size-4.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
           </div>
 
           {/* Image Showcase Section */}

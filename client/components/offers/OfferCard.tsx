@@ -4,6 +4,7 @@ import { useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Check, Sparkles, Clock, ArrowUpRight, ShieldCheck, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Offer } from "@/types/offers";
 
 interface OfferCardProps {
@@ -109,13 +110,13 @@ export const OfferCard = memo(function OfferCard({ offer, outletName }: OfferCar
 
         {/* Redeem CTA Button */}
         <div className="flex flex-col gap-2 pt-1">
-          <a
-            href="#menu"
+          <Link
+            href="/menu"
             className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2.5 text-xs font-sans font-bold uppercase tracking-wider text-white shadow-soft transition-all duration-300 hover:scale-102 cursor-pointer"
           >
             <span>Redeem Offer</span>
             <ArrowUpRight className="size-4" />
-          </a>
+          </Link>
 
           {/* Terms Toggle Link */}
           <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
@@ -315,7 +316,7 @@ export function HeroSection() {
             {"\n"}Reimagined.
           </h1>
           <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center">
-            <a
+            <Link
               href="/menu"
               className="group relative inline-flex items-center gap-2.5 rounded-full px-6 md:px-8 py-2.5 md:py-3.5 font-heading uppercase tracking-wider text-sm overflow-hidden text-[#69f0ae] min-h-11"
             >
@@ -323,7 +324,7 @@ export function HeroSection() {
               <span className="absolute inset-0 rounded-full opacity-[.08] bg-[#00c853]" />
               Explore Menu
               <span className="text-sm">→</span>
-            </a>
+            </Link>
             <a
               href="#story"
               className="group relative inline-flex items-center gap-2.5 rounded-full px-6 md:px-8 py-2.5 md:py-3.5 font-heading uppercase tracking-wider text-sm text-white/70 min-h-11"
@@ -398,7 +399,7 @@ export function HeroSection() {
             ref={buttonsRef}
             className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center"
           >
-            <a
+            <Link
               href="/menu"
               className="group relative inline-flex items-center gap-2.5 rounded-full px-6 md:px-8 py-2.5 md:py-3.5 font-heading uppercase tracking-wider text-sm overflow-hidden text-[#69f0ae] min-h-11"
             >
@@ -410,7 +411,7 @@ export function HeroSection() {
               <span className="text-sm opacity-50 group-hover:translate-x-0.5 transition-transform duration-200">
                 →
               </span>
-            </a>
+            </Link>
 
             <a
               href="#story"

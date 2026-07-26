@@ -98,10 +98,10 @@ export function GamesSection() {
           {/* Premium CTA Button */}
           <Reveal>
             <Link
-              href="/menu"
+              href="/games"
               className="group inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm font-sans font-semibold uppercase tracking-wider text-white shadow-soft transition-all duration-300 hover:bg-brand-green-hover hover:scale-105 cursor-pointer mt-0.5 sm:mt-2"
             >
-              Explore Games
+              Explore More Games
               <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </Reveal>
@@ -127,6 +127,7 @@ export function GamesSection() {
           <button
             onClick={prevSlide}
             type="button"
+            suppressHydrationWarning
             className="absolute left-0 sm:left-1 md:left-2 z-50 size-9 sm:size-11 md:size-13 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-on-surface shadow-soft border border-white/60 hover:scale-110 hover:bg-white transition-all duration-300 cursor-pointer"
             aria-label="Previous Game"
           >
@@ -184,6 +185,7 @@ export function GamesSection() {
           <button
             onClick={nextSlide}
             type="button"
+            suppressHydrationWarning
             className="absolute right-0 sm:right-1 md:right-2 z-50 size-9 sm:size-11 md:size-13 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-on-surface shadow-soft border border-white/60 hover:scale-110 hover:bg-white transition-all duration-300 cursor-pointer"
             aria-label="Next Game"
           >

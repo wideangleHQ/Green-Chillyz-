@@ -16,6 +16,7 @@ import {
   StoreFacilityController,
   StoreAnnouncementController,
 } from './store-manager.controller';
+import { MenuController } from './menu.controller';
 import {
   StoreService,
   StoreTimingService,
@@ -23,6 +24,7 @@ import {
   StoreManagerService,
   StoreCacheService,
   StoreImageService,
+  MenuService,
 } from './services';
 
 @Module({
@@ -40,6 +42,7 @@ import {
     StoreManagerController,
     StoreFacilityController,
     StoreAnnouncementController,
+    MenuController,
   ],
   providers: [
     StoreService,
@@ -48,7 +51,8 @@ import {
     StoreManagerService,
     StoreCacheService,
     StoreImageService,
+    MenuService,
   ],
-  exports: [StoreService, StoreCacheService],
+  exports: [StoreService, StoreCacheService, MenuService],
 })
 export class StoreModule {}

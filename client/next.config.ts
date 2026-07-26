@@ -12,7 +12,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "cdn.greenchillyz.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.greenchillyz.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },

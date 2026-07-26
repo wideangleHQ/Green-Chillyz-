@@ -133,6 +133,8 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
         {/* Floating Bottom Action Button */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30">
           <button
+            type="button"
+            suppressHydrationWarning
             onClick={(e) => {
               e.stopPropagation();
               if (isActive && onPlay) onPlay(game.id);

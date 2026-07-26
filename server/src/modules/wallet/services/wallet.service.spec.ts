@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { TransactionType, TransactionSource, TransactionStatus } from '@prisma/client';
 import { WalletService } from './wallet.service';
@@ -76,9 +77,12 @@ describe('WalletService', () => {
       invalidateAll: vi.fn(),
     };
 
+    const eventEmitter = { emit: vi.fn(), emitAsync: vi.fn() };
+
     service = new WalletService(
       prisma as unknown as PrismaService,
       cache as unknown as WalletCacheService,
+      eventEmitter as unknown as EventEmitter2,
     );
   });
 

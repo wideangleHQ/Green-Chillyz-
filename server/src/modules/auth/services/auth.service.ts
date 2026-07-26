@@ -13,6 +13,11 @@ import {
   RegistrationProvider,
 } from '../../customer-bootstrap/events';
 import { BOOTSTRAP_EVENTS } from '../../customer-bootstrap/constants';
+import { NOTIFICATION_EVENTS } from '../../notification/constants';
+import { CustomerRegisteredNotificationEvent } from '../../notification/events';
+import { AUDIT_EVENTS } from '../../audit/constants';
+import { AuthAuditEvent } from '../../audit/events';
+import { AuditActorType } from '@prisma/client';
 import { SupabaseService } from './supabase.service';
 import { TokenService } from './token.service';
 import { SessionService } from './session.service';
@@ -79,7 +84,13 @@ export class AuthService {
       });
     }
 
-    await this.publishUserRegistered(user.id, user.email, 'credentials', ipAddress);
+    await this.publishUserRegistered(
+      user.id,
+      user.email,
+      user.fullName,
+      'credentials',
+      ipAddress,
+    );
 
     const parsedUA = this.deviceService.parseUserAgent(userAgent);
     const device = await this.deviceService.findOrCreateDevice(user.id, {
@@ -149,6 +160,9 @@ export class AuthService {
         wasSuccessful: false,
         failureReason: 'Invalid password',
       });
+      this.emitLoginAudit(
+        user.id, 'credentials', false, ipAddress, userAgent, 'Invalid password',
+      );
       throw new UnauthorizedException(AUTH_ERRORS.INVALID_CREDENTIALS);
     }
 
@@ -194,6 +208,8 @@ export class AuthService {
       wasSuccessful: true,
       failureReason: null,
     });
+
+    this.emitLoginAudit(user.id, 'credentials', true, ipAddress, userAgent);
 
     const authUser = await this.buildUserResponse(user.id);
     return { user: authUser, tokens };
@@ -252,7 +268,13 @@ export class AuthService {
           });
         }
 
-        await this.publishUserRegistered(user.id, user.email, 'google', ipAddress);
+        await this.publishUserRegistered(
+          user.id,
+          user.email,
+          user.fullName,
+          'google',
+          ipAddress,
+        );
       }
     }
 
@@ -310,6 +332,8 @@ export class AuthService {
       wasSuccessful: true,
       failureReason: null,
     });
+
+    this.emitLoginAudit(user.id, 'google', true, ipAddress, userAgent);
 
     const authUser = await this.buildUserResponse(user.id);
     return { user: authUser, isNewUser, tokens };
@@ -464,6 +488,7 @@ export class AuthService {
   private async publishUserRegistered(
     userId: string,
     email: string,
+    fullName: string,
     provider: RegistrationProvider,
     ipAddress: string,
   ): Promise<void> {
@@ -478,6 +503,43 @@ export class AuthService {
         `Customer bootstrap failed for user ${userId}: ${message}`,
       );
     }
+
+    // Welcome message. Emitted after bootstrap so the wallet the notification
+    // points at already exists.
+    this.eventEmitter.emit(
+      NOTIFICATION_EVENTS.CUSTOMER_REGISTERED,
+      new CustomerRegisteredNotificationEvent(userId, fullName),
+    );
+  }
+
+  /**
+   * Emits a login audit event. The audit module decides what to persist; auth
+   * only reports what happened.
+   */
+  private emitLoginAudit(
+    userId: string,
+    provider: string,
+    succeeded: boolean,
+    ipAddress: string,
+    userAgent: string | undefined,
+    failureReason?: string,
+  ): void {
+    this.eventEmitter.emit(
+      AUDIT_EVENTS.CUSTOMER_LOGIN,
+      new AuthAuditEvent(
+        userId,
+        AuditActorType.CUSTOMER,
+        'LOGIN',
+        provider,
+        succeeded,
+        {
+          ipAddress,
+          device: userAgent ?? null,
+          userAgent: userAgent ?? null,
+        },
+        failureReason,
+      ),
+    );
   }
 
   private async buildUserResponse(userId: string): Promise<AuthUserResponse> {

@@ -10,9 +10,9 @@ import {
   Send,
   Check,
   Sparkles,
-  Heart,
   ShieldCheck,
 } from "lucide-react";
+import { useActiveStores } from "@/hooks/useStores";
 import { Reveal } from "@/components/ui/Reveal";
 
 const BRAND_MOTTO_ITEMS = [
@@ -27,30 +27,30 @@ const BRAND_MOTTO_ITEMS = [
 ];
 
 const OUTLET_LOCATIONS = [
-  { name: "Indiranagar", brand: "GreenChillyz", area: "100ft Road", href: "#locations" },
-  { name: "Koramangala", brand: "YellowChillyz", area: "5th Block", href: "#locations" },
-  { name: "UB City", brand: "GoldenChillyz", area: "Level 2", href: "#locations" },
-  { name: "Whitefield", brand: "GreenChillyz", area: "ITPL Main Rd", href: "#locations" },
-  { name: "Jayanagar", brand: "YellowChillyz", area: "4th Block", href: "#locations" },
-  { name: "HSR Layout", brand: "GreenChillyz", area: "27th Main", href: "#locations" },
+  { name: "Indiranagar", brand: "GreenChillyz", area: "100ft Road", href: "/#locations" },
+  { name: "Koramangala", brand: "YellowChillyz", area: "5th Block", href: "/#locations" },
+  { name: "UB City", brand: "GoldenChillyz", area: "Level 2", href: "/#locations" },
+  { name: "Whitefield", brand: "GreenChillyz", area: "ITPL Main Rd", href: "/#locations" },
+  { name: "Jayanagar", brand: "YellowChillyz", area: "4th Block", href: "/#locations" },
+  { name: "HSR Layout", brand: "GreenChillyz", area: "27th Main", href: "/#locations" },
 ];
 
 const NAV_COLUMNS = [
   {
     heading: "Explore",
     links: [
-      { href: "#story", label: "Our Story" },
-      { href: "#menu", label: "Interactive Menu" },
-      { href: "#signature", label: "Signature Dishes" },
-      { href: "#games", label: "Games & Rewards" },
-      { href: "#offers", label: "Local Deals" },
+      { href: "/#story", label: "Our Story" },
+      { href: "/menu", label: "Interactive Menu" },
+      { href: "/#signature", label: "Signature Dishes" },
+      { href: "/games", label: "Games & Rewards" },
+      { href: "/#offers", label: "Local Deals" },
     ],
   },
   {
     heading: "Experience",
     links: [
-      { href: "#locations", label: "Store Locator" },
-      { href: "#reviews", label: "Verified Reviews" },
+      { href: "/#locations", label: "Store Locator" },
+      { href: "/#reviews", label: "Verified Reviews" },
       { href: "/join", label: "Rewards Club" },
       { href: "/franchise", label: "Franchise Program" },
     ],
@@ -76,6 +76,18 @@ const SOCIAL_LINKS = [
 export function Footer() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const { data: activeStores } = useActiveStores();
+
+  const displayedStores = activeStores && activeStores.length > 0
+    ? activeStores.slice(0, 6).map((store) => {
+        const area = store.shortDescription || store.addressLine1.split(',')[0];
+        return {
+          name: store.name,
+          area: area,
+          href: `#locations`,
+        };
+      })
+    : OUTLET_LOCATIONS;
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,7 +192,7 @@ export function Footer() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {OUTLET_LOCATIONS.map((loc) => (
+              {displayedStores.map((loc) => (
                 <Link
                   key={loc.name}
                   href={loc.href}
@@ -206,7 +218,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pt-10 border-t border-white/15 items-start">
           {/* Brand Identity (4 cols) */}
           <div className="md:col-span-4 flex flex-col gap-4">
-            <Link href="#top" className="flex items-center gap-3 group">
+            <Link href="/#top" className="flex items-center gap-3 group">
               <div className="size-11 rounded-full bg-white p-1 flex items-center justify-center shadow-soft transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/assets/icons/logo.png"
@@ -297,12 +309,6 @@ export function Footer() {
       <div className="w-full bg-[#003615] border-t border-white/15 py-5">
         <div className="container-site flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans text-white/70">
           <p>© {new Date().getFullYear()} GreenChillyz Group. All rights reserved.</p>
-
-          <p className="flex items-center gap-1">
-            <span>Crafted with</span>
-            <Heart className="size-3 text-red-400 fill-red-400" />
-            <span>for food lovers.</span>
-          </p>
 
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-amber-400 transition-colors">

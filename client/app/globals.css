@@ -183,6 +183,10 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.01em;
 }
 
+.font-sans {
+  font-family: var(--font-sans) !important;
+}
+
 body {
   background-color: var(--color-surface);
   color: var(--color-on-surface);
@@ -197,11 +201,11 @@ body {
   border-radius: 4px;
 }
 
-/* Inputs signal premium interaction with a gold focus border */
+/* Inputs focus styling — keep it simple, no outlines/borders */
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline-color: var(--color-gold);
+  outline: none;
 }
 
 ::selection {

@@ -8,3 +8,4 @@ export { UpdateStoreGalleryDto } from './store-gallery.dto';
 export { CreateStoreFacilityDto } from './store-facility.dto';
 export { CreateStoreManagerDto, UpdateStoreManagerDto } from './store-manager.dto';
 export { CreateStoreAnnouncementDto, UpdateStoreAnnouncementDto } from './store-announcement.dto';
+export { MenuQueryDto } from './menu-query.dto';

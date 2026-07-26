@@ -364,7 +364,7 @@ export function SignatureCreationsSection() {
                     </div>
 
                     <div className="flex flex-col gap-2 mt-auto mr-12 relative z-10">
-                      <h3 className="text-2xl md:text-3xl font-heading text-white tracking-tight uppercase leading-[0.95] max-w-[90%]">
+                      <h3 className="text-2xl md:text-3xl font-sans font-bold text-white tracking-tight uppercase leading-[0.95] max-w-[90%]">
                         {dish.name}
                       </h3>
                       <p className="text-xs md:text-sm text-white/75 font-sans leading-relaxed mt-1.5 line-clamp-3">

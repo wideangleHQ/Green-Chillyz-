@@ -1,7 +1,21 @@
 import axios from 'axios';
 import type { ApiErrorShape } from '@/types/auth';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const getApiBase = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  if (typeof window !== 'undefined' && envUrl) {
+    try {
+      const parsedEnv = new URL(envUrl);
+      const port = parsedEnv.port ? `:${parsedEnv.port}` : '';
+      return `${window.location.protocol}//${window.location.hostname}${port}`;
+    } catch (e) {
+      console.error('Failed to parse NEXT_PUBLIC_API_URL', e);
+    }
+  }
+  return envUrl || 'http://localhost:5001';
+};
+
+const API_BASE = getApiBase();
 
 export const api = axios.create({
   baseURL: `${API_BASE}/api/v1`,

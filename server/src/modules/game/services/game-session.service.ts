@@ -5,6 +5,7 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../../database/prisma.service';
 import { GameCacheService } from './game-cache.service';
 import { EligibilityService } from './eligibility.service';
@@ -19,6 +20,8 @@ import { GameSession, GameSessionStatus, RewardEventType, RewardSourceType, Pris
 import { GAME_ERRORS } from '../constants/game.constants';
 import { PaginatedResponse } from '../../../common/interfaces';
 import { paginate } from '../../../common/pagination/paginator';
+import { NOTIFICATION_EVENTS } from '../../notification/constants';
+import { GameCompletedEvent } from '../../notification/events';
 
 @Injectable()
 export class GameSessionService {
@@ -34,6 +37,7 @@ export class GameSessionService {
     private readonly registry: GameRegistry,
     private readonly rewardEngine: RewardEngineService,
     private readonly walletService: WalletService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async startSession(
@@ -192,6 +196,19 @@ export class GameSessionService {
           finalStatus = GameSessionStatus.REWARDED;
           this.logger.log(
             `Credited user ${userId} with ${decision.totalCoins} coins. New balance: ${creditResult.newBalance}`,
+          );
+
+          // Richer than the generic wallet event; the notification listener
+          // suppresses the wallet message for GAME_REWARD so only one fires.
+          this.eventEmitter.emit(
+            NOTIFICATION_EVENTS.GAME_COMPLETED,
+            new GameCompletedEvent(
+              userId,
+              session.gameId,
+              session.game.name,
+              decision.totalCoins,
+              session.id,
+            ),
           );
         }
       }

@@ -43,7 +43,22 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: corsOrigins,
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      if (!origin || !isProduction) {
+        // In development, dynamically allow any origin (localhost, LAN IP, public IP, etc.)
+        callback(null, true);
+      } else {
+        const isAllowed = corsOrigins.includes(origin);
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',

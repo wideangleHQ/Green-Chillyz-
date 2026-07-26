@@ -286,7 +286,7 @@ export function SpinWheelGame({ game, onClose, onSuccess }: SpinWheelGameProps) 
 
               {spinResult.rewardDecision?.rewardGranted && spinResult.rewardDecision?.totalCoins > 0 && (
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl px-6 py-3 my-1">
-                  <span className="block text-[32px] font-heading font-extrabold text-amber-600 leading-none">
+                  <span className="block text-[32px] font-sans font-extrabold text-amber-600 leading-none">
                     +{spinResult.rewardDecision.totalCoins}
                   </span>
                   <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-amber-600/80 block mt-1">

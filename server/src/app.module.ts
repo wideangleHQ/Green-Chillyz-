@@ -25,6 +25,9 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { RewardModule } from './modules/reward/reward.module';
 import { GameModule } from './modules/game/game.module';
 import { CustomerBootstrapModule } from './modules/customer-bootstrap/customer-bootstrap.module';
+import { RewardsModule } from './modules/rewards/rewards.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { AuditModule } from './modules/audit/audit.module';
 
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { CorrelationIdMiddleware } from './common/middleware/correlation.middleware';
@@ -82,6 +85,9 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation.middlew
     RewardModule,
     GameModule,
     CustomerBootstrapModule,
+    RewardsModule,
+    NotificationModule,
+    AuditModule,
   ],
 })
 export class AppModule implements NestModule {

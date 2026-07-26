@@ -19,7 +19,7 @@ export function WalletSummaryCard({ summary }: WalletSummaryCardProps) {
           <p className="text-xs font-sans font-bold uppercase tracking-wider text-white/70">
             Your Balance
           </p>
-          <p className="text-3xl md:text-4xl font-heading font-extrabold tracking-tight">
+          <p className="text-3xl md:text-4xl font-sans font-extrabold tracking-tight">
             {formatCoins(summary.balance)}
             <span className="text-sm font-sans font-bold ml-1 text-white/80">coins</span>
           </p>
@@ -69,7 +69,7 @@ function StatCard({
           {label}
         </span>
       </div>
-      <p className="text-lg font-heading font-extrabold">{value}</p>
+      <p className="text-lg font-sans font-extrabold">{value}</p>
     </div>
   );
 }

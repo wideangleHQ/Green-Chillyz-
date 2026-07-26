@@ -18,6 +18,15 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, hasRole, hasPermission, openAuthModal } = useAuth();
 
+  // Opening the modal is a state update, so it must happen after render
+  // commits — calling it inline warns and can loop.
+  const shouldPromptSignIn = !isLoading && !isAuthenticated;
+  React.useEffect(() => {
+    if (shouldPromptSignIn) {
+      openAuthModal('sign-in');
+    }
+  }, [shouldPromptSignIn, openAuthModal]);
+
   if (isLoading) {
     return (
       fallback ?? (
@@ -29,9 +38,6 @@ export function ProtectedRoute({
   }
 
   if (!isAuthenticated) {
-    if (typeof window !== 'undefined') {
-      openAuthModal('sign-in');
-    }
     return (
       fallback ?? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">

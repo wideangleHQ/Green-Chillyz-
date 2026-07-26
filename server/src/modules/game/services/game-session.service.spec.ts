@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
 import { PrismaService } from '../../../database/prisma.service';
 import { GameCacheService } from './game-cache.service';
@@ -59,6 +60,8 @@ describe('GameSessionService', () => {
       credit: vi.fn(),
     };
 
+    const eventEmitter = { emit: vi.fn(), emitAsync: vi.fn() };
+
     service = new GameSessionService(
       prisma as unknown as PrismaService,
       cache as unknown as GameCacheService,
@@ -69,6 +72,7 @@ describe('GameSessionService', () => {
       registry as unknown as GameRegistry,
       rewardEngine as unknown as RewardEngineService,
       walletService as unknown as WalletService,
+      eventEmitter as unknown as EventEmitter2,
     );
   });
 
