@@ -11,7 +11,12 @@ const OnboardingWrapper = dynamic(
   { ssr: true }
 );
 
-// Lazy load sections below the fold to improve initial page load performance
+// Lazy load sections below the fold for optimal Lighthouse performance
+const BrandSnapshotSection = dynamic(
+  () => import("@/components/brand-snapshot/BrandSnapshotSection").then((mod) => mod.BrandSnapshotSection),
+  { ssr: true }
+);
+
 const BrandStorySection = dynamic(
   () => import("@/components/brand-story/BrandStorySection").then((mod) => mod.BrandStorySection),
   { ssr: true }
@@ -22,18 +27,28 @@ const SignatureCreationsSection = dynamic(
   { ssr: true }
 );
 
-const GamesSection = dynamic(
-  () => import("@/components/games/GamesSection").then((mod) => mod.GamesSection),
-  { ssr: true }
-);
-
 const OffersSection = dynamic(
   () => import("@/components/offers/OffersSection").then((mod) => mod.OffersSection),
   { ssr: true }
 );
 
+const GamesSection = dynamic(
+  () => import("@/components/games/GamesSection").then((mod) => mod.GamesSection),
+  { ssr: true }
+);
+
+const BusinessVerticalsSection = dynamic(
+  () => import("@/components/business-verticals/BusinessVerticalsSection").then((mod) => mod.BusinessVerticalsSection),
+  { ssr: true }
+);
+
 const LocationsSection = dynamic(
   () => import("@/components/locations/LocationsSection").then((mod) => mod.LocationsSection),
+  { ssr: true }
+);
+
+const WhyGreenChillyzSection = dynamic(
+  () => import("@/components/why-greenchillyz/WhyGreenChillyzSection").then((mod) => mod.WhyGreenChillyzSection),
   { ssr: true }
 );
 
@@ -56,11 +71,14 @@ export default function Home() {
       <OnboardingWrapper />
       <main>
         <HeroSection />
+        <BrandSnapshotSection />
         <BrandStorySection />
         <SignatureCreationsSection />
-        <GamesSection />
         <OffersSection />
+        <GamesSection />
+        <BusinessVerticalsSection />
         <LocationsSection />
+        <WhyGreenChillyzSection />
         <ReviewsSection />
       </main>
       <Footer />

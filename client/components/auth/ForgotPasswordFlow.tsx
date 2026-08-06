@@ -178,7 +178,7 @@ export function ForgotPasswordFlow() {
                 {emailForm.formState.errors.email && <p className="text-xs font-medium text-brand-red">{emailForm.formState.errors.email.message}</p>}
               </div>
               <motion.button type="submit" disabled={requestOtpMutation.isPending} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3.5 font-heading text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3.5 font-sans font-bold text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {requestOtpMutation.isPending ? <><Loader2 className="size-5 animate-spin" /><span>Sending…</span></> : <span>Send Code</span>}
               </motion.button>
@@ -211,7 +211,7 @@ export function ForgotPasswordFlow() {
                 </button>
               </div>
               <motion.button type="submit" disabled={verifyOtpMutation.isPending} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3.5 font-heading text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3.5 font-sans font-bold text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {verifyOtpMutation.isPending ? <><Loader2 className="size-5 animate-spin" /><span>Verifying…</span></> : <span>Verify OTP</span>}
               </motion.button>
@@ -255,7 +255,7 @@ export function ForgotPasswordFlow() {
                 {resetForm.formState.errors.confirmNewPassword && <p className="text-xs font-medium text-brand-red">{resetForm.formState.errors.confirmNewPassword.message}</p>}
               </div>
               <motion.button type="submit" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                className="flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full bg-brand-green px-6 py-3.5 font-heading text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover"
+                className="flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full bg-brand-green px-6 py-3.5 font-sans font-bold text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover"
               >
                 <span>Update Password</span>
               </motion.button>

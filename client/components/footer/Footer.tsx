@@ -125,9 +125,48 @@ export function Footer() {
 
           <Reveal>
             <p className="text-sm sm:text-base md:text-lg font-sans text-white/80 max-w-2xl leading-relaxed mt-1">
-              Made fresh, served warm. One family, three authentic dining concepts across Bangalore &amp; Odisha: GreenChillyz, YellowChillyz, and GoldenChillyz.
+              Serving Odisha since 1999 with 15+ outlets, authentic hand-ground spices, and 300+ dedicated hospitality professionals.
             </p>
           </Reveal>
+        </div>
+
+        {/* DEDICATED ENQUIRY CHANNELS STRIP */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-white/15">
+          <div className="p-5 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/15 flex flex-col gap-2">
+            <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider text-amber-400">
+              Corporate Enquiries
+            </span>
+            <span className="text-sm font-sans font-bold text-white">
+              corporate@greenchillyz.com
+            </span>
+            <span className="text-xs font-sans text-white/70">
+              Headquarters • Bhubaneswar, Odisha
+            </span>
+          </div>
+
+          <div className="p-5 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/15 flex flex-col gap-2">
+            <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider text-amber-400">
+              Catering &amp; Events
+            </span>
+            <span className="text-sm font-sans font-bold text-white">
+              catering@greenchillyz.com
+            </span>
+            <span className="text-xs font-sans text-white/70">
+              Live Counters • Weddings &amp; Galas
+            </span>
+          </div>
+
+          <div className="p-5 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/15 flex flex-col gap-2">
+            <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider text-amber-400">
+              Franchise Opportunities
+            </span>
+            <span className="text-sm font-sans font-bold text-white">
+              franchise@greenchillyz.com
+            </span>
+            <span className="text-xs font-sans text-white/70">
+              Expansion Partner Program
+            </span>
+          </div>
         </div>
 
         {/* TOP ROW: Newsletter Card & Outlets Grid */}

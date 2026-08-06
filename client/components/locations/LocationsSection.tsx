@@ -119,7 +119,7 @@ export function LocationsSection() {
     <section
       id="locations"
       aria-labelledby="locations-heading"
-      className="relative w-full min-h-screen lg:h-screen lg:max-h-screen bg-[#FFF8F1] p-[39px] mt-16 md:mt-24 overflow-hidden flex flex-col justify-between"
+      className="relative w-full min-h-screen lg:h-screen lg:max-h-screen bg-[#FFF8F1] container-site py-10 md:py-16 mt-16 md:mt-24 overflow-hidden flex flex-col justify-between"
     >
       {/* Large Faded Background Typography */}
       <div className="absolute top-[4%] left-1/2 -translate-x-1/2 text-[13vw] font-heading text-on-surface/[0.035] pointer-events-none select-none z-0 tracking-widest uppercase leading-none whitespace-nowrap">
@@ -131,25 +131,28 @@ export function LocationsSection() {
 
       {/* Header Area */}
       <div className="relative z-10 w-full shrink-0 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-on-surface/10">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="relative flex size-3">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-green opacity-75" />
               <span className="relative inline-flex size-3 rounded-full bg-brand-green" />
             </span>
             <span className="text-xs font-sans font-bold uppercase tracking-wider text-brand-green">
-              {stores.length} Locations &amp; Growing
+              <span className="font-number font-extrabold text-sm">15+</span> Outlets Across Odisha
+            </span>
+            <span className="text-[11px] font-sans font-semibold text-stone-600 bg-stone-200/60 px-2.5 py-0.5 rounded-full border border-stone-300/60">
+              Vision: <span className="font-number font-bold text-xs text-stone-900">100</span> Outlets
             </span>
           </div>
           <h2
             id="locations-heading"
             className="text-2xl md:text-4xl lg:text-5xl font-heading text-on-surface font-extrabold uppercase tracking-tight leading-none"
           >
-            Find Your <span className="text-brand-red">Nearest Table.</span>
+            Find Your <span className="text-brand-green">Nearest Outlet.</span>
           </h2>
         </div>
         <p className="text-xs md:text-sm font-sans text-on-surface-variant max-w-md text-left sm:text-right">
-          Play, Redeem Rewards &amp; Visit Your Nearest GreenChillyz Experience.
+          Rapidly expanding across Odisha. Visit your nearest GreenChillyz kitchen for authentic dining &amp; reward redemption.
         </p>
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { getStoreMenu, getFeaturedDishes } from "@/lib/api/menuApi";
+import { getStoreMenu, getFeaturedDishes, getMenuCategories } from "@/lib/api/menuApi";
 import type { MenuQueryParams } from "@/types/menu";
 
 export const MENU_KEYS = {
@@ -10,6 +10,7 @@ export const MENU_KEYS = {
     [...MENU_KEYS.all, "store", storeId, params] as const,
   featured: (storeId: string) =>
     [...MENU_KEYS.all, "featured", storeId] as const,
+  categories: () => [...MENU_KEYS.all, "categories"] as const,
 };
 
 export function useStoreMenu(storeId: string, params?: MenuQueryParams, enabled = true) {
@@ -28,7 +29,16 @@ export function useFeaturedDishes(storeId: string, enabled = true) {
     queryKey: MENU_KEYS.featured(storeId),
     queryFn: () => getFeaturedDishes(storeId),
     enabled: enabled && !!storeId,
-    staleTime: 5 * 60 * 1000, // 5 minutes stale time for featured items
+    staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
+  });
+}
+
+export function useMenuCategories() {
+  return useQuery({
+    queryKey: MENU_KEYS.categories(),
+    queryFn: getMenuCategories,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }

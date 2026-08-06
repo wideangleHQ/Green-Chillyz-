@@ -101,13 +101,13 @@ export function RedemptionSuccess({ redemption, onClose }: RedemptionSuccessProp
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-full border border-stone-200 px-5 py-3 font-heading text-sm uppercase tracking-wider text-stone-600 transition-all hover:bg-stone-50 cursor-pointer"
+                className="flex-1 rounded-full border border-stone-200 px-5 py-3 font-sans font-bold text-sm uppercase tracking-wider text-stone-600 transition-all hover:bg-stone-50 cursor-pointer"
               >
                 Keep Browsing
               </button>
               <Link
                 href="/rewards/vouchers"
-                className="flex-1 inline-flex items-center justify-center rounded-full bg-brand-green px-5 py-3 font-heading text-sm uppercase tracking-wider text-white shadow-soft transition-all hover:bg-brand-green-hover hover:shadow-hover"
+                className="flex-1 inline-flex items-center justify-center rounded-full bg-brand-green px-5 py-3 font-sans font-bold text-sm uppercase tracking-wider text-white shadow-soft transition-all hover:bg-brand-green-hover hover:shadow-hover"
               >
                 My Vouchers
               </Link>

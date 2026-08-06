@@ -15,6 +15,21 @@ export interface Dish {
   calories?: number;
   allergens?: string[];
   prepTime?: number;
+  slug?: string;
+  sku?: string;
+  tags?: string[];
+}
+
+export interface MenuCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  image: string | null;
+  icon: string | null;
+  sortOrder: number;
+  status: string;
+  _count?: { items: number };
 }
 
 export interface MenuQueryParams {

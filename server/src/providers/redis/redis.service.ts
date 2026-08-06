@@ -13,6 +13,7 @@ export class RedisService implements OnModuleDestroy {
       port: this.configService.get<number>('redis.port'),
       password: this.configService.get<string>('redis.password') || undefined,
       db: this.configService.get<number>('redis.db'),
+      maxRetriesPerRequest: 1,
       retryStrategy: (times) => Math.min(times * 100, 3000),
     });
 

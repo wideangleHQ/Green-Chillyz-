@@ -176,7 +176,7 @@ export function SignInForm() {
           disabled={loginMutation.isPending}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
-          className="relative mt-2 flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-green px-6 py-3.5 font-heading text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover disabled:cursor-not-allowed disabled:opacity-60"
+          className="relative mt-2 flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-green px-6 py-3.5 font-sans font-bold text-base uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:bg-brand-green-hover hover:shadow-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loginMutation.isPending ? (
             <>

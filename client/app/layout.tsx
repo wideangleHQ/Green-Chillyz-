@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 const anton = localFont({
@@ -11,6 +12,12 @@ const anton = localFont({
 const manrope = localFont({
   src: "./fonts/Manrope-VariableFont_wght.ttf",
   variable: "--font-manrope",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
   display: "swap",
 });
 
@@ -27,7 +34,6 @@ export const metadata: Metadata = {
     url: "/",
     siteName: "GreenChillyz Group",
     type: "website",
-    // OG image (1200×630, Canva pipeline) pending — 09_Asset_Pipeline.md
   },
   twitter: {
     card: "summary_large_image",
@@ -45,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${anton.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${anton.variable} ${manrope.variable} ${spaceGrotesk.variable}`}>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>

@@ -45,7 +45,7 @@ export function ProtectedRoute({
           <button
             type="button"
             onClick={() => openAuthModal('sign-in')}
-            className="rounded-full bg-brand-green px-6 py-2.5 font-heading text-sm uppercase tracking-wider text-white shadow-soft transition-all hover:bg-brand-green-hover hover:shadow-hover cursor-pointer"
+            className="rounded-full bg-brand-green px-6 py-2.5 font-sans font-bold text-sm uppercase tracking-wider text-white shadow-soft transition-all hover:bg-brand-green-hover hover:shadow-hover cursor-pointer"
           >
             Sign In
           </button>

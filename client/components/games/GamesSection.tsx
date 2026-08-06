@@ -49,7 +49,7 @@ export function GamesSection() {
     <section
       id="games"
       aria-labelledby="games-heading"
-      className="relative w-full bg-[#FFF8F1] px-[20px] sm:px-[39px] py-[24px] sm:py-[60px] md:py-[80px] h-[100dvh] max-h-[100dvh] lg:h-auto lg:max-h-none overflow-x-hidden overflow-y-visible select-none flex flex-col justify-between"
+      className="relative w-full bg-[#FFF8F1] py-[24px] sm:py-[60px] md:py-[80px] h-[100dvh] max-h-[100dvh] lg:h-auto lg:max-h-none overflow-x-hidden overflow-y-visible select-none flex flex-col justify-between"
     >
       <div id="rewards" className="absolute top-0 left-0" />
 
@@ -69,7 +69,7 @@ export function GamesSection() {
         <CircleDollarSign className="size-20 md:size-24 text-amber-600 stroke-[1]" />
       </div>
 
-      <div className="relative z-10 w-full h-full flex flex-col lg:flex-row gap-3 sm:gap-8 lg:gap-14 items-center justify-between min-h-0 overflow-x-hidden overflow-y-visible">
+      <div className="container-site relative z-10 w-full h-full flex flex-col lg:flex-row gap-3 sm:gap-8 lg:gap-14 items-center justify-between min-h-0 overflow-x-hidden overflow-y-visible">
         {/* LEFT COLUMN: Editorial Header */}
         <div className="w-full lg:w-[28%] flex flex-col items-start gap-2.5 sm:gap-4 md:gap-5 shrink-0 z-20">
           <Reveal>

@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/*
+  Design tokens — adapted for the Dashboard IAM operations portal.
+  Sourced from docs/19_Design_Tokens.md. Supports dark mode-ready semantic variables.
+*/
+@theme {
+  /* Brand colors */
+  --color-brand-green: #006b2a;
+  --color-brand-green-hover: #004d1e;
+  --color-primary: #006b2a;
+  --color-primary-container: #008737;
+  --color-on-primary: #ffffff;
+  --color-secondary: #1f6c3a;
+  --color-secondary-container: #a4f1b2;
+  --color-tertiary: #735c00;
+  --color-tertiary-container: #cca72f;
+  --color-gold: #d4af37;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-outline: #6e7b6c;
+  --color-outline-variant: #bdcab9;
+
+  /* Typography tokens (Anton and Manrope loaded locally in layout.tsx) */
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-anton), Impact, sans-serif;
+
+  /* Radius tokens — sharp corners never used */
+  --radius-sm: 0.5rem;
+  --radius-DEFAULT: 1rem;
+  --radius-md: 1.5rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+
+  /* Shadow tokens — multi-layer ambient only */
+  --shadow-soft:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-medium:
+    0 6px 10px -2px rgba(0, 0, 0, 0.06), 0 16px 24px -4px rgba(0, 0, 0, 0.12);
+  --shadow-heavy:
+    0 10px 20px -4px rgba(0, 0, 0, 0.1), 0 24px 48px -8px rgba(0, 0, 0, 0.18);
+  --shadow-glass:
+    0 4px 8px -2px rgba(0, 0, 0, 0.04), 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+
+  /* Blur tokens */
+  --blur-glass-sm: 16px;
+  --blur-glass-md: 24px;
+  --blur-glass-lg: 32px;
+
+  /* Motion tokens */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --background: #fff8f1;
+  --foreground: #1e1b17;
+  --surface: #ffffff;
+  --surface-hover: #fcf6f0;
+  --border: rgba(0, 107, 42, 0.15);
+  --border-focus: #006b2a;
+  --text-muted: #6b7280;
+  --card-bg: #ffffff;
+  --brand-panel-bg: #ebf5ee;
+  --brand-panel-fg: #1e1b17;
+  --input-bg: #ffffff;
+}
+
+/* Scoped dark-theme variables for next-themes class selector */
+.dark {
+  --background: #0d0f0e;
+  --foreground: #f3f4f6;
+  --surface: #151a17;
+  --surface-hover: #1e2520;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-focus: #008737;
+  --text-muted: #9ca3af;
+  --card-bg: #111513;
+  --brand-panel-bg: #050807;
+  --brand-panel-fg: #f3f4f6;
+  --input-bg: #151a17;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+/* Apply transitions to all common theme-responsive elements */
+*, *::before, *::after {
+  transition-property: background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Glass panel — single canonical recipe */
+@utility glass {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-glass-sm));
+  -webkit-backdrop-filter: blur(var(--blur-glass-sm));
+  box-shadow: var(--shadow-glass);
+  @media (min-width: 768px) {
+    backdrop-filter: blur(var(--blur-glass-md));
+    -webkit-backdrop-filter: blur(var(--blur-glass-md));
+  }
+}
+
+/* Visible focus ring everywhere — never removed without replacement */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+/* Inputs focus styling — keep it simple, no outlines/borders */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}
+
+::selection {
+  background-color: var(--color-secondary-container);
+  color: #1e1b17;
+}

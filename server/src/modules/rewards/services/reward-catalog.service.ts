@@ -251,6 +251,9 @@ export class RewardCatalogService {
           { description: { contains: query.search, mode: 'insensitive' as const } },
         ],
       }),
+      ...(query.storeId && {
+        storeLinks: { some: { storeId: query.storeId, isActive: true } },
+      }),
     };
 
     const [rows, total] = await Promise.all([

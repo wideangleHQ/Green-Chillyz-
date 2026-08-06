@@ -95,7 +95,7 @@ export function BrandStorySection() {
         } as React.CSSProperties}
       />
 
-      <div className="mx-auto max-w-[1500px] px-[24px] md:px-[32px] lg:px-[39px] flex flex-col md:flex-row gap-10 md:gap-14 relative z-20">
+      <div className="container-site flex flex-col md:flex-row gap-10 md:gap-14 relative z-20">
         
         {/* LEFT COLUMN (Approx 18%) */}
         <div className="w-full md:w-[18%] flex flex-col items-start gap-4">
@@ -180,7 +180,7 @@ export function BrandStorySection() {
             <Link
               href="/menu"
               id="learn-more-about-btn"
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-heading uppercase tracking-wider transition-all duration-500 hover:-translate-y-0.5 hover:shadow-soft cursor-pointer border"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-sans font-bold uppercase tracking-wider transition-all duration-500 hover:-translate-y-0.5 hover:shadow-soft cursor-pointer border"
               style={{
                 borderColor: "var(--brand-accent)",
                 color: "var(--brand-accent)",

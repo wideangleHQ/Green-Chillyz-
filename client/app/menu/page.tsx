@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 
 import { useActiveStores, useNearbyStores } from "@/hooks/useStores";
-import { useStoreMenu, useFeaturedDishes } from "@/hooks/useMenu";
+import { useStoreMenu, useFeaturedDishes, useMenuCategories } from "@/hooks/useMenu";
 import { formatCoins } from "@/types/wallet";
 import { useWalletSummary } from "@/hooks/useWallet";
 import { useAuth } from "@/components/auth/AuthContext";
@@ -74,7 +74,20 @@ function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
   return debounced;
 }
 
-const CATEGORIES = [
+const CATEGORY_ICON_MAP: Record<string, React.ComponentType<any>> = {
+  "Recommended": Award,
+  "Meals": Utensils,
+  "Starters": Flame,
+  "Combos": Package,
+  "Chinese": Soup,
+  "Pizza": Pizza,
+  "Rice": Leaf,
+  "Noodles": UtensilsCrossed,
+  "Desserts": Cake,
+  "Beverages": CupSoda,
+};
+
+const FALLBACK_CATEGORIES = [
   "Recommended",
   "Meals",
   "Starters",
@@ -86,19 +99,6 @@ const CATEGORIES = [
   "Desserts",
   "Beverages",
 ];
-
-const CATEGORY_CONFIGS: Record<string, { icon: React.ComponentType<any> }> = {
-  "Recommended": { icon: Award },
-  "Meals": { icon: Utensils },
-  "Starters": { icon: Flame },
-  "Combos": { icon: Package },
-  "Chinese": { icon: Soup },
-  "Pizza": { icon: Pizza },
-  "Rice": { icon: Leaf },
-  "Noodles": { icon: UtensilsCrossed },
-  "Desserts": { icon: Cake },
-  "Beverages": { icon: CupSoda },
-};
 
 const SEARCH_PLACEHOLDERS = [
   "Search Paneer",
@@ -220,6 +220,18 @@ export default function MenuPage() {
     });
   }, []);
 
+  // Fetch menu categories from API
+  const { data: apiCategories } = useMenuCategories();
+
+  const categories = useMemo(() => {
+    if (!apiCategories || apiCategories.length === 0) return FALLBACK_CATEGORIES;
+    const names = apiCategories
+      .filter((c) => c.status === "ACTIVE")
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((c) => c.name);
+    return ["Recommended", ...names.filter((n) => n !== "Recommended")];
+  }, [apiCategories]);
+
   // Fetch active outlets
   const { data: activeStores, isLoading: isStoresLoading } = useActiveStores();
 
@@ -301,8 +313,7 @@ export default function MenuPage() {
   const categorizedMenu = useMemo(() => {
     const grouped: Record<string, Dish[]> = {};
 
-    // Initialise empty lists for categories
-    CATEGORIES.forEach((cat) => {
+    categories.forEach((cat) => {
       grouped[cat] = [];
     });
 
@@ -325,7 +336,7 @@ export default function MenuPage() {
     grouped["Recommended"] = recommendedItems;
 
     return grouped;
-  }, [filteredMenu]);
+  }, [filteredMenu, categories]);
 
   // Active Category Observer/Scroll Tracker (requestAnimationFrame + passive listener)
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -339,7 +350,7 @@ export default function MenuPage() {
         window.requestAnimationFrame(() => {
           const scrollPos = window.scrollY + 220; // offset categories bar height
           let active = "Recommended";
-          for (const cat of CATEGORIES) {
+          for (const cat of categories) {
             const el = categoryRefs.current[cat];
             if (el && el.offsetTop <= scrollPos) {
               active = cat;
@@ -354,7 +365,7 @@ export default function MenuPage() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [categories]);
 
   const handleCategoryClick = useCallback((category: string) => {
     setSelectedCategory(category);
@@ -498,7 +509,7 @@ export default function MenuPage() {
 
         {/* 5. Sticky Category Navigation */}
         <CategoryBar
-          categories={CATEGORIES}
+          categories={categories}
           activeCategory={selectedCategory}
           onCategoryClick={handleCategoryClick}
         />
@@ -542,7 +553,7 @@ export default function MenuPage() {
 
             {/* 7. Category Items Sections */}
             <div className="mt-8 flex flex-col gap-16">
-              {CATEGORIES.map((category) => {
+              {categories.map((category) => {
                 const items = categorizedMenu[category] || [];
                 return (
                   <div
@@ -1076,8 +1087,7 @@ const CategoryBar = memo(({ categories, activeCategory, onCategoryClick }: Categ
       >
         {categories.map((cat) => {
           const isActive = cat === activeCategory;
-          const config = CATEGORY_CONFIGS[cat] || { icon: Award };
-          const Icon = config.icon;
+          const Icon = CATEGORY_ICON_MAP[cat] || Utensils;
           
           return (
             <button

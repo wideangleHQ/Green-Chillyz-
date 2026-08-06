@@ -27,6 +27,11 @@ import {
     VoucherService,
     RewardAnalyticsService,
   ],
-  exports: [RewardCatalogService, RewardRedemptionService, VoucherService],
+  exports: [
+    RewardCatalogService,
+    RewardRedemptionService,
+    VoucherService,
+    RewardAnalyticsService,
+  ],
 })
 export class RewardsModule {}

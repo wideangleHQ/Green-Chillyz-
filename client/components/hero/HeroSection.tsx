@@ -308,14 +308,22 @@ export function HeroSection() {
           aria-hidden="true"
         />
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center">
-          <p className="text-[10px] md:text-label-caps uppercase tracking-[0.25em] font-semibold text-[#69f0ae] mb-4">
-            Fresh · Modern · Reimagined
+          <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-sans font-bold uppercase tracking-[0.2em] bg-white/10 backdrop-blur-md text-[#69f0ae] border border-[#69f0ae]/30 mb-3">
+            <span>Since 1999</span>
+            <span className="size-1 rounded-full bg-[#69f0ae]" />
+            <span>26 Years of Heritage</span>
+          </div>
+          <p className="text-[10px] md:text-label-caps uppercase tracking-[0.25em] font-semibold text-white/80 mb-3">
+            Odisha's Premier Casual Dining Destination
           </p>
           <h1 className="text-display-hero-mobile md:text-display-hero-tablet xl:text-display-hero text-white font-extrabold tracking-tight leading-none whitespace-pre-line max-w-4xl">
-            Fresh. Modern.
-            {"\n"}Reimagined.
+            Legacy of Flavor.
+            {"\n"}Crafted Fresh Daily.
           </h1>
-          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center">
+          <p className="mt-4 text-xs md:text-sm text-white/80 max-w-xl font-sans font-medium leading-relaxed">
+            From our first kitchen in 1999 to 15+ outlets across Odisha, experience uncompromised quality, authentic spices, and flame-grilled excellence.
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row items-center gap-4 justify-center">
             <Link
               href="/menu"
               className="group relative inline-flex items-center gap-2.5 rounded-full px-6 md:px-8 py-2.5 md:py-3.5 font-heading uppercase tracking-wider text-sm overflow-hidden text-[#69f0ae] min-h-11"
@@ -329,8 +337,13 @@ export function HeroSection() {
               href="#story"
               className="group relative inline-flex items-center gap-2.5 rounded-full px-6 md:px-8 py-2.5 md:py-3.5 font-heading uppercase tracking-wider text-sm text-white/70 min-h-11"
             >
-              Our Story
+              Our Legacy
             </a>
+          </div>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-[11px] font-sans font-semibold text-white/70">
+            <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/10">26+ Years Legacy</span>
+            <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/10">15+ Outlets</span>
+            <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/10">300+ Team Members</span>
           </div>
         </div>
       </section>
@@ -376,56 +389,74 @@ export function HeroSection() {
         aria-hidden="true"
       />
 
-      {/* Main Hero Content overlays */}
+      {/* Main Hero Content overlays - Transparent and Clean */}
       <div className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center pointer-events-none">
-        <div className="flex flex-col items-center justify-center pointer-events-auto">
-          <p
+        <div className="flex flex-col items-center justify-center pointer-events-auto max-w-4xl">
+          <div
             ref={taglineRef}
-            className="text-[10px] md:text-label-caps uppercase tracking-[0.25em] font-semibold text-[#69f0ae] mb-4"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-sans font-bold uppercase tracking-[0.2em] bg-white/10 backdrop-blur-sm text-[#69f0ae] border border-[#69f0ae]/30 mb-4"
           >
-            Fresh · Modern · Reimagined
-          </p>
+            <span>Since 1999</span>
+            <span className="size-1.5 rounded-full bg-[#69f0ae]" />
+            <span className="font-number">26</span>
+            <span>Years of Heritage</span>
+          </div>
 
           <h1
             ref={headlineRef}
             id="hero-headline"
-            className="text-display-hero-mobile md:text-display-hero-tablet xl:text-display-hero text-white font-extrabold tracking-tight leading-none whitespace-pre-line max-w-4xl"
+            className="text-display-hero-mobile md:text-display-hero-tablet xl:text-display-hero text-white font-extrabold tracking-tight leading-none whitespace-pre-line max-w-4xl drop-shadow-md"
           >
-            Fresh. Modern.
-            {"\n"}Reimagined.
+            Legacy of Flavor.
+            {"\n"}Crafted Fresh Daily.
           </h1>
+
+          <p className="mt-5 text-sm sm:text-base md:text-lg text-white/95 max-w-2xl font-sans font-medium leading-relaxed drop-shadow-sm">
+            For over 26 years, GreenChillyz has brought authentic Indian flavors, flame-grilled perfection, and warm hospitality across Odisha.
+          </p>
 
           <div
             ref={buttonsRef}
-            className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center"
+            className="mt-8 flex flex-col items-center gap-6 justify-center w-full"
           >
-            <Link
-              href="/menu"
-              className="group relative inline-flex items-center gap-2.5 rounded-full px-6 md:px-8 py-2.5 md:py-3.5 font-heading uppercase tracking-wider text-sm overflow-hidden text-[#69f0ae] min-h-11"
-            >
-              <span className="absolute inset-0 rounded-full border border-white/[.12] group-hover:border-white/[.22] transition-colors duration-300" />
-              <span
-                className="absolute inset-0 rounded-full opacity-[.08] group-hover:opacity-[.16] bg-[#00c853] transition-opacity duration-300"
-              />
-              Explore Menu
-              <span className="text-sm opacity-50 group-hover:translate-x-0.5 transition-transform duration-200">
-                →
-              </span>
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+              {/* Solid Primary Red CTA Button with Fluid Green Hover */}
+              <Link
+                href="/menu"
+                className="btn-fluid-red inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 font-sans font-extrabold uppercase tracking-wider text-sm shadow-heavy cursor-pointer min-h-12 border border-white/10"
+              >
+                <span>Explore Menu</span>
+                <span className="text-sm">→</span>
+              </Link>
 
-            <a
-              href="#story"
-              onClick={(e) => {
-                e.preventDefault();
-                const el = document.getElementById("story");
-                if (el) {
-                  el.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="group relative inline-flex items-center gap-2.5 rounded-full px-6 md:px-8 py-2.5 md:py-3.5 font-heading uppercase tracking-wider text-sm text-white/70 hover:text-white transition-colors duration-200 min-h-11"
-            >
-              Our Story
-            </a>
+              {/* Solid Secondary White CTA Button */}
+              <a
+                href="#story"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const el = document.getElementById("story");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 font-sans font-extrabold uppercase tracking-wider text-sm bg-white text-stone-900 hover:bg-stone-100 transition-colors duration-200 shadow-medium min-h-12"
+              >
+                Our Legacy
+              </a>
+            </div>
+
+            {/* Clean Trust Indicators with Space Grotesk Font for Numbers */}
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-sans font-bold text-white">
+              <span className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-xs">
+                <span className="font-number text-[#69f0ae]">26+</span> Years Legacy
+              </span>
+              <span className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-xs">
+                <span className="font-number text-[#69f0ae]">15+</span> Outlets
+              </span>
+              <span className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-xs">
+                <span className="font-number text-[#69f0ae]">300+</span> Team Members
+              </span>
+            </div>
           </div>
         </div>
       </div>

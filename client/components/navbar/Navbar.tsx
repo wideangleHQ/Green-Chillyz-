@@ -15,7 +15,7 @@ import { useWalletSummary } from "@/hooks/useWallet";
 import { formatCoins } from "@/types/wallet";
 
 const NAV_LINKS = [
-  { href: "/#story", label: "Story" },
+  { href: "/about", label: "About" },
   { href: "/menu", label: "Menu" },
   { href: "/games", label: "Games" },
   { href: "/#rewards", label: "Rewards" },
@@ -36,7 +36,7 @@ function CoinsButton({ onClick, balance }: CoinsButtonProps) {
       type="button"
       suppressHydrationWarning
       onClick={onClick}
-      className="flex min-h-11 items-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2 text-sm font-heading uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:shadow-hover cursor-pointer border-none"
+      className="flex min-h-11 items-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2 text-sm font-sans font-extrabold uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:shadow-hover cursor-pointer border-none"
     >
       <CircleDollarSign aria-hidden="true" className="size-5" strokeWidth={2} />
       <span suppressHydrationWarning>{balance !== undefined ? `${formatCoins(balance)} CC` : "Coins"}</span>

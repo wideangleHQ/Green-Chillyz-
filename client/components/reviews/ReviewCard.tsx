@@ -101,7 +101,7 @@ export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) 
               />
             ))}
           </div>
-          <span className="text-xs font-sans font-bold text-amber-700 ml-0.5">
+          <span className="text-xs font-number font-bold text-amber-700 ml-0.5">
             {review.rating.toFixed(1)}
           </span>
         </div>

@@ -158,17 +158,20 @@
   }
 }
 
-/* Site container: 1440px cap; 20px mobile / 24px tablet / 80px desktop margins */
+/* Site container: 1440px cap; 20px mobile / 32px tablet / 48px-64px desktop side padding */
 @utility container-site {
   width: 100%;
   max-width: 1440px;
   margin-inline: auto;
   padding-inline: 20px;
-  @media (min-width: 768px) {
-    padding-inline: 24px;
+  @media (min-width: 640px) {
+    padding-inline: 32px;
+  }
+  @media (min-width: 1024px) {
+    padding-inline: 48px;
   }
   @media (min-width: 1280px) {
-    padding-inline: 80px;
+    padding-inline: 64px;
   }
 }
 
@@ -306,4 +309,37 @@ select:focus-visible {
   animation: marquee-right 55s linear infinite;
   will-change: transform;
 }
+
+/* Space Grotesk Dedicated Numerical Font Utility */
+.font-number {
+  font-family: var(--font-space-grotesk), var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fluid Green Transition Effect for Primary Red Buttons (200-300ms) */
+.btn-fluid-red {
+  position: relative;
+  overflow: hidden;
+  background-color: #c62828;
+  color: #ffffff;
+  z-index: 1;
+  transition: color 250ms ease, box-shadow 250ms ease, transform 200ms ease;
+}
+
+.btn-fluid-red::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: #006b2a;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+  border-radius: inherit;
+}
+
+.btn-fluid-red:hover::before {
+  transform: scaleY(1);
+}
+
 

@@ -14,6 +14,13 @@
       "runtimeArgs": ["run", "start:dev", "--prefix", "server"],
       "port": 5001,
       "autoPort": true
+    },
+    {
+      "name": "dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "dashboard"],
+      "port": 5100,
+      "autoPort": true
     }
   ]
 }

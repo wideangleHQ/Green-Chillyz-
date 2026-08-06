@@ -30,6 +30,20 @@ export const envValidationSchema = Joi.object({
   JWT_AUDIENCE: Joi.string().default('greenchillyz-client'),
   REFRESH_TOKEN_EXPIRY_DAYS: Joi.number().default(30),
 
+  // Dashboard IAM
+  DASHBOARD_JWT_SECRET: Joi.string().min(32).required(),
+  DASHBOARD_JWT_REFRESH_SECRET: Joi.string().min(32).required(),
+  DASHBOARD_JWT_EXPIRES_IN: Joi.string().default('15m'),
+  DASHBOARD_JWT_AUDIENCE: Joi.string().default('greenchillyz-dashboard'),
+  DASHBOARD_REFRESH_TOKEN_EXPIRY_DAYS: Joi.number().default(7),
+  DASHBOARD_CODE_PEPPER: Joi.string().min(32).required(),
+  DASHBOARD_CODE_PREFIX: Joi.string().default('GC'),
+  DASHBOARD_CODE_SECRET_LENGTH: Joi.number().min(6).max(32).default(8),
+  DASHBOARD_MAX_FAILED_ATTEMPTS: Joi.number().min(1).default(5),
+  DASHBOARD_LOCK_DURATION_MINUTES: Joi.number().min(1).default(15),
+  DASHBOARD_LOGIN_RATE_LIMIT_WINDOW_SECONDS: Joi.number().min(1).default(60),
+  DASHBOARD_LOGIN_RATE_LIMIT_MAX_ATTEMPTS: Joi.number().min(1).default(10),
+
   // Supabase
   SUPABASE_URL: Joi.string().uri().required(),
   SUPABASE_JWT_SECRET: Joi.string().required(),

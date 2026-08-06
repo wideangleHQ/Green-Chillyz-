@@ -165,7 +165,7 @@ export function RedeemModal({
                 type="button"
                 onClick={onClose}
                 disabled={isRedeeming}
-                className="flex-1 rounded-full border border-stone-200 px-5 py-3 font-heading text-sm uppercase tracking-wider text-stone-600 transition-all hover:bg-stone-50 cursor-pointer disabled:opacity-50"
+                className="flex-1 rounded-full border border-stone-200 px-5 py-3 font-sans font-bold text-sm uppercase tracking-wider text-stone-600 transition-all hover:bg-stone-50 cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -174,7 +174,7 @@ export function RedeemModal({
                 type="button"
                 onClick={onConfirm}
                 disabled={!canRedeem || isRedeeming}
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 font-heading text-sm uppercase tracking-wider text-white shadow-soft transition-all hover:bg-brand-green-hover hover:shadow-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 font-sans font-bold text-sm uppercase tracking-wider text-white shadow-soft transition-all hover:bg-brand-green-hover hover:shadow-hover cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isRedeeming && (
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />

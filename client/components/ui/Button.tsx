@@ -21,19 +21,19 @@ interface ButtonProps {
    primary = gradient fill, expanding soft shadow; secondary = ghost pill,
    1px white border + blur backdrop; ghost = borderless quiet action. */
 const base =
-  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full px-8 py-3.5 text-nav-link transition-all duration-200 font-heading uppercase tracking-wider";
+  "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-2 rounded-full px-8 py-3.5 text-nav-link transition-all duration-200 font-sans font-extrabold uppercase tracking-wider";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand-green hover:bg-brand-green-hover text-white shadow-soft hover:shadow-hover",
+    "btn-fluid-red text-white shadow-soft font-bold tracking-wider",
   "primary-green":
-    "bg-brand-green hover:bg-brand-green-hover text-white shadow-soft hover:shadow-hover",
+    "bg-brand-green hover:bg-brand-green-hover text-white shadow-soft hover:shadow-hover font-bold tracking-wider",
   "primary-red":
-    "bg-brand-red hover:bg-brand-red-hover text-white shadow-soft hover:shadow-hover",
+    "btn-fluid-red text-white shadow-soft font-bold tracking-wider",
   secondary:
-    "glass border-white/20 text-on-surface hover:shadow-hover",
+    "bg-white/90 hover:bg-white text-stone-900 border border-stone-200/80 shadow-soft font-bold tracking-wider hover:border-brand-green/40 transition-colors duration-200",
   ghost:
-    "border border-outline-variant text-on-surface hover:shadow-hover",
+    "border border-stone-300 text-on-surface hover:bg-stone-100/80 transition-colors duration-200 font-bold",
 };
 
 const MotionLink = motion.create(Link);
