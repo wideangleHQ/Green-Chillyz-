@@ -58,7 +58,7 @@ export function BrandSnapshotSection() {
               <Reveal key={stat.id}>
                 <motion.div
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="group relative p-6 md:p-8 rounded-[24px] bg-white/80 backdrop-blur-sm border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/30 transition-all duration-300 flex flex-col justify-between h-full min-h-[160px]"
+                  className="group relative p-6 md:p-8 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/30 transition-all duration-300 flex flex-col justify-between h-full min-h-[160px]"
                 >
                   <div className="flex items-start justify-between">
                     <span className="text-3xl sm:text-4xl md:text-5xl font-number font-extrabold text-on-surface tracking-tight group-hover:text-brand-green transition-colors duration-300">

@@ -244,9 +244,11 @@ export class CoinEconomyService {
       };
     }
 
+    const calculationContext = await this.withResolvedPurchaseCoins(rule, context);
+
     const calculation = await this.calculator.calculate(
       rule,
-      context,
+      calculationContext,
       now,
       limitCheck.remainingCoins,
     );
@@ -284,6 +286,24 @@ export class CoinEconomyService {
       return this.rules.findActiveByType(context.ruleType);
     }
     throw new BadRequestException('Either ruleType or ruleId is required');
+  }
+
+  private async withResolvedPurchaseCoins(
+    rule: CoinRuleResponse,
+    context: CoinEarnContext,
+  ): Promise<CoinEarnContext> {
+    if (rule.ruleType !== CoinRuleType.PURCHASE_BONUS) return context;
+
+    const rawAmount =
+      context.metadata?.purchaseAmount ?? context.metadata?.orderAmount ?? null;
+    if (rawAmount === null || rawAmount === undefined) return context;
+
+    const amount = Number(rawAmount);
+    if (!Number.isFinite(amount)) return context;
+
+    const slabCoins = await this.rules.resolvePurchaseCoins(amount);
+    if (slabCoins === null) return { ...context, requestedCoins: 0 };
+    return { ...context, requestedCoins: slabCoins };
   }
 
   private async buildCustomerViews(

@@ -117,9 +117,9 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
         {/* Floating Top Right Reward Badge */}
         <div className="absolute top-4 right-4 z-30">
           <div
-            className="px-3.5 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider backdrop-blur-md border flex items-center gap-1.5 shadow-md transition-all duration-300"
+            className="px-3.5 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-wider border flex items-center gap-1.5 shadow-md transition-all duration-300"
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backgroundColor: "#ffffff",
               color: game.accentColor,
               borderColor: `${game.accentColor}40`,
               boxShadow: hoverActive ? `0 0 16px ${game.accentColor}40` : "0 4px 12px rgba(0,0,0,0.08)",
@@ -148,7 +148,7 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
       </div>
 
       {/* Bottom Content Card Box */}
-      <div className={`w-full rounded-[22px] bg-white/80 backdrop-blur-md p-5 border border-white/80 shadow-soft flex flex-col gap-2 transition-all duration-300 ${isActive ? "group-hover:bg-white group-hover:shadow-hover" : ""}`}>
+      <div className={`w-full rounded-[22px] bg-white p-5 border border-stone-200/80 shadow-soft flex flex-col gap-2 transition-all duration-300 ${isActive ? "group-hover:shadow-hover" : ""}`}>
         <div className="flex items-center justify-between">
           <div className="text-lg md:text-xl font-sans font-extrabold text-on-surface uppercase tracking-tight">
             {game.name}

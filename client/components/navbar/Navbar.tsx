@@ -136,7 +136,7 @@ export function Navbar() {
                 >
                   <span suppressHydrationWarning>{user?.fullName ? user.fullName.charAt(0).toUpperCase() : <UserRound className="size-5" />}</span>
                 </button>
-                <div className="absolute right-0 top-12 hidden w-48 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-heavy backdrop-blur-md group-hover:block">
+                <div className="absolute right-0 top-12 hidden w-48 rounded-2xl border border-stone-200 bg-white p-2 shadow-heavy group-hover:block">
                   <div className="px-3 py-2 border-b border-slate-100">
                     <p className="text-xs font-bold text-slate-900 truncate">{user?.fullName}</p>
                     <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>

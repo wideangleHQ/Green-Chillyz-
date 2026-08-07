@@ -234,7 +234,7 @@ function RewardDetail() {
       </div>
 
       {/* Sticky action bar on mobile keeps the primary action reachable. */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-stone-100 p-4">
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-stone-200 p-4">
         <RedeemButton
           disabled={!canRedeem || soldOut}
           soldOut={soldOut}

@@ -46,6 +46,17 @@ export const REWARDS_KEYS = {
 const CATALOG_STALE = 2 * 60 * 1000;
 const CATALOG_GC = 10 * 60 * 1000;
 
+function resolveStoreArgs(
+  storeIdOrEnabled?: string | boolean,
+  enabled = true,
+) {
+  return {
+    storeId: typeof storeIdOrEnabled === "string" ? storeIdOrEnabled : undefined,
+    enabled:
+      typeof storeIdOrEnabled === "boolean" ? storeIdOrEnabled : enabled,
+  };
+}
+
 export function useRewardsCatalog(
   filters?: Omit<RewardQueryParams, "page">,
   enabled = true,
@@ -57,7 +68,7 @@ export function useRewardsCatalog(
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
-    enabled,
+    enabled: enabled && Boolean(filters?.storeId),
     staleTime: CATALOG_STALE,
     gcTime: CATALOG_GC,
   });
@@ -73,41 +84,59 @@ export function useRewardCategories(enabled = true) {
   });
 }
 
-export function useFeaturedRewards(enabled = true) {
+export function useFeaturedRewards(
+  storeIdOrEnabled?: string | boolean,
+  enabled = true,
+) {
+  const args = resolveStoreArgs(storeIdOrEnabled, enabled);
   return useQuery({
-    queryKey: REWARDS_KEYS.featured(),
-    queryFn: getFeaturedRewards,
-    enabled,
+    queryKey: [...REWARDS_KEYS.featured(), args.storeId] as const,
+    queryFn: () => getFeaturedRewards({ storeId: args.storeId }),
+    enabled: args.enabled && Boolean(args.storeId),
     staleTime: CATALOG_STALE,
     gcTime: CATALOG_GC,
   });
 }
 
-export function usePopularRewards(enabled = true) {
+export function usePopularRewards(
+  storeIdOrEnabled?: string | boolean,
+  enabled = true,
+) {
+  const args = resolveStoreArgs(storeIdOrEnabled, enabled);
   return useQuery({
-    queryKey: REWARDS_KEYS.popular(),
-    queryFn: getPopularRewards,
-    enabled,
+    queryKey: [...REWARDS_KEYS.popular(), args.storeId] as const,
+    queryFn: () => getPopularRewards({ storeId: args.storeId }),
+    enabled: args.enabled && Boolean(args.storeId),
     staleTime: 5 * 60 * 1000,
     gcTime: CATALOG_GC,
   });
 }
 
-export function useReward(idOrSlug: string, enabled = true) {
+export function useReward(
+  idOrSlug: string,
+  storeIdOrEnabled?: string | boolean,
+  enabled = true,
+) {
+  const args = resolveStoreArgs(storeIdOrEnabled, enabled);
   return useQuery({
-    queryKey: REWARDS_KEYS.detail(idOrSlug),
-    queryFn: () => getReward(idOrSlug),
-    enabled: enabled && Boolean(idOrSlug),
+    queryKey: [...REWARDS_KEYS.detail(idOrSlug), args.storeId] as const,
+    queryFn: () => getReward(idOrSlug, { storeId: args.storeId }),
+    enabled: args.enabled && Boolean(idOrSlug) && Boolean(args.storeId),
     staleTime: CATALOG_STALE,
     gcTime: CATALOG_GC,
   });
 }
 
-export function useRelatedRewards(idOrSlug: string, enabled = true) {
+export function useRelatedRewards(
+  idOrSlug: string,
+  storeIdOrEnabled?: string | boolean,
+  enabled = true,
+) {
+  const args = resolveStoreArgs(storeIdOrEnabled, enabled);
   return useQuery({
-    queryKey: REWARDS_KEYS.related(idOrSlug),
-    queryFn: () => getRelatedRewards(idOrSlug),
-    enabled: enabled && Boolean(idOrSlug),
+    queryKey: [...REWARDS_KEYS.related(idOrSlug), args.storeId] as const,
+    queryFn: () => getRelatedRewards(idOrSlug, { storeId: args.storeId }),
+    enabled: args.enabled && Boolean(idOrSlug) && Boolean(args.storeId),
     staleTime: CATALOG_STALE,
     gcTime: CATALOG_GC,
   });
@@ -117,11 +146,16 @@ export function useRelatedRewards(idOrSlug: string, enabled = true) {
  * Eligibility depends on live wallet balance, so it is kept short-lived and
  * refetched when the window regains focus.
  */
-export function useRewardEligibility(idOrSlug: string, enabled = true) {
+export function useRewardEligibility(
+  idOrSlug: string,
+  storeIdOrEnabled?: string | boolean,
+  enabled = true,
+) {
+  const args = resolveStoreArgs(storeIdOrEnabled, enabled);
   return useQuery({
-    queryKey: REWARDS_KEYS.eligibility(idOrSlug),
-    queryFn: () => getRewardEligibility(idOrSlug),
-    enabled: enabled && Boolean(idOrSlug),
+    queryKey: [...REWARDS_KEYS.eligibility(idOrSlug), args.storeId] as const,
+    queryFn: () => getRewardEligibility(idOrSlug, { storeId: args.storeId }),
+    enabled: args.enabled && Boolean(idOrSlug) && Boolean(args.storeId),
     staleTime: 15 * 1000,
     gcTime: 60 * 1000,
     refetchOnWindowFocus: true,

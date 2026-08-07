@@ -162,7 +162,7 @@ export function LocationsSection() {
         <div className="lg:col-span-5 flex flex-col h-full min-h-0 relative">
           {/* Sticky Search Bar */}
           <div className="shrink-0 pb-3">
-            <div className="relative flex items-center w-full rounded-full bg-white/80 backdrop-blur-md border border-white/80 px-4 py-2.5 shadow-soft transition-all duration-300 focus-within:border-brand-green/60 focus-within:ring-2 focus-within:ring-brand-green/20 focus-within:bg-white">
+            <div className="relative flex items-center w-full rounded-full bg-white border border-stone-200 px-4 py-2.5 shadow-soft transition-all duration-300 focus-within:border-brand-green/60 focus-within:ring-2 focus-within:ring-brand-green/20">
               <Search className="size-4 text-on-surface-variant mr-3 shrink-0" />
               <input
                 id="outlet-search-input"
@@ -211,7 +211,7 @@ export function LocationsSection() {
               }}
             >
               {filteredStores.length === 0 ? (
-                <div className="p-6 rounded-[20px] bg-white/60 backdrop-blur-md border border-white/60 text-center text-xs md:text-sm font-sans text-on-surface-variant">
+                <div className="p-6 rounded-[20px] bg-white border border-stone-200 text-center text-xs md:text-sm font-sans text-on-surface-variant">
                   No outlets found matching &quot;{query}&quot;. Try a different search term.
                 </div>
               ) : (
@@ -234,7 +234,7 @@ export function LocationsSection() {
                       className={`shrink-0 w-full text-left p-4 rounded-[20px] transition-all duration-300 flex flex-col gap-2 relative overflow-hidden group cursor-pointer border ${
                         isSelected
                           ? "bg-white shadow-md border-brand-green"
-                          : "bg-white/70 backdrop-blur-md border-white/80 hover:bg-white hover:shadow-soft"
+                          : "bg-white border-stone-200/80 hover:shadow-soft"
                       }`}
                       style={{
                         borderColor: isSelected ? themeColor : undefined,
@@ -340,11 +340,11 @@ export function LocationsSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.3 }}
-                className="w-full bg-black/40 backdrop-blur-md rounded-[22px] p-5 border border-white/20 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white"
+                className="w-full bg-stone-900 rounded-[22px] p-5 border border-stone-800 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white"
               >
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider bg-white/20 text-white backdrop-blur-sm border border-white/30">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider bg-stone-800 text-white border border-stone-700">
                       {activeStore.brandName}
                     </span>
                     <span className="text-xs font-sans text-emerald-400 font-bold flex items-center gap-1">

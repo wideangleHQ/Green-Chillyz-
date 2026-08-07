@@ -128,7 +128,7 @@ export function GamesSection() {
             onClick={prevSlide}
             type="button"
             suppressHydrationWarning
-            className="absolute left-0 sm:left-1 md:left-2 z-50 size-9 sm:size-11 md:size-13 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-on-surface shadow-soft border border-white/60 hover:scale-110 hover:bg-white transition-all duration-300 cursor-pointer"
+            className="absolute left-0 sm:left-1 md:left-2 z-50 size-9 sm:size-11 md:size-13 rounded-full bg-white flex items-center justify-center text-on-surface shadow-soft border border-stone-200 hover:scale-110 hover:bg-stone-50 transition-all duration-300 cursor-pointer"
             aria-label="Previous Game"
           >
             <ChevronLeft className="size-4.5 md:size-6 text-on-surface" />
@@ -186,7 +186,7 @@ export function GamesSection() {
             onClick={nextSlide}
             type="button"
             suppressHydrationWarning
-            className="absolute right-0 sm:right-1 md:right-2 z-50 size-9 sm:size-11 md:size-13 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-on-surface shadow-soft border border-white/60 hover:scale-110 hover:bg-white transition-all duration-300 cursor-pointer"
+            className="absolute right-0 sm:right-1 md:right-2 z-50 size-9 sm:size-11 md:size-13 rounded-full bg-white flex items-center justify-center text-on-surface shadow-soft border border-stone-200 hover:scale-110 hover:bg-stone-50 transition-all duration-300 cursor-pointer"
             aria-label="Next Game"
           >
             <ChevronRight className="size-4.5 md:size-6 text-on-surface" />

@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
+import { useState } from 'react';
 import { useDashboardAuth } from '@/components/providers/AuthProvider';
-import { useStoreStats, useStoreActivity, useUnreadNotificationsCount, useQueryAuditLogs } from '@/hooks/useDashboardOps';
+import { useStoreStats, useStoreActivity, useUnreadNotificationsCount, useQueryAuditLogs, useRedeemStoreVoucher } from '@/hooks/useDashboardOps';
+import { useToast } from '@/components/providers/ToastProvider';
 import { useMyAssignment, useMyProfile, usePreviewMyRewards } from '@/hooks/useRewardManagement';
 import { useChallenges } from '@/hooks/useChallenges';
 import { PageHeader } from '@/components/layout';
@@ -21,6 +23,7 @@ import {
   Trophy,
   Target,
   GitBranch,
+  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -34,6 +37,26 @@ export default function DashboardHome() {
   const { data: previewRewards } = usePreviewMyRewards();
   const { data: challenges } = useChallenges({ status: 'ACTIVE' });
   const { data: recentAudit } = useQueryAuditLogs({ page: 1, pageSize: 5 });
+  const redeemStoreVoucherMutation = useRedeemStoreVoucher();
+  const { showToast } = useToast();
+  const [quickRedeemCode, setQuickRedeemCode] = useState('');
+  const [quickRedeemSuccess, setQuickRedeemSuccess] = useState<string | null>(null);
+
+  const handleQuickRedeem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickRedeemCode.trim()) { showToast('Enter a coupon code', 'error'); return; }
+    setQuickRedeemSuccess(null);
+    try {
+      const result = await redeemStoreVoucherMutation.mutateAsync(quickRedeemCode.trim());
+      const name = result?.voucher?.name || quickRedeemCode;
+      setQuickRedeemSuccess(`"${name}" redeemed successfully!`);
+      showToast(`Voucher redeemed!`, 'success');
+      setQuickRedeemCode('');
+      setTimeout(() => setQuickRedeemSuccess(null), 5000);
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || err.message || 'Failed to redeem', 'error');
+    }
+  };
 
   const profileName = (myProfile as any)?.name || 'Not assigned';
   const assignmentStatus = myAssignment ? 'Active' : 'None';
@@ -167,6 +190,36 @@ export default function DashboardHome() {
             loading={statsLoading}
           />
         </div>
+      </section>
+
+      {/* Quick Voucher Redemption */}
+      <section className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Zap className="w-4 h-4 text-[var(--color-primary)]" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Quick Voucher Redemption</h3>
+        </div>
+        <form onSubmit={handleQuickRedeem} className="flex items-center gap-3">
+          <input
+            type="text"
+            value={quickRedeemCode}
+            onChange={e => setQuickRedeemCode(e.target.value.toUpperCase())}
+            placeholder="Enter coupon code"
+            className="flex-1 max-w-xs px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--input-bg)] text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+            disabled={redeemStoreVoucherMutation.isPending}
+          />
+          <button
+            type="submit"
+            disabled={redeemStoreVoucherMutation.isPending || !quickRedeemCode.trim()}
+            className="px-4 py-2 bg-[var(--color-primary)] text-white text-xs font-bold rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+          >
+            {redeemStoreVoucherMutation.isPending ? 'Redeeming...' : 'Redeem'}
+          </button>
+        </form>
+        {quickRedeemSuccess && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-green-700 dark:text-green-300 font-semibold">
+            <Ticket className="w-3.5 h-3.5" /> {quickRedeemSuccess}
+          </div>
+        )}
       </section>
 
       {/* Activity & Sidebar */}

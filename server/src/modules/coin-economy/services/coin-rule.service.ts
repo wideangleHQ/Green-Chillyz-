@@ -13,6 +13,7 @@ import {
   CoinRuleQueryDto,
   CreateCoinRuleDto,
   DuplicateCoinRuleDto,
+  ReplacePurchaseSlabsDto,
   UpdateCoinRuleDto,
 } from '../dto';
 import {
@@ -142,6 +143,60 @@ export class CoinRuleService {
     return this.repo.findMetadata(id);
   }
 
+  async getPurchaseSlabs(): Promise<PurchaseSlab[]> {
+    const rule = await this.findActiveByType(CoinRuleType.PURCHASE_BONUS);
+    if (!rule) return [];
+    return this.getPurchaseSlabsForRule(rule.id);
+  }
+
+  async getPurchaseSlabsForRule(id: string): Promise<PurchaseSlab[]> {
+    const metadata = await this.findMetadata(id);
+    const entry = metadata.find((item) => item.key === PURCHASE_SLABS_METADATA_KEY);
+    return normalizePurchaseSlabs(entry?.value);
+  }
+
+  async replacePurchaseSlabs(
+    dto: ReplacePurchaseSlabsDto,
+    actorId?: string,
+  ): Promise<PurchaseSlab[]> {
+    const rule = await this.repo.findActiveByType(CoinRuleType.PURCHASE_BONUS);
+    if (!rule) throw new NotFoundException(COIN_ECONOMY_ERRORS.RULE_NOT_FOUND);
+
+    const slabs = normalizePurchaseSlabs(dto.slabs);
+    validatePurchaseSlabs(slabs);
+
+    const before = await this.getPurchaseSlabsForRule(rule.id);
+    await this.repo.replaceMetadata(rule.id, {
+      [PURCHASE_SLABS_METADATA_KEY]: slabs,
+    });
+    await this.repo.recordHistory({
+      ruleId: rule.id,
+      action: 'PURCHASE_SLAB_UPDATED',
+      status: rule.status,
+      reason: dto.reason ?? null,
+      changedBy: actorId ?? null,
+      snapshot: { previousValue: before, newValue: slabs } as unknown as Prisma.InputJsonValue,
+    });
+    await this.cache.invalidateRule(rule.id, rule.ruleType);
+    this.events.emit(COIN_ECONOMY_EVENTS.PURCHASE_SLAB_CHANGED, {
+      ruleId: rule.id,
+      changedBy: actorId ?? null,
+      previousValue: before,
+      newValue: slabs,
+    });
+    return slabs;
+  }
+
+  async resolvePurchaseCoins(amount: number): Promise<number | null> {
+    if (amount < 0) throw new BadRequestException(COIN_ECONOMY_ERRORS.INVALID_PURCHASE_SLAB);
+    const slabs = await this.getPurchaseSlabs();
+    const match = slabs
+      .filter((slab) => slab.enabled)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .find((slab) => amount >= slab.minAmount && amount <= slab.maxAmount);
+    return match?.coins ?? null;
+  }
+
   // ─── Writes ───────────────────────────────────────
 
   async create(
@@ -193,6 +248,8 @@ export class CoinRuleService {
     });
 
     if (dto.metadata) {
+      const slabs = metadataPurchaseSlabs(dto.metadata);
+      if (slabs) validatePurchaseSlabs(slabs);
       await this.repo.replaceMetadata(rule.id, dto.metadata);
     }
 
@@ -289,6 +346,8 @@ export class CoinRuleService {
     });
 
     if (dto.metadata) {
+      const slabs = metadataPurchaseSlabs(dto.metadata);
+      if (slabs) validatePurchaseSlabs(slabs);
       await this.repo.replaceMetadata(rule.id, dto.metadata);
     }
 
@@ -559,4 +618,63 @@ function toSnapshot(rule: CoinRuleRecord): Record<string, unknown> {
     effectiveFrom: rule.effectiveFrom?.toISOString() ?? null,
     effectiveUntil: rule.effectiveUntil?.toISOString() ?? null,
   };
+}
+
+const PURCHASE_SLABS_METADATA_KEY = 'purchaseSlabs';
+
+export interface PurchaseSlab {
+  minAmount: number;
+  maxAmount: number;
+  coins: number;
+  enabled: boolean;
+  sortOrder: number;
+}
+
+function normalizePurchaseSlabs(value: unknown): PurchaseSlab[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((raw, index) => {
+    const slab = raw as Record<string, unknown>;
+    return {
+      minAmount: Number(slab.minAmount),
+      maxAmount:
+        slab.maxAmount === null || slab.maxAmount === undefined
+          ? Number.MAX_SAFE_INTEGER
+          : Number(slab.maxAmount),
+      coins: Number(slab.coins),
+      enabled: slab.enabled === undefined ? true : Boolean(slab.enabled),
+      sortOrder:
+        slab.sortOrder === undefined || slab.sortOrder === null
+          ? index
+          : Number(slab.sortOrder),
+    };
+  });
+}
+
+function metadataPurchaseSlabs(
+  metadata: Record<string, unknown>,
+): PurchaseSlab[] | null {
+  if (!(PURCHASE_SLABS_METADATA_KEY in metadata)) return null;
+  return normalizePurchaseSlabs(metadata[PURCHASE_SLABS_METADATA_KEY]);
+}
+
+function validatePurchaseSlabs(slabs: PurchaseSlab[]): void {
+  const normalized = slabs
+    .filter((slab) => slab.enabled)
+    .sort((a, b) => a.minAmount - b.minAmount || a.sortOrder - b.sortOrder);
+
+  for (const slab of normalized) {
+    const numbers = [slab.minAmount, slab.maxAmount, slab.coins, slab.sortOrder];
+    if (
+      numbers.some((value) => !Number.isFinite(value) || value < 0) ||
+      slab.maxAmount < slab.minAmount
+    ) {
+      throw new BadRequestException(COIN_ECONOMY_ERRORS.INVALID_PURCHASE_SLAB);
+    }
+  }
+
+  for (let index = 1; index < normalized.length; index++) {
+    if (normalized[index].minAmount <= normalized[index - 1].maxAmount) {
+      throw new BadRequestException(COIN_ECONOMY_ERRORS.OVERLAPPING_PURCHASE_SLABS);
+    }
+  }
 }

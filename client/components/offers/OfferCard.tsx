@@ -42,7 +42,7 @@ export const OfferCard = memo(function OfferCard({ offer, outletName }: OfferCar
         {/* Top Badges */}
         <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2 z-10">
           {/* Badge Tag */}
-          <span className="px-3 py-1 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider bg-brand-green/90 backdrop-blur-md text-white shadow-md border border-white/20">
+          <span className="px-3 py-1 rounded-full text-[10px] font-sans font-bold uppercase tracking-wider bg-brand-green text-white shadow-md border-none">
             {offer.badge}
           </span>
 

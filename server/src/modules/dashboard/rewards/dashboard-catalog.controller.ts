@@ -71,8 +71,7 @@ export class DashboardCatalogController {
     @DashboardCurrentStore('sessionId') sessionId: string,
     @Body() dto: CreateRewardDto,
   ) {
-    dto.storeIds = [storeId];
-    return this.catalogService.create(dto, sessionId);
+    return this.catalogService.createForStore(dto, storeId, sessionId);
   }
 
   @Get('categories')
@@ -98,8 +97,13 @@ export class DashboardCatalogController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get reward details' })
-  async getReward(@Param('id', ParseUUIDPipe) id: string) {
-    return this.catalogService.getDetail(id);
+  async getReward(
+    @Param('id', ParseUUIDPipe) id: string,
+    @DashboardCurrentStore('storeId') storeId: string,
+  ) {
+    const reward = await this.catalogService.getDetail(id);
+    this.assertStoreOwnership(reward, storeId);
+    return reward;
   }
 
   @Patch(':id')
@@ -109,9 +113,8 @@ export class DashboardCatalogController {
     @Body() dto: UpdateRewardDto,
     @DashboardCurrentStore('storeId') storeId: string,
   ) {
-    const existing = await this.catalogService.getDetail(id);
-    this.assertStoreOwnership(existing, storeId);
-    return this.catalogService.update(id, dto);
+    await this.assertRewardOwnership(id, storeId);
+    return this.catalogService.updateForStore(id, dto, storeId);
   }
 
   @Patch(':id/status/:status')
@@ -122,8 +125,7 @@ export class DashboardCatalogController {
     @Param('status') status: RewardStatus,
     @DashboardCurrentStore('storeId') storeId: string,
   ) {
-    const existing = await this.catalogService.getDetail(id);
-    this.assertStoreOwnership(existing, storeId);
+    await this.assertRewardOwnership(id, storeId);
     return this.catalogService.updateStatus(id, status);
   }
 
@@ -134,8 +136,7 @@ export class DashboardCatalogController {
     @Param('stock') stock: string,
     @DashboardCurrentStore('storeId') storeId: string,
   ) {
-    const existing = await this.catalogService.getDetail(id);
-    this.assertStoreOwnership(existing, storeId);
+    await this.assertRewardOwnership(id, storeId);
     return this.catalogService.adjustStock(id, parseInt(stock, 10));
   }
 
@@ -148,14 +149,23 @@ export class DashboardCatalogController {
     @Param('id', ParseUUIDPipe) id: string,
     @DashboardCurrentStore('storeId') storeId: string,
   ) {
-    const existing = await this.catalogService.getDetail(id);
-    this.assertStoreOwnership(existing, storeId);
+    await this.assertRewardOwnership(id, storeId);
     await this.catalogService.delete(id);
     return { message: 'Reward deleted successfully' };
   }
 
   private assertStoreOwnership(reward: RewardDetail, storeId: string): void {
-    if (reward.stores.length > 0 && !reward.stores.some((s) => s.id === storeId)) {
+    if (!reward.stores.some((s) => s.id === storeId)) {
+      throw new ForbiddenException('Cannot manage rewards from another store');
+    }
+  }
+
+  private async assertRewardOwnership(rewardId: string, storeId: string): Promise<void> {
+    const belongsToStore = await this.catalogService.isAvailableAtStore(
+      rewardId,
+      storeId,
+    );
+    if (!belongsToStore) {
       throw new ForbiddenException('Cannot manage rewards from another store');
     }
   }

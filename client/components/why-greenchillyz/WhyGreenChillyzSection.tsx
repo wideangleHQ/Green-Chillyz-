@@ -88,7 +88,7 @@ export function WhyGreenChillyzSection() {
               <Reveal key={pillar.id}>
                 <motion.div
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="group relative p-6 rounded-[24px] bg-white/90 backdrop-blur-sm border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[200px]"
+                  className="group relative p-6 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[200px]"
                 >
                   <div>
                     <div className="size-11 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 group-hover:bg-brand-green group-hover:text-white transition-colors duration-300">

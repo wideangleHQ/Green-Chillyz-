@@ -45,7 +45,7 @@ export function OnboardingModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-on-surface/40 backdrop-blur-md"
+          className="fixed inset-0 bg-on-surface/50"
         />
 
         {/* Modal Main Dialog Container */}
@@ -54,7 +54,7 @@ export function OnboardingModal() {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-[32px] p-6 sm:p-8 shadow-floating border border-white/80 z-10 flex flex-col gap-6 overflow-hidden my-auto"
+          className="relative w-full max-w-lg bg-white rounded-[32px] p-6 sm:p-8 shadow-floating border border-stone-200/80 z-10 flex flex-col gap-6 overflow-hidden my-auto"
         >
           {/* Subtle Ambient Decorative Radial Glow */}
           <div className="absolute top-0 right-0 size-48 bg-brand-green/10 rounded-full blur-3xl pointer-events-none" />

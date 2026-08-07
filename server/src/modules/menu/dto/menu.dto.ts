@@ -176,6 +176,19 @@ export class CreateMenuItemDto {
   @IsOptional()
   carbs?: number;
 
+  @ApiProperty({ minimum: 0, description: 'Price in currency units' })
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  price!: number;
+
+  @ApiPropertyOptional({ minimum: 0, description: 'Discounted price if applicable' })
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @IsOptional()
+  discountedPrice?: number;
+
   @ApiPropertyOptional({ enum: MenuStatus, default: MenuStatus.DRAFT })
   @IsEnum(MenuStatus)
   @IsOptional()

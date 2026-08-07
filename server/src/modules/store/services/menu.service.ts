@@ -8,6 +8,7 @@ export interface Dish {
   description: string;
   category: string;
   price: number;
+  discountedPrice?: number;
   isVeg: boolean;
   isBestseller: boolean;
   isNew: boolean;
@@ -114,12 +115,17 @@ export class MenuService {
     const isBestseller = item.isFeatured || tagNames.some((t: string) => t.toLowerCase() === 'bestseller');
     const isRecommended = item.isRecommended || tagNames.some((t: string) => t.toLowerCase() === 'signature');
 
+    // Use new price columns instead of hardcoded 0
+    const price = Number(item.price || 0);
+    const discountedPrice = item.discountedPrice ? Number(item.discountedPrice) : undefined;
+
     return {
       id: item.id,
       name: item.name,
       description: item.description || item.shortDescription || '',
       category: item.category?.name || 'Uncategorized',
-      price: 0,
+      price,
+      discountedPrice,
       isVeg,
       isBestseller,
       isNew: item.isSeasonal ?? false,

@@ -91,7 +91,7 @@ export function WalletQuickView({ isOpen, onClose }: WalletQuickViewProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-stone-950/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-stone-950/70">
           {/* Backdrop click to close */}
           <div className="absolute inset-0 cursor-default" onClick={onClose} />
 

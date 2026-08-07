@@ -76,6 +76,7 @@ describe('RewardsController', () => {
       eligibility as unknown as RewardEligibilityService,
       voucher as unknown as VoucherService,
       analytics as unknown as RewardAnalyticsService,
+      {} as any,
     );
   });
 

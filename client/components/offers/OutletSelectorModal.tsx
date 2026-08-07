@@ -46,7 +46,7 @@ export function OutletSelectorModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm cursor-pointer"
+            className="absolute inset-0 bg-on-surface/50 cursor-pointer"
           />
 
           {/* Modal / Bottom Sheet Panel */}
@@ -55,7 +55,7 @@ export function OutletSelectorModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-lg bg-white rounded-t-[32px] sm:rounded-[32px] p-6 shadow-floating z-10 flex flex-col max-h-[85vh] sm:max-h-[80vh] overflow-hidden border border-white/80"
+            className="relative w-full max-w-lg bg-white rounded-t-[32px] sm:rounded-[32px] p-6 shadow-floating z-10 flex flex-col max-h-[85vh] sm:max-h-[80vh] overflow-hidden border border-stone-200/80"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-on-surface/10">

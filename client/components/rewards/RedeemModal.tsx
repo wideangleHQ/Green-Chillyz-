@@ -83,7 +83,7 @@ export function RedeemModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => !isRedeeming && onClose()}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50"
             aria-hidden="true"
           />
 

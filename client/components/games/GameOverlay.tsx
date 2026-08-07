@@ -99,7 +99,7 @@ export function GameOverlay({ gameSlug, onClose }: GameOverlayProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] bg-stone-950/90 flex items-center justify-center p-4">
       {/* Click Outside to Close */}
       <div className="absolute inset-0 cursor-default" onClick={showGameInstance ? undefined : onClose} />
 

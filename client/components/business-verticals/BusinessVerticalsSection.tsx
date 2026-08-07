@@ -120,7 +120,7 @@ export function BusinessVerticalsSection() {
 
                   {/* Text Content Overlay */}
                   <div className="absolute inset-0 z-20 p-6 md:p-8 flex flex-col justify-end text-white">
-                    <span className="text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#69f0ae] bg-black/40 backdrop-blur-xs px-3 py-1 rounded-full border border-white/15 w-fit mb-3">
+                    <span className="text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#69f0ae] bg-stone-900 px-3 py-1 rounded-full border border-stone-800 w-fit mb-3">
                       {vertical.categoryLabel}
                     </span>
 

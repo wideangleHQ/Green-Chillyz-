@@ -69,7 +69,7 @@ export function OffersSection() {
           <Reveal>
             <div className="flex flex-wrap items-center gap-3">
               {selectedOutlet ? (
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-4 py-2 border border-white/80 shadow-soft text-xs font-sans font-bold text-on-surface">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 border border-stone-200 shadow-soft text-xs font-sans font-bold text-on-surface">
                   <MapPin className="size-4 text-brand-green shrink-0 animate-bounce" />
                   <span>
                     Showing offers from{" "}
@@ -124,7 +124,7 @@ export function OffersSection() {
               className={`px-4 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-wider transition-all duration-300 shrink-0 cursor-pointer ${
                 category === cat.value
                   ? "bg-brand-green text-white shadow-md scale-105"
-                  : "bg-white/80 text-on-surface-variant hover:bg-white hover:text-on-surface border border-white/80 shadow-xs"
+                  : "bg-white text-on-surface-variant hover:text-on-surface border border-stone-200 shadow-xs"
               }`}
             >
               {cat.label}
@@ -139,13 +139,13 @@ export function OffersSection() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="w-full h-[380px] rounded-[28px] bg-stone-200/60 animate-pulse border border-white/60 shadow-soft"
+                className="w-full h-[380px] rounded-[28px] bg-stone-100 animate-pulse border border-stone-200 shadow-soft"
               />
             ))}
           </div>
         ) : status === "denied" && !selectedOutlet ? (
           /* Permission Denied Empty State */
-          <div className="w-full bg-white/80 backdrop-blur-md rounded-[32px] p-8 md:p-12 border border-white shadow-soft flex flex-col items-center justify-center text-center gap-4 max-w-xl mx-auto">
+          <div className="w-full bg-white rounded-[32px] p-8 md:p-12 border border-stone-200 shadow-soft flex flex-col items-center justify-center text-center gap-4 max-w-xl mx-auto">
             <div className="size-16 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600">
               <Navigation className="size-8 stroke-[1.5]" />
             </div>
@@ -197,7 +197,7 @@ export function OffersSection() {
           </div>
         ) : (
           /* No Offers Available at Selected Outlet */
-          <div className="w-full bg-white/80 backdrop-blur-md rounded-[32px] p-8 md:p-12 border border-white shadow-soft flex flex-col items-center justify-center text-center gap-4 max-w-md mx-auto">
+          <div className="w-full bg-white rounded-[32px] p-8 md:p-12 border border-stone-200 shadow-soft flex flex-col items-center justify-center text-center gap-4 max-w-md mx-auto">
             <div className="size-16 rounded-full bg-stone-100 flex items-center justify-center text-stone-400">
               <ShoppingBag className="size-8 stroke-[1.5]" />
             </div>

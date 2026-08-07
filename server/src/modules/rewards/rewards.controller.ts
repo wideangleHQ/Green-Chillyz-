@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -15,10 +16,13 @@ import { ApiOperation, ApiTags, ApiParam } from '@nestjs/swagger';
 import { Request } from 'express';
 import { RewardStatus } from '@prisma/client';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { JwtPayload } from '../auth/interfaces';
+import { StoreVoucherStatus } from '@prisma/client';
+import { PrismaService } from '../../database/prisma.service';
 import {
   RewardCatalogService,
   RewardRedemptionService,
@@ -49,7 +53,60 @@ export class RewardsController {
     private readonly eligibilityService: RewardEligibilityService,
     private readonly voucherService: VoucherService,
     private readonly analyticsService: RewardAnalyticsService,
+    private readonly prisma: PrismaService,
   ) {}
+
+  // ─── Store Vouchers (public, no auth) ─────────────────
+
+  @Get('store-vouchers/:storeId')
+  @Public()
+  @ApiOperation({
+    summary: 'Active store vouchers for customers',
+    description:
+      'Returns promotional vouchers that are currently active and available ' +
+      'for the given store. No authentication required.',
+  })
+  @ApiParam({ name: 'storeId', type: String })
+  async getStoreVouchers(@Param('storeId', ParseUUIDPipe) storeId: string) {
+    const now = new Date();
+
+    return this.prisma.storeVoucher.findMany({
+      where: {
+        storeId,
+        status: StoreVoucherStatus.ACTIVE,
+        archivedAt: null,
+        OR: [{ startDate: null }, { startDate: { lte: now } }],
+        AND: [
+          { OR: [{ endDate: null }, { endDate: { gte: now } }] },
+          { OR: [{ totalLimit: 0 }, { remainingCount: { gt: 0 } }] },
+        ],
+      },
+      orderBy: [{ priority: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
+      select: {
+        id: true,
+        name: true,
+        shortTitle: true,
+        description: true,
+        offerTag: true,
+        discountBadge: true,
+        offerImage: true,
+        bannerImage: true,
+        couponCode: true,
+        voucherType: true,
+        minimumOrderValue: true,
+        maximumDiscount: true,
+        voucherValue: true,
+        itemsIncluded: true,
+        redeemVenue: true,
+        validDays: true,
+        startDate: true,
+        endDate: true,
+        validTime: true,
+        isFeatured: true,
+        terms: true,
+      },
+    });
+  }
 
   // ─── Catalog ──────────────────────────────────────────
 
@@ -74,15 +131,15 @@ export class RewardsController {
   @Get('featured')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Featured rewards for the catalog hero' })
-  async listFeatured() {
-    return this.catalogService.getFeatured();
+  async listFeatured(@Query('storeId') storeId?: string) {
+    return storeId ? this.catalogService.getFeaturedForStore(storeId) : [];
   }
 
   @Get('popular')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Most redeemed rewards' })
-  async listPopular() {
-    return this.catalogService.getPopular();
+  async listPopular(@Query('storeId') storeId?: string) {
+    return storeId ? this.catalogService.getPopularForStore(storeId) : [];
   }
 
   // ─── Vouchers (declared before :idOrSlug to avoid capture) ──
@@ -255,19 +312,42 @@ export class RewardsController {
   @ApiOperation({ summary: 'Get reward details by ID or slug' })
   async getReward(
     @Param('idOrSlug') idOrSlug: string,
-    @CurrentUser() user: JwtPayload,
+    @Query('storeId') storeIdOrUser: string | JwtPayload | undefined,
+    @CurrentUser() userArg?: JwtPayload,
   ) {
-    const reward = await this.catalogService.getDetail(idOrSlug);
-    await this.analyticsService.trackView(reward.id, user.sub);
+    const storeId =
+      typeof storeIdOrUser === 'string' ? storeIdOrUser : undefined;
+    const user =
+      typeof storeIdOrUser === 'object' && storeIdOrUser
+        ? storeIdOrUser
+        : userArg;
+    if (!storeId) {
+      throw new NotFoundException('Reward not found');
+    }
+    const reward = await this.catalogService.getDetailForStore(
+      idOrSlug,
+      storeId,
+    );
+    if (user) {
+      await this.analyticsService.trackView(reward.id, user.sub);
+    }
     return reward;
   }
 
   @Get(':idOrSlug/related')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Rewards related to this one' })
-  async getRelated(@Param('idOrSlug') idOrSlug: string) {
-    const reward = await this.catalogService.getDetail(idOrSlug);
-    return this.catalogService.getRelated(reward.id, reward.category?.id ?? null);
+  async getRelated(
+    @Param('idOrSlug') idOrSlug: string,
+    @Query('storeId') storeId?: string,
+  ) {
+    if (!storeId) return [];
+    const reward = await this.catalogService.getDetailForStore(idOrSlug, storeId);
+    return this.catalogService.getRelatedForStore(
+      reward.id,
+      reward.category?.id ?? null,
+      storeId,
+    );
   }
 
   @Get(':idOrSlug/eligibility')
@@ -279,9 +359,20 @@ export class RewardsController {
   })
   async checkEligibility(
     @Param('idOrSlug') idOrSlug: string,
-    @CurrentUser() user: JwtPayload,
+    @Query('storeId') storeIdOrUser: string | JwtPayload | undefined,
+    @CurrentUser() userArg?: JwtPayload,
   ) {
-    return this.redemptionService.checkEligibility(user.sub, idOrSlug);
+    const storeId =
+      typeof storeIdOrUser === 'string' ? storeIdOrUser : undefined;
+    const user =
+      typeof storeIdOrUser === 'object' && storeIdOrUser
+        ? storeIdOrUser
+        : userArg;
+    if (!storeId) {
+      throw new NotFoundException('Reward not found');
+    }
+    await this.catalogService.getDetailForStore(idOrSlug, storeId);
+    return this.redemptionService.checkEligibility(user?.sub ?? '', idOrSlug);
   }
 
   @Post(':idOrSlug/redeem')

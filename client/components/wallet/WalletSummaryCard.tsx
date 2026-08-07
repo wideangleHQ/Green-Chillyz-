@@ -62,7 +62,7 @@ function StatCard({
   value: string;
 }) {
   return (
-    <div className="bg-white/10 rounded-2xl px-4 py-3 backdrop-blur-sm">
+    <div className="bg-[#004d1e] rounded-2xl px-4 py-3">
       <div className="flex items-center gap-1.5 mb-1">
         <span className="text-white/60">{icon}</span>
         <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-white/60">

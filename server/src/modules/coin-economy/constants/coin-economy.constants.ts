@@ -23,6 +23,8 @@ export const COIN_ECONOMY_ERRORS = {
   DUPLICATE_LIMIT_SCOPE: 'A limit with this scope already exists for this rule and store',
   CANNOT_ARCHIVE_ENABLED: 'Disable the rule before archiving it',
   EMPTY_LIMIT: 'A limit must cap either coins or claims',
+  INVALID_PURCHASE_SLAB: 'Purchase slabs require non-negative min, max and coins values',
+  OVERLAPPING_PURCHASE_SLABS: 'Purchase slabs cannot overlap',
 } as const;
 
 export const COIN_ECONOMY_REJECTIONS = {
@@ -92,6 +94,8 @@ export const COIN_ECONOMY_EVENTS = {
   RULE_ARCHIVED: 'coin-rule.archived',
   RULE_RESTORED: 'coin-rule.restored',
   RULE_DUPLICATED: 'coin-rule.duplicated',
+  PURCHASE_SLAB_CHANGED: 'coin-rule.purchase-slab.changed',
+  CAMPAIGN_CHANGED: 'coin-rule.campaign.changed',
   MULTIPLIER_CHANGED: 'coin-multiplier.changed',
   LIMIT_CHANGED: 'coin-limit.changed',
   LIMIT_REACHED: 'coin-limit.reached',

@@ -40,7 +40,7 @@ import { useStoreMenu, useFeaturedDishes, useMenuCategories } from "@/hooks/useM
 import { formatCoins } from "@/types/wallet";
 import { useWalletSummary } from "@/hooks/useWallet";
 import { useAuth } from "@/components/auth/AuthContext";
-import type { Dish, MenuQueryParams } from "@/types/menu";
+import type { Dish, MenuQueryParams, MenuCategory } from "@/types/menu";
 import type { Store } from "@/types/store";
 import { Footer } from "@/components/footer/Footer";
 
@@ -223,14 +223,79 @@ export default function MenuPage() {
   // Fetch menu categories from API
   const { data: apiCategories } = useMenuCategories();
 
+  // Derive unique category objects for the selected store/brand
+  const categoryObjects = useMemo(() => {
+    if (!apiCategories || apiCategories.length === 0) {
+      // Return fallback as objects with synthetic IDs
+      return FALLBACK_CATEGORIES.map((name, idx) => ({
+        id: `fallback-${idx}`,
+        name,
+        slug: name.toLowerCase(),
+        sortOrder: idx,
+        status: 'ACTIVE' as const,
+        description: null,
+        image: null,
+        icon: null,
+      }));
+    }
+
+    // Filter by selected store's brand if available
+    let filteredCategories = apiCategories.filter((c) => c.status === "ACTIVE");
+    
+    // If we have a selected store with a brandName, filter categories to that brand
+    if (selectedStore?.brandName) {
+      const storeBrandNormalized = getNormalizedBrand(selectedStore.brandName);
+      
+      // Group categories by name to identify which ones exist for the selected brand
+      const categoriesByName = new Map<string, MenuCategory[]>();
+      filteredCategories.forEach((cat) => {
+        const list = categoriesByName.get(cat.name) || [];
+        list.push(cat);
+        categoriesByName.set(cat.name, list);
+      });
+
+      // For each category name, prefer the one matching the current brand
+      const uniqueCategories: MenuCategory[] = [];
+      categoriesByName.forEach((cats, name) => {
+        // Try to find a category that belongs to the current brand
+        // Note: We would need brandId on the category object to do exact matching
+        // For now, we'll take the first one found (all have same name, different IDs)
+        // This prevents duplicates while allowing brand-specific categories
+        uniqueCategories.push(cats[0]);
+      });
+
+      filteredCategories = uniqueCategories;
+    } else {
+      // No selected store yet - remove duplicates by name, keeping first occurrence
+      const seen = new Set<string>();
+      filteredCategories = filteredCategories.filter((c) => {
+        if (seen.has(c.name)) return false;
+        seen.add(c.name);
+        return true;
+      });
+    }
+
+    const sorted = filteredCategories.sort((a, b) => a.sortOrder - b.sortOrder);
+    
+    // Add synthetic "Recommended" category at the start
+    const recommended = {
+      id: 'recommended',
+      name: 'Recommended',
+      slug: 'recommended',
+      sortOrder: -1,
+      status: 'ACTIVE' as const,
+      description: null,
+      image: null,
+      icon: null,
+    };
+
+    return [recommended, ...sorted.filter((c) => c.name !== "Recommended")];
+  }, [apiCategories, selectedStore]);
+
+  // Extract just the names for backward compatibility with existing code
   const categories = useMemo(() => {
-    if (!apiCategories || apiCategories.length === 0) return FALLBACK_CATEGORIES;
-    const names = apiCategories
-      .filter((c) => c.status === "ACTIVE")
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((c) => c.name);
-    return ["Recommended", ...names.filter((n) => n !== "Recommended")];
-  }, [apiCategories]);
+    return categoryObjects.map((c) => c.name);
+  }, [categoryObjects]);
 
   // Fetch active outlets
   const { data: activeStores, isLoading: isStoresLoading } = useActiveStores();
@@ -509,7 +574,7 @@ export default function MenuPage() {
 
         {/* 5. Sticky Category Navigation */}
         <CategoryBar
-          categories={categories}
+          categoryObjects={categoryObjects}
           activeCategory={selectedCategory}
           onCategoryClick={handleCategoryClick}
         />
@@ -553,27 +618,27 @@ export default function MenuPage() {
 
             {/* 7. Category Items Sections */}
             <div className="mt-8 flex flex-col gap-16">
-              {categories.map((category) => {
-                const items = categorizedMenu[category] || [];
+              {categoryObjects.map((categoryObj) => {
+                const items = categorizedMenu[categoryObj.name] || [];
                 return (
                   <div
-                    key={category}
+                    key={categoryObj.id}
                     ref={(el) => {
-                      categoryRefs.current[category] = el;
+                      categoryRefs.current[categoryObj.name] = el;
                     }}
                     className="scroll-mt-48"
                   >
                     <div className="border-b border-stone-200 pb-2 mb-6 flex items-baseline justify-between">
                       <div className="flex items-baseline gap-2">
                         <h3 className="font-sans text-xl font-bold uppercase text-on-surface tracking-wide">
-                          {category}
+                          {categoryObj.name}
                         </h3>
                         <span className="text-xs font-sans text-brand-green font-bold uppercase tracking-wider">
                           {items.length} {items.length === 1 ? "Item" : "Items"}
                         </span>
                       </div>
                       <button
-                        onClick={() => handleCategoryClick(category)}
+                        onClick={() => handleCategoryClick(categoryObj.name)}
                         className="text-xs font-sans font-bold text-brand-green flex items-center gap-1 hover:underline cursor-pointer uppercase tracking-wider"
                       >
                         View All <ChevronRight className="size-3.5" />
@@ -699,7 +764,7 @@ const Header = memo(({ walletBalance, user }: { walletBalance?: number; user?: a
 
   return (
     <motion.header
-      className={`fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200/80 transition-all duration-300 flex justify-center ${
+      className={`fixed top-0 inset-x-0 z-50 bg-white border-b border-stone-200/80 transition-all duration-300 flex justify-center ${
         isScrolled ? "py-2 shadow-soft" : "py-4"
       }`}
     >
@@ -878,7 +943,7 @@ const OutletSelector = memo(({
       {/* Geolocation Drawer/Modal */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-stone-950/60 backdrop-blur-xs p-0 sm:p-4">
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-stone-950/70 p-0 sm:p-4">
             <div className="absolute inset-0 cursor-default" onClick={handleClose} />
             <motion.div
               initial={{ y: "100%", opacity: 0.5 }}
@@ -1057,12 +1122,21 @@ FilterChip.displayName = "FilterChip";
 
 // 5. STICKY CATEGORIES BAR
 interface CategoryBarProps {
-  categories: string[];
+  categoryObjects: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    sortOrder: number;
+    status: string;
+    description: string | null;
+    image: string | null;
+    icon: string | null;
+  }>;
   activeCategory: string;
   onCategoryClick: (category: string) => void;
 }
 
-const CategoryBar = memo(({ categories, activeCategory, onCategoryClick }: CategoryBarProps) => {
+const CategoryBar = memo(({ categoryObjects, activeCategory, onCategoryClick }: CategoryBarProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll categories bar to center the active category item on mobile
@@ -1085,15 +1159,15 @@ const CategoryBar = memo(({ categories, activeCategory, onCategoryClick }: Categ
         ref={containerRef}
         className="bg-white border border-stone-155 rounded-3xl p-3 shadow-soft overflow-x-auto no-scrollbar flex gap-2 select-none w-full scroll-smooth"
       >
-        {categories.map((cat) => {
-          const isActive = cat === activeCategory;
-          const Icon = CATEGORY_ICON_MAP[cat] || Utensils;
+        {categoryObjects.map((catObj) => {
+          const isActive = catObj.name === activeCategory;
+          const Icon = CATEGORY_ICON_MAP[catObj.name] || Utensils;
           
           return (
             <button
-              key={cat}
-              data-cat={cat}
-              onClick={() => onCategoryClick(cat)}
+              key={catObj.id}
+              data-cat={catObj.name}
+              onClick={() => onCategoryClick(catObj.name)}
               className={`relative flex flex-col items-center justify-center py-2.5 px-4 min-w-[90px] rounded-2xl transition-all duration-300 cursor-pointer shrink-0 gap-1.5 focus:outline-none`}
             >
               {/* Active State Background Pill */}
@@ -1110,7 +1184,7 @@ const CategoryBar = memo(({ categories, activeCategory, onCategoryClick }: Categ
                 <Icon className="size-5" />
               </div>
               <span className={`relative z-10 font-sans text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 ${isActive ? "text-brand-green" : "text-stone-400 group-hover:text-stone-700"}`}>
-                {cat}
+                {catObj.name}
               </span>
             </button>
           );
@@ -1339,7 +1413,7 @@ const DishDetailDrawer = memo(({
   return (
     <AnimatePresence>
       {dish && (
-        <div className="fixed inset-0 z-[100] flex justify-end bg-stone-950/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[100] flex justify-end bg-stone-950/70">
           {/* Click backdrop to close */}
           <div className="absolute inset-0 cursor-default" onClick={onClose} />
 
@@ -1355,21 +1429,21 @@ const DishDetailDrawer = memo(({
             <div className="absolute top-4 right-4 z-20 flex gap-2">
               <button
                 onClick={onShare}
-                className="p-2.5 bg-white/90 backdrop-blur-md rounded-full shadow-soft text-stone-600 hover:bg-white transition cursor-pointer"
+                className="p-2.5 bg-white rounded-full shadow-soft text-stone-600 hover:bg-stone-50 transition cursor-pointer border border-stone-200"
                 aria-label="Share dish"
               >
                 <Share2 className="size-5" />
               </button>
               <button
                 onClick={handleWishlist}
-                className="p-2.5 bg-white/90 backdrop-blur-md rounded-full shadow-soft text-stone-600 hover:text-red-500 transition cursor-pointer"
+                className="p-2.5 bg-white rounded-full shadow-soft text-stone-600 hover:text-red-500 transition cursor-pointer border border-stone-200"
                 aria-label="Toggle wishlist"
               >
                 <Heart className={`size-5 ${wishlisted ? "fill-red-500 text-red-500" : ""}`} />
               </button>
               <button
                 onClick={onClose}
-                className="p-2.5 bg-white/90 backdrop-blur-md rounded-full shadow-soft text-stone-600 hover:bg-white transition cursor-pointer"
+                className="p-2.5 bg-white rounded-full shadow-soft text-stone-600 hover:bg-stone-50 transition cursor-pointer border border-stone-200"
                 aria-label="Close details"
               >
                 <X className="size-5" />
@@ -1379,7 +1453,7 @@ const DishDetailDrawer = memo(({
             {/* Food photography hero */}
             <div className="relative w-full h-[260px] sm:h-[300px] bg-stone-100 shrink-0 shadow-inner">
               <Image src={dish.image} alt={dish.name} fill className="object-cover" />
-              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-stone-150 shadow-soft">
+              <div className="absolute bottom-4 left-4 bg-white rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-stone-200 shadow-soft">
                 <span className={`size-2.5 rounded-full ${dish.isVeg ? "bg-emerald-500" : "bg-red-500"}`} />
                 <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-stone-700">
                   {dish.isVeg ? "Pure Veg" : "Non-Veg"}

@@ -35,6 +35,10 @@ export const opsKeys = {
   storeManagers: (id: string) => ['ops', 'store', id, 'managers'] as const,
   storeFacilities: (id: string) => ['ops', 'store', id, 'facilities'] as const,
   storeGallery: (id: string) => ['ops', 'store', id, 'gallery'] as const,
+  storeVouchers: (params: any) => ['ops', 'store-vouchers', params] as const,
+  storeVoucher: (id: string) => ['ops', 'store-voucher', id] as const,
+  storeVoucherHistory: (id: string, params: any) => ['ops', 'store-voucher', id, 'history', params] as const,
+  storeVoucherAnalytics: () => ['ops', 'store-voucher-analytics'] as const,
 };
 
 // --- Store hooks ---
@@ -454,6 +458,129 @@ export function useAddStoreHoliday() {
       opsApi.addStoreHoliday(storeId, dto),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: opsKeys.storeHolidays(variables.storeId) });
+    },
+  });
+}
+
+// --- Store Voucher hooks ---
+export function useListStoreVouchers(params: any) {
+  return useQuery({
+    queryKey: opsKeys.storeVouchers(params),
+    queryFn: () => opsApi.listStoreVouchers(params),
+    staleTime: 1000 * 30,
+  });
+}
+
+export function useStoreVoucher(id: string) {
+  return useQuery({
+    queryKey: opsKeys.storeVoucher(id),
+    queryFn: () => opsApi.getStoreVoucher(id),
+    enabled: !!id,
+    staleTime: 1000 * 60,
+  });
+}
+
+export function useStoreVoucherHistory(id: string, params?: any) {
+  return useQuery({
+    queryKey: opsKeys.storeVoucherHistory(id, params),
+    queryFn: () => opsApi.getStoreVoucherHistory(id, params),
+    enabled: !!id,
+    staleTime: 1000 * 30,
+  });
+}
+
+export function useStoreVoucherAnalytics() {
+  return useQuery({
+    queryKey: opsKeys.storeVoucherAnalytics(),
+    queryFn: () => opsApi.getStoreVoucherAnalytics(),
+    staleTime: 1000 * 60,
+  });
+}
+
+export function useCreateStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (dto: any) => opsApi.createStoreVoucher(dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-voucher-analytics'] });
+    },
+  });
+}
+
+export function useUpdateStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: any }) => opsApi.updateStoreVoucher(id, dto),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+      queryClient.invalidateQueries({ queryKey: opsKeys.storeVoucher(variables.id) });
+    },
+  });
+}
+
+export function useArchiveStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => opsApi.archiveStoreVoucher(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-voucher-analytics'] });
+    },
+  });
+}
+
+export function useRestoreStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => opsApi.restoreStoreVoucher(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-voucher-analytics'] });
+    },
+  });
+}
+
+export function useActivateStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => opsApi.activateStoreVoucher(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-voucher-analytics'] });
+    },
+  });
+}
+
+export function useDeactivateStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => opsApi.deactivateStoreVoucher(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-voucher-analytics'] });
+    },
+  });
+}
+
+export function useDuplicateStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => opsApi.duplicateStoreVoucher(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+    },
+  });
+}
+
+export function useRedeemStoreVoucher() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (couponCode: string) => opsApi.redeemStoreVoucher(couponCode),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-vouchers'] });
+      queryClient.invalidateQueries({ queryKey: ['ops', 'store-voucher-analytics'] });
+      queryClient.invalidateQueries({ queryKey: opsKeys.stats() });
     },
   });
 }

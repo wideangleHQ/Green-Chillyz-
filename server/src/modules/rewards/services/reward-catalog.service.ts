@@ -135,6 +135,44 @@ export class RewardCatalogService {
     return rows.map((r) => this.toListItem(r));
   }
 
+  async getFeaturedForStore(storeId: string): Promise<RewardListItem[]> {
+    const rows = await this.prisma.reward.findMany({
+      where: { ...this.publishedWhereForStore(storeId), isFeatured: true },
+      select: LIST_SELECT,
+      orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+      take: REWARDS_DEFAULTS.FEATURED_LIMIT,
+    });
+    return rows.map((r) => this.toListItem(r));
+  }
+
+  async getPopularForStore(storeId: string): Promise<RewardListItem[]> {
+    const rows = await this.prisma.reward.findMany({
+      where: this.publishedWhereForStore(storeId),
+      select: LIST_SELECT,
+      orderBy: [{ totalRedemptions: 'desc' }, { priority: 'desc' }],
+      take: REWARDS_DEFAULTS.POPULAR_LIMIT,
+    });
+    return rows.map((r) => this.toListItem(r));
+  }
+
+  async getRelatedForStore(
+    rewardId: string,
+    categoryId: string | null,
+    storeId: string,
+  ): Promise<RewardListItem[]> {
+    const rows = await this.prisma.reward.findMany({
+      where: {
+        ...this.publishedWhereForStore(storeId),
+        id: { not: rewardId },
+        ...(categoryId && { categoryId }),
+      },
+      select: LIST_SELECT,
+      orderBy: [{ priority: 'desc' }, { totalRedemptions: 'desc' }],
+      take: REWARDS_DEFAULTS.RELATED_LIMIT,
+    });
+    return rows.map((r) => this.toListItem(r));
+  }
+
   async getDetail(idOrSlug: string): Promise<RewardDetail> {
     const cached = await this.cache.getDetail<RewardDetail>(idOrSlug);
     if (cached) return cached;
@@ -155,6 +193,26 @@ export class RewardCatalogService {
     const detail = this.toDetail(reward);
     await this.cache.setDetail(idOrSlug, detail);
     return detail;
+  }
+
+  async getDetailForStore(
+    idOrSlug: string,
+    storeId: string,
+  ): Promise<RewardDetail> {
+    const reward = await this.findRawByIdOrSlug(idOrSlug, {
+      category: { select: { id: true, name: true, slug: true } },
+      brand: { select: { id: true, name: true } },
+      storeLinks: {
+        where: { isActive: true },
+        select: { store: { select: { id: true, name: true, city: true } } },
+      },
+    });
+
+    if (!reward || !this.isPublishedForStore(reward, storeId)) {
+      throw new NotFoundException(REWARDS_ERRORS.REWARD_NOT_FOUND);
+    }
+
+    return this.toDetail(reward);
   }
 
   /** Raw entity for the redemption path — never cached, always fresh. */
@@ -308,6 +366,14 @@ export class RewardCatalogService {
     return this.getDetail(reward.id);
   }
 
+  async createForStore(
+    dto: CreateRewardDto,
+    storeId: string,
+    createdBy: string,
+  ): Promise<RewardDetail> {
+    return this.create({ ...dto, storeIds: [storeId] }, createdBy);
+  }
+
   async update(id: string, dto: UpdateRewardDto): Promise<RewardDetail> {
     const existing = await this.prisma.reward.findUnique({
       where: { id },
@@ -348,6 +414,27 @@ export class RewardCatalogService {
     );
 
     return this.getDetail(id);
+  }
+
+  async updateForStore(
+    id: string,
+    dto: UpdateRewardDto,
+    storeId: string,
+  ): Promise<RewardDetail> {
+    if (!(await this.isAvailableAtStore(id, storeId))) {
+      throw new NotFoundException(REWARDS_ERRORS.REWARD_NOT_FOUND);
+    }
+
+    const { storeIds: _storeIds, ...safeDto } = dto;
+    return this.update(id, safeDto);
+  }
+
+  async isAvailableAtStore(rewardId: string, storeId: string): Promise<boolean> {
+    const link = await this.prisma.rewardStoreAvailability.findFirst({
+      where: { rewardId, storeId, isActive: true },
+      select: { id: true },
+    });
+    return !!link;
   }
 
   async updateStatus(id: string, status: RewardStatus): Promise<RewardDetail> {
@@ -450,6 +537,13 @@ export class RewardCatalogService {
     };
   }
 
+  private publishedWhereForStore(storeId: string): Prisma.RewardWhereInput {
+    return {
+      ...this.publishedWhere(),
+      storeLinks: { some: { storeId, isActive: true } },
+    };
+  }
+
   private async buildCatalogWhere(query: RewardQueryDto): Promise<Prisma.RewardWhereInput> {
     const where: Prisma.RewardWhereInput = { ...this.publishedWhere() };
 
@@ -470,15 +564,27 @@ export class RewardCatalogService {
       where.coinCost = { lte: query.maxCoinCost };
     }
     if (query.storeId) {
-      // Global rewards are redeemable anywhere; store-specific ones must link.
-      where.OR = [
-        ...(where.OR ?? []),
-        { availability: 'GLOBAL' },
-        { storeLinks: { some: { storeId: query.storeId, isActive: true } } },
-      ];
+      where.storeLinks = { some: { storeId: query.storeId, isActive: true } };
+    } else {
+      where.id = { equals: '__store_required__' };
     }
 
     return where;
+  }
+
+  private isPublishedForStore(row: Record<string, any>, storeId: string): boolean {
+    const now = Date.now();
+    const validFrom = row.validFrom ? new Date(row.validFrom).getTime() : null;
+    const validUntil = row.validUntil ? new Date(row.validUntil).getTime() : null;
+
+    return (
+      row.status === RewardStatus.PUBLISHED &&
+      (validFrom === null || validFrom <= now) &&
+      (validUntil === null || validUntil >= now) &&
+      (row.storeLinks ?? []).some(
+        (link: { store?: { id?: string } }) => link.store?.id === storeId,
+      )
+    );
   }
 
   private buildOrderBy(sort?: string): Prisma.RewardOrderByWithRelationInput[] {

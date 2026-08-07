@@ -236,7 +236,7 @@ export default function AboutPage() {
 
           <div className="container-site relative z-10 text-center flex flex-col items-center max-w-4xl">
             <Reveal>
-              <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-sans font-bold uppercase tracking-[0.2em] bg-white/10 backdrop-blur-md text-[#69f0ae] border border-[#69f0ae]/30 mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-sans font-bold uppercase tracking-[0.2em] bg-[#071f10] text-[#69f0ae] border border-[#69f0ae]/30 mb-6">
                 <span>Since 1999</span>
                 <span className="size-1.5 rounded-full bg-[#69f0ae]" />
                 <span className="font-number">26</span>
@@ -294,7 +294,7 @@ export default function AboutPage() {
                       <div className="w-full md:w-1/2 pl-12 md:pl-0 md:px-8">
                         <motion.div
                           whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                          className="p-6 md:p-8 rounded-[24px] bg-white/90 backdrop-blur-sm border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300"
+                          className="p-6 md:p-8 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300"
                         >
                           <span className="text-sm font-number font-extrabold uppercase tracking-wider text-brand-green bg-brand-green/10 px-3 py-1 rounded-full border border-brand-green/20">
                             {item.year}
@@ -418,7 +418,7 @@ export default function AboutPage() {
               <Reveal key={stat.label}>
                 <motion.div
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="p-6 rounded-[24px] bg-white/90 backdrop-blur-sm border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[160px]"
+                  className="p-6 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[160px]"
                 >
                   <span className="text-4xl md:text-5xl font-number font-extrabold text-on-surface tracking-tight text-brand-green">
                     {stat.value}
@@ -470,7 +470,7 @@ export default function AboutPage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                    <span className="absolute bottom-4 left-4 text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#69f0ae] bg-black/50 backdrop-blur-xs px-3 py-1 rounded-full border border-white/15">
+                    <span className="absolute bottom-4 left-4 text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#69f0ae] bg-stone-900 px-3 py-1 rounded-full border border-stone-800">
                       {b.identity}
                     </span>
                   </div>
@@ -538,7 +538,7 @@ export default function AboutPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none z-10" />
 
                       <div className="absolute inset-0 z-20 p-6 md:p-8 flex flex-col justify-end text-white">
-                        <span className="text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#69f0ae] bg-black/40 backdrop-blur-xs px-3 py-1 rounded-full border border-white/15 w-fit mb-3">
+                        <span className="text-[10px] font-sans font-extrabold uppercase tracking-widest text-[#69f0ae] bg-stone-900 px-3 py-1 rounded-full border border-stone-800 w-fit mb-3">
                           {v.label}
                         </span>
                         <h3 className="text-xl sm:text-2xl font-heading font-extrabold uppercase tracking-tight text-white group-hover:text-[#69f0ae] transition-colors">
@@ -654,7 +654,7 @@ export default function AboutPage() {
               <Reveal key={pillar.title}>
                 <motion.div
                   whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="p-6 rounded-[24px] bg-white/90 backdrop-blur-sm border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[190px]"
+                  className="p-6 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[190px]"
                 >
                   <div>
                     <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider text-brand-green">

@@ -364,7 +364,6 @@ const REWARD_CREATE_FIELDS = [
   'validFrom',
   'validUntil',
   'terms',
-  'storeIds',
   'metadata',
 ] as const;
 
@@ -552,6 +551,63 @@ const CHALLENGE_REWARD_CREATE_FIELDS = [
 const CHALLENGE_REWARD_UPDATE_FIELDS = CHALLENGE_REWARD_CREATE_FIELDS.filter(
   (field) => field !== 'challengeId',
 );
+
+// Store Voucher types
+export type StoreVoucherType = 'PERCENTAGE' | 'FLAT_DISCOUNT' | 'FREE_ITEM' | 'COMBO' | 'FREE_BEVERAGE' | 'GIFT' | 'COIN_VOUCHER';
+export type StoreVoucherStatus = 'DRAFT' | 'ACTIVE' | 'EXPIRED' | 'PAUSED' | 'ARCHIVED';
+
+export interface StoreVoucher {
+  id: string;
+  storeId: string;
+  name: string;
+  shortTitle: string | null;
+  description: string | null;
+  offerTag: string | null;
+  discountBadge: string | null;
+  offerImage: string | null;
+  bannerImage: string | null;
+  couponCode: string;
+  voucherType: StoreVoucherType;
+  minimumOrderValue: number | null;
+  maximumDiscount: number | null;
+  voucherValue: number | null;
+  itemsIncluded: string | null;
+  redeemVenue: string | null;
+  validDays: string[] | null;
+  startDate: string | null;
+  endDate: string | null;
+  validTime: string | null;
+  totalLimit: number;
+  remainingCount: number;
+  redeemedCount: number;
+  status: StoreVoucherStatus;
+  isFeatured: boolean;
+  priority: number;
+  sortOrder: number;
+  terms: string[] | null;
+  createdAt: string;
+  updatedAt: string;
+  archivedAt: string | null;
+}
+
+export interface StoreVoucherAnalytics {
+  created: number;
+  redeemed: number;
+  remaining: number;
+  expired: number;
+  mostRedeemed: Array<{ name: string; count: number }>;
+  conversionRate: number;
+}
+
+const STORE_VOUCHER_CREATE_FIELDS = [
+  'name', 'shortTitle', 'description', 'offerTag', 'discountBadge',
+  'offerImage', 'bannerImage', 'couponCode', 'voucherType',
+  'minimumOrderValue', 'maximumDiscount', 'voucherValue', 'itemsIncluded',
+  'redeemVenue', 'validDays', 'startDate', 'endDate', 'validTime',
+  'totalLimit', 'isFeatured', 'priority', 'sortOrder', 'terms',
+] as const;
+
+const STORE_VOUCHER_UPDATE_FIELDS = STORE_VOUCHER_CREATE_FIELDS;
 
 export const opsApi = {
   // --- Customers ---
@@ -905,16 +961,15 @@ export const opsApi = {
     return data;
   },
 
-  // Catalog administration follows the backend reward-catalog admin contract.
+  // Catalog administration is store-scoped by DashboardAuthGuard.
   async listCatalogAdmin(params?: AnyRecord): Promise<PaginatedResponse<Reward>> {
-    const { data } = await api.get<PaginatedResponse<Reward>>('/rewards-catalog/admin/list', {
+    const { data } = await api.get<PaginatedResponse<Reward>>('/dashboard/catalog', {
       params: pick(params, [
         'page',
         'pageSize',
         'search',
         'category',
         'brandId',
-        'storeId',
         'rewardType',
         'affordableOnly',
         'maxCoinCost',
@@ -927,27 +982,27 @@ export const opsApi = {
   },
 
   async createReward(dto: any): Promise<Reward> {
-    const { data } = await api.post<Reward>('/rewards-catalog', pick(dto, REWARD_CREATE_FIELDS));
+    const { data } = await api.post<Reward>('/dashboard/catalog', pick(dto, REWARD_CREATE_FIELDS));
     return data;
   },
 
   async updateReward(rewardId: string, dto: any): Promise<Reward> {
-    const { data } = await api.patch<Reward>(`/rewards-catalog/${rewardId}`, pick(dto, REWARD_UPDATE_FIELDS));
+    const { data } = await api.patch<Reward>(`/dashboard/catalog/${rewardId}`, pick(dto, REWARD_UPDATE_FIELDS));
     return data;
   },
 
   async updateRewardStatus(rewardId: string, status: string): Promise<Reward> {
-    const { data } = await api.patch<Reward>(`/rewards-catalog/${rewardId}/status/${status}`);
+    const { data } = await api.patch<Reward>(`/dashboard/catalog/${rewardId}/status/${status}`);
     return data;
   },
 
   async adjustRewardStock(rewardId: string, stock: number): Promise<Reward> {
-    const { data } = await api.patch<Reward>(`/rewards-catalog/${rewardId}/stock/${stock}`);
+    const { data } = await api.patch<Reward>(`/dashboard/catalog/${rewardId}/stock/${stock}`);
     return data;
   },
 
   async deleteReward(rewardId: string) {
-    const { data } = await api.delete(`/rewards-catalog/${rewardId}`);
+    const { data } = await api.delete(`/dashboard/catalog/${rewardId}`);
     return data;
   },
 
@@ -1468,6 +1523,79 @@ export const opsApi = {
     const { data } = await api.get<any>('/reward-resolution/customer-summary', {
       params: pick(params, ['customerId', 'storeId']),
     });
+    return data;
+  },
+
+  // --- Store Vouchers ---
+  async listStoreVouchers(params?: {
+    search?: string;
+    status?: string;
+    tag?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<PaginatedResponse<StoreVoucher>> {
+    const { data } = await api.get<PaginatedResponse<StoreVoucher>>('/dashboard/store-vouchers', {
+      params: pick(params, ['search', 'status', 'tag', 'fromDate', 'toDate', 'page', 'pageSize']),
+    });
+    return data;
+  },
+
+  async getStoreVoucher(id: string): Promise<StoreVoucher> {
+    const { data } = await api.get<StoreVoucher>(`/dashboard/store-vouchers/${id}`);
+    return data;
+  },
+
+  async createStoreVoucher(dto: any): Promise<StoreVoucher> {
+    const { data } = await api.post<StoreVoucher>('/dashboard/store-vouchers', pick(dto, STORE_VOUCHER_CREATE_FIELDS));
+    return data;
+  },
+
+  async updateStoreVoucher(id: string, dto: any): Promise<StoreVoucher> {
+    const { data } = await api.patch<StoreVoucher>(`/dashboard/store-vouchers/${id}`, pick(dto, STORE_VOUCHER_UPDATE_FIELDS));
+    return data;
+  },
+
+  async archiveStoreVoucher(id: string): Promise<StoreVoucher> {
+    const { data } = await api.post<StoreVoucher>(`/dashboard/store-vouchers/${id}/archive`);
+    return data;
+  },
+
+  async restoreStoreVoucher(id: string): Promise<StoreVoucher> {
+    const { data } = await api.post<StoreVoucher>(`/dashboard/store-vouchers/${id}/restore`);
+    return data;
+  },
+
+  async activateStoreVoucher(id: string): Promise<StoreVoucher> {
+    const { data } = await api.post<StoreVoucher>(`/dashboard/store-vouchers/${id}/activate`);
+    return data;
+  },
+
+  async deactivateStoreVoucher(id: string): Promise<StoreVoucher> {
+    const { data } = await api.post<StoreVoucher>(`/dashboard/store-vouchers/${id}/deactivate`);
+    return data;
+  },
+
+  async duplicateStoreVoucher(id: string): Promise<StoreVoucher> {
+    const { data } = await api.post<StoreVoucher>(`/dashboard/store-vouchers/${id}/duplicate`);
+    return data;
+  },
+
+  async redeemStoreVoucher(couponCode: string): Promise<any> {
+    const { data } = await api.post<any>('/dashboard/store-vouchers/redeem', { couponCode });
+    return data;
+  },
+
+  async getStoreVoucherHistory(id: string, params?: { page?: number; pageSize?: number }): Promise<any> {
+    const { data } = await api.get<any>(`/dashboard/store-vouchers/${id}/history`, {
+      params: pick(params, ['page', 'pageSize']),
+    });
+    return data;
+  },
+
+  async getStoreVoucherAnalytics(): Promise<StoreVoucherAnalytics> {
+    const { data } = await api.get<StoreVoucherAnalytics>('/dashboard/store-vouchers/analytics');
     return data;
   },
 };

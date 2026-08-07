@@ -16,6 +16,7 @@ import {
   Megaphone,
   Settings,
   Layers,
+  Ticket,
 } from 'lucide-react';
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
@@ -53,6 +54,10 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
     { name: 'Operations', href: '/operations', icon: <Layers className="w-4 h-4" /> },
     { name: 'Customers', href: '/customers', icon: <Users className="w-4 h-4" /> },
     { name: 'Marketing', href: '/marketing', icon: <Megaphone className="w-4 h-4" /> },
+    { name: 'Vouchers', href: '/vouchers', icon: <Ticket className="w-4 h-4" />, children: [
+      { name: 'Create Voucher', href: '/vouchers/create' },
+      { name: 'Redeem Voucher', href: '/vouchers/redeem' }
+    ]},
     { name: 'Reports', href: '/reports', icon: <BarChart3 className="w-4 h-4" /> },
     { name: 'Administration', href: '/administration', icon: <Settings className="w-4 h-4" /> },
   ];

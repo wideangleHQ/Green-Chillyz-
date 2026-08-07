@@ -85,7 +85,7 @@ function TransactionRow({ transaction }: { transaction: WalletTransaction }) {
   const sign = isCredit ? "+" : "-";
 
   return (
-    <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/80 shadow-xs">
+    <div className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 border border-stone-200/80 shadow-xs">
       <div className="size-10 rounded-full bg-stone-50 flex items-center justify-center shrink-0">
         {TYPE_ICONS[transaction.type]}
       </div>

@@ -1,5 +1,6 @@
 import {
   IsBoolean,
+  IsArray,
   IsDateString,
   IsEnum,
   IsInt,
@@ -9,6 +10,7 @@ import {
   IsString,
   MaxLength,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
@@ -266,4 +268,46 @@ export class CoinRuleQueryDto {
   @Transform(({ value }) => value === true || value === 'true')
   @IsBoolean()
   includeArchived?: boolean;
+}
+
+export class PurchaseSlabDto {
+  @ApiProperty({ example: 100 })
+  @IsInt()
+  @Min(0)
+  minAmount!: number;
+
+  @ApiPropertyOptional({ example: 199 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  maxAmount?: number;
+
+  @ApiProperty({ example: 5 })
+  @IsInt()
+  @Min(0)
+  coins!: number;
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+
+  @ApiPropertyOptional({ default: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  sortOrder?: number;
+}
+
+export class ReplacePurchaseSlabsDto {
+  @ApiProperty({ type: [PurchaseSlabDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PurchaseSlabDto)
+  slabs!: PurchaseSlabDto[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  reason?: string;
 }

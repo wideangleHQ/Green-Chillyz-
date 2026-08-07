@@ -113,7 +113,7 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-stone-950/60 backdrop-blur-xs"
+            className="absolute inset-0 bg-stone-950/70"
             aria-hidden="true"
           />
 

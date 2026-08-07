@@ -22,6 +22,8 @@ import { DashboardStoresController } from './stores/dashboard-stores.controller'
 import { DashboardStoresService } from './stores/dashboard-stores.service';
 import { DashboardVouchersController } from './vouchers/dashboard-vouchers.controller';
 import { DashboardVouchersService } from './vouchers/dashboard-vouchers.service';
+import { StoreVoucherController } from './vouchers/store-voucher.controller';
+import { StoreVoucherManagementService } from './vouchers/store-voucher.service';
 import { DashboardWalletController } from './wallet/dashboard-wallet.controller';
 import { DashboardWalletService } from './wallet/dashboard-wallet.service';
 
@@ -51,6 +53,7 @@ import { DashboardWalletService } from './wallet/dashboard-wallet.service';
     DashboardRewardsController,
     DashboardCatalogController,
     DashboardVouchersController,
+    StoreVoucherController,
     DashboardStoresController,
     DashboardNotificationsController,
     DashboardAnalyticsController,
@@ -64,6 +67,7 @@ import { DashboardWalletService } from './wallet/dashboard-wallet.service';
     DashboardWalletService,
     DashboardRewardsService,
     DashboardVouchersService,
+    StoreVoucherManagementService,
     DashboardStoresService,
     DashboardNotificationsService,
     DashboardAnalyticsService,

@@ -69,6 +69,14 @@ export const AUDIT_EVENTS = {
   MANUAL_WALLET_ADJUSTMENT: 'audit.wallet.manual_adjustment',
   CUSTOMER_LOOKUP: 'audit.customer.lookup',
   SYSTEM_ERROR: 'audit.system.error',
+
+  // Store voucher events.
+  STORE_VOUCHER_CREATED: 'audit.store_voucher.created',
+  STORE_VOUCHER_UPDATED: 'audit.store_voucher.updated',
+  STORE_VOUCHER_ARCHIVED: 'audit.store_voucher.archived',
+  STORE_VOUCHER_RESTORED: 'audit.store_voucher.restored',
+  STORE_VOUCHER_REDEEMED: 'audit.store_voucher.redeemed',
+  STORE_VOUCHER_STATUS_CHANGED: 'audit.store_voucher.status_changed',
 } as const;
 
 /**
@@ -94,6 +102,7 @@ export const AUDIT_ENTITY_TYPES = {
   PERMISSION: 'PERMISSION',
   SESSION: 'SESSION',
   SYSTEM: 'SYSTEM',
+  STORE_VOUCHER: 'STORE_VOUCHER',
 } as const;
 
 export const AUDIT_ACTIONS = {
@@ -116,6 +125,11 @@ export const AUDIT_ACTIONS = {
   REVOKE: 'REVOKE',
   LOOKUP: 'LOOKUP',
   ERROR: 'ERROR',
+  ARCHIVE: 'ARCHIVE',
+  RESTORE: 'RESTORE',
+  ACTIVATE: 'ACTIVATE',
+  DEACTIVATE: 'DEACTIVATE',
+  DUPLICATE: 'DUPLICATE',
 } as const;
 
 export type AuditEntityType =

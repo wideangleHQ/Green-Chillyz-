@@ -62,7 +62,7 @@ export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) 
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="group relative w-[280px] sm:w-[330px] md:w-[370px] shrink-0 p-5 md:p-6 rounded-[22px] md:rounded-[26px] bg-white/80 backdrop-blur-md border border-on-surface/[0.07] hover:border-brand-green/30 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,107,42,0.12)] hover:bg-white transition-all duration-500 flex flex-col justify-between gap-4 will-change-transform transform-gpu cursor-pointer select-none"
+      className="group relative w-[280px] sm:w-[330px] md:w-[370px] shrink-0 p-5 md:p-6 rounded-[22px] md:rounded-[26px] bg-white border border-on-surface/[0.07] hover:border-brand-green/30 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,107,42,0.12)] transition-all duration-500 flex flex-col justify-between gap-4 will-change-transform transform-gpu cursor-pointer select-none"
       style={{
         transformStyle: "preserve-3d",
       }}

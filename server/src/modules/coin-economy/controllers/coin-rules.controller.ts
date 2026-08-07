@@ -22,6 +22,7 @@ import {
   CoinRuleQueryDto,
   CreateCoinRuleDto,
   DuplicateCoinRuleDto,
+  ReplacePurchaseSlabsDto,
   UpdateCoinRuleDto,
 } from '../dto';
 import { COIN_ECONOMY_PERMISSIONS } from '../constants';
@@ -37,6 +38,23 @@ export class CoinRulesController {
   @ApiOperation({ summary: 'List coin rules with filters and pagination' })
   findAll(@Query() query: CoinRuleQueryDto) {
     return this.service.findAll(query);
+  }
+
+  @Get('purchase-slabs/current')
+  @Permissions(COIN_ECONOMY_PERMISSIONS.RULE_VIEW)
+  @ApiOperation({ summary: 'Get active purchase reward slabs' })
+  getPurchaseSlabs() {
+    return this.service.getPurchaseSlabs();
+  }
+
+  @Post('purchase-slabs/current')
+  @Permissions(COIN_ECONOMY_PERMISSIONS.RULE_UPDATE)
+  @ApiOperation({ summary: 'Replace active purchase reward slabs' })
+  replacePurchaseSlabs(
+    @Body() dto: ReplacePurchaseSlabsDto,
+    @CurrentUser('id') userId?: string,
+  ) {
+    return this.service.replacePurchaseSlabs(dto, userId);
   }
 
   @Get(':id')
