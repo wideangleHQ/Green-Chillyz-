@@ -123,6 +123,51 @@ export interface Redemption {
   voucher: Voucher;
 }
 
+export type StoreVoucherType =
+  | "PERCENTAGE"
+  | "FLAT_DISCOUNT"
+  | "FREE_ITEM"
+  | "COMBO"
+  | "FREE_BEVERAGE"
+  | "GIFT"
+  | "COIN_VOUCHER";
+
+export interface StoreVoucherItem {
+  id: string;
+  name: string;
+  shortTitle: string | null;
+  description: string | null;
+  offerTag: string | null;
+  discountBadge: string | null;
+  offerImage: string | null;
+  bannerImage: string | null;
+  couponCode: string;
+  voucherType: StoreVoucherType;
+  minimumOrderValue: string | number | null;
+  maximumDiscount: string | number | null;
+  voucherValue: string | number | null;
+  itemsIncluded: string | null;
+  redeemVenue: string | null;
+  validDays: string[] | null;
+  startDate: string | null;
+  endDate: string | null;
+  validTime: string | null;
+  isFeatured: boolean;
+  totalLimit: number;
+  remainingCount: number;
+  terms: string[] | null;
+}
+
+export const VOUCHER_TYPE_LABELS: Record<StoreVoucherType, string> = {
+  PERCENTAGE: "Percentage Discount",
+  FLAT_DISCOUNT: "Flat Discount",
+  FREE_ITEM: "Free Item",
+  COMBO: "Combo Offer",
+  FREE_BEVERAGE: "Free Beverage",
+  GIFT: "Gift",
+  COIN_VOUCHER: "Coin Voucher",
+};
+
 export interface RewardQueryParams {
   page?: number;
   pageSize?: number;

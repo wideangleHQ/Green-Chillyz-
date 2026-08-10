@@ -2,146 +2,110 @@
 
 export type ImageSource = ImageBitmap | HTMLImageElement;
 
-class ImageLoader {
-  private images: (ImageSource | null)[] = [];
-  private totalFrames = 566;
-  private step = 1;
-  private indicesToLoad: number[] = [];
-  private priorityIndices: number[] = [];
+export type CachedFrame = {
+  index: number;
+  bitmap: ImageSource;
+};
 
-  private loadedCount = 0;
-  private totalToLoad = 0;
-  private priorityLoadedCount = 0;
-  private priorityTotal = 0;
+// Global registries to prevent duplication across React renders/Strict Mode
+const frameRegistry: Record<number, ImageSource> = {};
+const loadingFrames: Record<number, Promise<ImageSource | null>> = {};
+const failedFrames: Set<number> = new Set();
 
-  private isPriorityDone = false;
-  private isAllDone = false;
-  private isStarted = false;
+const TOTAL_FRAMES = 566;
 
-  private progressListeners = new Set<(progress: number, loadedCount: number, totalToLoad: number, isPriorityDone: boolean) => void>();
-  private activeConnections = 0;
-  private concurrencyLimit = 25;
-  private loadQueue: number[] = [];
+export class HeroFrameController {
+  private isDestroyed = false;
+  private preloadAbortController: AbortController | null = null;
+  private currentFrame = 1;
 
-  constructor() {
-    // Initialized in start()
+  constructor() {}
+
+  /**
+   * CRITICAL PATH: Load Frame 1 FIRST
+   */
+  public async loadCriticalFrame(): Promise<ImageSource | null> {
+    if (this.isDestroyed) return null;
+    return this.loadFrame(1, true);
   }
 
-  public subscribe(listener: (progress: number, loadedCount: number, totalToLoad: number, isPriorityDone: boolean) => void) {
-    this.progressListeners.add(listener);
-    const progress = this.priorityTotal > 0 ? Math.round((this.priorityLoadedCount / this.priorityTotal) * 100) : 0;
-    listener(progress, this.priorityLoadedCount, this.priorityTotal, this.isPriorityDone);
-    return () => this.progressListeners.delete(listener);
+  /**
+   * BACKGROUND PATH: Load remaining frames 2 through 566
+   */
+  public startBackgroundPreload() {
+    if (this.isDestroyed || this.preloadAbortController) return;
+
+    this.preloadAbortController = new AbortController();
+    const signal = this.preloadAbortController.signal;
+
+    const maxConcurrency = typeof window !== "undefined" && window.innerWidth < 768 ? 2 : 4;
+    this.runBackgroundPreload(maxConcurrency, signal).catch(() => {});
   }
 
-  public start() {
-    if (typeof window === "undefined") return;
-    if (this.indicesToLoad.length === 0) {
-      const width = window.innerWidth;
-      if (width < 768) {
-        this.step = 3;
-        this.concurrencyLimit = 6;
-      } else if (width < 1024) {
-        this.step = 2;
-        this.concurrencyLimit = 8;
-      } else {
-        this.step = 1;
-        this.concurrencyLimit = 16;
-      }
+  private async runBackgroundPreload(concurrency: number, signal: AbortSignal) {
+    let currentPreloadIndex = 2; // Start from frame 2
 
-      const tempIndices: number[] = [];
-      for (let i = 1; i <= this.totalFrames; i += this.step) {
-        tempIndices.push(i);
-      }
-      if (tempIndices[tempIndices.length - 1] !== this.totalFrames) {
-        tempIndices.push(this.totalFrames);
-      }
+    const workers = Array(concurrency).fill(0).map(async () => {
+      while (!signal.aborted && currentPreloadIndex <= TOTAL_FRAMES) {
+        const frameIndex = currentPreloadIndex++;
 
-      this.indicesToLoad = tempIndices;
-      this.totalToLoad = this.indicesToLoad.length;
-      this.images = new Array(this.totalFrames + 1).fill(null);
+        if (frameRegistry[frameIndex] || failedFrames.has(frameIndex)) {
+          continue;
+        }
 
-      this.priorityIndices = this.indicesToLoad.filter(idx => idx <= 75);
-      this.priorityTotal = this.priorityIndices.length;
-
-      const remainingIndices = this.indicesToLoad.filter(idx => idx > 75);
-
-      this.loadQueue = [...this.priorityIndices, ...remainingIndices];
-      this.isStarted = true;
-    }
-
-    if (this.isPriorityDone) {
-      this.progressListeners.forEach(l => l(100, this.priorityLoadedCount, this.priorityTotal, true));
-    }
-
-    this.processQueue();
-  }
-
-  private processQueue() {
-    while (this.activeConnections < this.concurrencyLimit && this.loadQueue.length > 0) {
-      const idx = this.loadQueue.shift()!;
-      this.activeConnections++;
-      this.loadFrame(idx);
-    }
-  }
-
-  private async loadFrame(frameIndex: number) {
-    const frameNum = String(frameIndex).padStart(5, "0");
-    const url = `/assets/chilli-animation/${frameNum}.jpg`;
-
-    let source: ImageSource | null = null;
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const blob = await response.blob();
-
-      if (typeof window !== "undefined" && typeof window.createImageBitmap === "function") {
         try {
-          source = await createImageBitmap(blob);
-        } catch {
+          await this.loadFrame(frameIndex, false);
+        } catch (e) {
+          // Failure is recorded, worker continues
+        }
+      }
+    });
+
+    await Promise.all(workers);
+  }
+
+  private async loadFrame(frameIndex: number, isCritical: boolean): Promise<ImageSource | null> {
+    if (frameRegistry[frameIndex]) return frameRegistry[frameIndex];
+    if (failedFrames.has(frameIndex)) return null;
+    if (loadingFrames[frameIndex]) return loadingFrames[frameIndex];
+
+    const loadPromise = (async () => {
+      try {
+        const frameNum = String(frameIndex).padStart(5, "0");
+        const url = `/assets/chilli-animation/${frameNum}.jpg`;
+
+        const response = await fetch(url, {
+          priority: isCritical ? "high" : "low",
+        } as RequestInit);
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const blob = await response.blob();
+        if (this.isDestroyed) return null; // Abort processing if destroyed
+
+        let source: ImageSource | null = null;
+        if (typeof window !== "undefined" && typeof window.createImageBitmap === "function") {
+          try {
+            source = await createImageBitmap(blob);
+          } catch {
+            source = await this.loadFromBlob(blob);
+          }
+        } else {
           source = await this.loadFromBlob(blob);
         }
-      } else {
-        source = await this.loadFromBlob(blob);
+
+        frameRegistry[frameIndex] = source;
+        return source;
+      } catch (e) {
+        failedFrames.add(frameIndex);
+        return null;
+      } finally {
+        delete loadingFrames[frameIndex];
       }
-    } catch {
-      try {
-        source = await this.loadAsImageElement(url);
-      } catch {
-        // Frame failed — continue with remaining frames
-      }
-    }
+    })();
 
-    if (!this.isStarted) return;
-
-    this.images[frameIndex] = source;
-    this.activeConnections--;
-
-    this.loadedCount++;
-    if (frameIndex <= 75) {
-      this.priorityLoadedCount++;
-    }
-
-    if (!this.isPriorityDone && this.priorityLoadedCount === this.priorityTotal) {
-      this.isPriorityDone = true;
-    }
-
-    if (this.loadedCount === this.totalToLoad) {
-      this.isAllDone = true;
-    }
-
-    const progress = this.isPriorityDone
-      ? 100
-      : Math.round((this.priorityLoadedCount / this.priorityTotal) * 100);
-
-    this.progressListeners.forEach(l => l(progress, this.priorityLoadedCount, this.priorityTotal, this.isPriorityDone));
-
-    this.processQueue();
+    loadingFrames[frameIndex] = loadPromise;
+    return loadPromise;
   }
 
   private loadFromBlob(blob: Blob): Promise<HTMLImageElement> {
@@ -160,72 +124,22 @@ class ImageLoader {
     });
   }
 
-  private loadAsImageElement(url: string): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const timer = setTimeout(() => {
-        img.onload = null;
-        img.onerror = null;
-        reject(new Error(`Timeout: ${url}`));
-      }, 8000);
-
-      img.onload = () => {
-        clearTimeout(timer);
-        resolve(img);
-      };
-      img.onerror = (e) => {
-        clearTimeout(timer);
-        reject(e);
-      };
-      img.src = url;
-    });
+  public seek(frame: number) {
+    if (this.isDestroyed || frame === this.currentFrame) return;
+    this.currentFrame = frame;
   }
 
   public getFrame(frameIndex: number): ImageSource | null {
-    if (frameIndex < 1 || frameIndex > this.totalFrames) return null;
-
-    if (this.images[frameIndex]) {
-      return this.images[frameIndex];
-    }
-
-    let nearestIndex = -1;
-    let minDiff = Infinity;
-
-    for (let i = 1; i <= this.totalFrames; i++) {
-      if (this.images[i]) {
-        const diff = Math.abs(i - frameIndex);
-        if (diff < minDiff) {
-          minDiff = diff;
-          nearestIndex = i;
-        }
-      }
-    }
-
-    if (nearestIndex !== -1) {
-      return this.images[nearestIndex];
-    }
-
-    return null;
+    if (this.isDestroyed) return null;
+    return frameRegistry[frameIndex] || null;
   }
 
-  public clear() {
-    this.isStarted = false;
-    this.images.forEach((img) => {
-      if (img && typeof (img as any).close === "function") {
-        (img as any).close();
-      }
-    });
-    this.images = [];
-    this.indicesToLoad = [];
-    this.priorityIndices = [];
-    this.loadQueue = [];
-    this.loadedCount = 0;
-    this.priorityLoadedCount = 0;
-    this.priorityTotal = 0;
-    this.isPriorityDone = false;
-    this.isAllDone = false;
-    this.activeConnections = 0;
+  public destroy() {
+    this.isDestroyed = true;
+    
+    if (this.preloadAbortController) {
+      this.preloadAbortController.abort();
+      this.preloadAbortController = null;
+    }
   }
 }
-
-export const imageLoader = new ImageLoader();

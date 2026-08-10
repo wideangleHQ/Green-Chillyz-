@@ -330,7 +330,7 @@ export function SignatureCreationsSection() {
                       <img
                         src={dish.image}
                         alt={dish.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
                         draggable={false}
                       />
                     </div>
@@ -351,7 +351,7 @@ export function SignatureCreationsSection() {
                     </div>
 
                     <div className="flex flex-col gap-2 mt-auto mr-12 relative z-10">
-                      <h3 className="text-2xl md:text-3xl font-sans font-bold text-white tracking-tight uppercase leading-[0.95] max-w-[90%]">
+                      <h3 className="text-2xl md:text-3xl font-heading font-bold text-white tracking-tight uppercase leading-[0.95] max-w-[90%]">
                         {dish.name}
                       </h3>
                       <p className="text-xs md:text-sm text-white/75 font-sans leading-relaxed mt-1.5 line-clamp-3">
@@ -360,8 +360,8 @@ export function SignatureCreationsSection() {
                     </div>
 
                     <div className="absolute bottom-6 right-6 z-30">
-                      <div className="size-9 md:size-11 rounded-full border border-white/30 flex items-center justify-center text-white transition-all duration-300 group-hover:bg-white group-hover:text-on-surface cursor-pointer">
-                        <ArrowUpRight className="size-5 transition-transform duration-300 group-hover:rotate-45" />
+                      <div className="size-9 md:size-11 rounded-full border border-white/30 flex items-center justify-center text-white transition-[background-color,color] duration-200 group-hover:bg-white group-hover:text-on-surface cursor-pointer">
+                        <ArrowUpRight className="size-5 transition-transform duration-200 group-hover:rotate-45" />
                       </div>
                     </div>
                   </div>

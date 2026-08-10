@@ -81,6 +81,7 @@ export class StoreVoucherManagementService {
         totalLimit,
         remainingCount: totalLimit,
         redeemedCount: 0,
+        status: dto.status ?? StoreVoucherStatus.ACTIVE,
         isFeatured: dto.isFeatured ?? false,
         priority: dto.priority ?? 0,
         sortOrder: dto.sortOrder ?? 0,

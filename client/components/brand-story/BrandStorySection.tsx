@@ -130,7 +130,7 @@ export function BrandStorySection() {
                   key={brand.id}
                   id={`brand-tab-${brand.id}`}
                   onClick={() => setActiveTab(brand.id)}
-                  className="px-5 py-2.5 rounded-full text-xs font-sans uppercase tracking-wider transition-all duration-500 cursor-pointer whitespace-nowrap border font-semibold"
+                  className="px-5 py-2.5 rounded-full text-xs font-sans uppercase tracking-wider transition-[background-color,border-color,color] duration-200 cursor-pointer whitespace-nowrap border font-semibold"
                   style={{
                     backgroundColor: isSelected ? "var(--brand-accent)" : "transparent",
                     borderColor: isSelected ? "var(--brand-accent)" : "rgba(30, 27, 23, 0.12)",
@@ -180,7 +180,7 @@ export function BrandStorySection() {
             <Link
               href="/menu"
               id="learn-more-about-btn"
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-sans font-bold uppercase tracking-wider transition-all duration-500 hover:-translate-y-0.5 hover:shadow-soft cursor-pointer border"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-sans font-bold uppercase tracking-wider transition-[background-color,color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-soft cursor-pointer border"
               style={{
                 borderColor: "var(--brand-accent)",
                 color: "var(--brand-accent)",
@@ -220,7 +220,7 @@ export function BrandStorySection() {
                       alt={`${activeBrand.name} flagship showcase`}
                       fill
                       sizes="(max-width: 1024px) 100vw, 60vw"
-                      className="object-cover transition-all duration-500 hover:scale-[1.03] hover:brightness-[1.05]"
+                      className="object-cover transition-[transform,filter] duration-200 hover:scale-[1.03] hover:brightness-[1.05]"
                       priority={activeTab === "green"}
                     />
                   </div>
@@ -232,7 +232,7 @@ export function BrandStorySection() {
                       alt={`${activeBrand.name} dish presentation`}
                       fill
                       sizes="(max-width: 1024px) 100vw, 40vw"
-                      className="object-cover transition-all duration-500 hover:scale-[1.03] hover:brightness-[1.05]"
+                      className="object-cover transition-[transform,filter] duration-200 hover:scale-[1.03] hover:brightness-[1.05]"
                     />
                   </div>
                 </motion.div>
@@ -262,7 +262,7 @@ export function BrandStorySection() {
                             alt={`${activeBrand.name} mobile showcase ${idx + 1}`}
                             fill
                             sizes="82vw"
-                            className="object-cover transition-all duration-500 hover:scale-[1.03] hover:brightness-[1.05]"
+                            className="object-cover transition-[transform,filter] duration-200 hover:scale-[1.03] hover:brightness-[1.05]"
                             draggable={false}
                           />
                         </div>
@@ -276,7 +276,7 @@ export function BrandStorySection() {
                       <button
                         key={idx}
                         onClick={() => emblaApi?.scrollTo(idx)}
-                        className="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                        className="h-2 rounded-full transition-[width,background-color] duration-200 cursor-pointer"
                         style={{
                           width: idx === selectedIndex ? "20px" : "8px",
                           backgroundColor: idx === selectedIndex ? "var(--brand-accent)" : "rgba(30, 27, 23, 0.15)",

@@ -5,18 +5,18 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import { imageLoader } from "@/lib/imageLoader";
+import { HeroFrameController } from "@/lib/imageLoader";
 
 export function HeroSection() {
   const heroRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const taglineRef = useRef<HTMLParagraphElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
   
   const reducedMotion = usePrefersReducedMotion();
   const [supportsMask, setSupportsMask] = useState(false);
+  const [isHeroReady, setIsHeroReady] = useState(false);
 
   // Scroll state & frame values
   const scrollState = useRef({ frame: 1 });
@@ -24,6 +24,27 @@ export function HeroSection() {
   const animationFrameId = useRef<number | null>(null);
   const lastDrawnFrameRef = useRef<number>(-1);
   const scrollProgressRef = useRef<number>(0);
+  const frameControllerRef = useRef<HeroFrameController | null>(null);
+
+  // Initialize and clean up the bounded HeroFrameController
+  useEffect(() => {
+    if (reducedMotion) return;
+    const controller = new HeroFrameController();
+    frameControllerRef.current = controller;
+    
+    // Critical Path: Load Frame 1 first
+    controller.loadCriticalFrame().then(() => {
+      setIsHeroReady(true);
+      // Background Path: Preload the rest
+      controller.startBackgroundPreload();
+    });
+
+    return () => {
+      // Complete lifecycle teardown
+      controller.destroy();
+      frameControllerRef.current = null;
+    };
+  }, [reducedMotion]);
 
   // Detect browser support for CSS mask-image
   useEffect(() => {
@@ -114,7 +135,7 @@ export function HeroSection() {
     );
 
     // 3. Headline exit: fade, translate upward, and blur from 60% to 80% scroll
-    tl.fromTo([taglineRef.current, headlineRef.current, descriptionRef.current],
+    tl.fromTo([headlineRef.current, descriptionRef.current],
       { opacity: 1, y: 0, filter: "blur(0px)" },
       {
         opacity: 0,
@@ -179,7 +200,8 @@ export function HeroSection() {
     const resizeCanvas = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      const dpr = window.devicePixelRatio || 1;
+      // Cap DPR to 1.5 to prevent massive canvas buffers (e.g. 30MB+) on Retina/4K displays
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       
       canvas.width = width * dpr;
       canvas.height = height * dpr;
@@ -230,8 +252,12 @@ export function HeroSection() {
         // Floating frame value is rounded only immediately before drawing
         const frameToDraw = Math.min(566, Math.max(1, Math.round(scrollState.current.frame)));
         
+        if (frameControllerRef.current) {
+          frameControllerRef.current.seek(frameToDraw);
+        }
+        
         if (frameToDraw !== lastDrawnFrameRef.current) {
-          const img = imageLoader.getFrame(frameToDraw);
+          const img = frameControllerRef.current?.getFrame(frameToDraw);
           if (img) {
             drawImageProp(img);
             lastDrawnFrameRef.current = frameToDraw;
@@ -267,14 +293,7 @@ export function HeroSection() {
     };
   }, [reducedMotion]);
 
-  // Clean up global image cache only on actual page navigation, not strict-mode remounts
-  useEffect(() => {
-    const handleBeforeUnload = () => imageLoader.clear();
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
+
 
   // ── Reduced Motion Fallback Render ──
   if (reducedMotion) {
@@ -309,11 +328,6 @@ export function HeroSection() {
           aria-hidden="true"
         />
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-[11px] font-sans font-bold uppercase tracking-[0.2em] bg-[#071f10] text-[#69f0ae] border border-[#69f0ae]/30 mb-3">
-            <span>Since 1999</span>
-            <span className="size-1 rounded-full bg-[#69f0ae]" />
-            <span>26 Years of Heritage</span>
-          </div>
           <p className="text-[10px] md:text-label-caps uppercase tracking-[0.25em] font-semibold text-white/80 mb-3">
             Odisha's Premier Casual Dining Destination
           </p>
@@ -376,7 +390,9 @@ export function HeroSection() {
       {/* Backing Canvas for Image Sequence */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 z-10 w-full h-full object-cover pointer-events-none will-change-transform"
+        className={`absolute inset-0 z-10 w-full h-full object-cover pointer-events-none will-change-transform transition-opacity duration-300 ease-out ${
+          isHeroReady ? "opacity-100" : "opacity-0"
+        }`}
         style={{ transform: "scale(1.05)" }}
       />
 
@@ -403,16 +419,6 @@ export function HeroSection() {
       {/* Main Hero Content overlays - Transparent and Clean */}
       <div className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center pointer-events-none">
         <div className="flex flex-col items-center justify-center pointer-events-auto max-w-4xl">
-          <div
-            ref={taglineRef}
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-sans font-bold uppercase tracking-[0.2em] bg-[#071f10] text-[#69f0ae] border border-[#69f0ae]/30 mb-4"
-          >
-            <span>Since 1999</span>
-            <span className="size-1.5 rounded-full bg-[#69f0ae]" />
-            <span className="font-number">26</span>
-            <span>Years of Heritage</span>
-          </div>
-
           <h1
             ref={headlineRef}
             id="hero-headline"

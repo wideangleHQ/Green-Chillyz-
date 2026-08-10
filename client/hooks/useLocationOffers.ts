@@ -8,11 +8,12 @@ import {
   LocationPermissionStatus,
 } from "@/types/offers";
 import { useActiveStores } from "@/hooks/useStores";
+import { useStoreVouchers } from "@/hooks/useRewards";
 import { storeToOutletLocation } from "@/types/store";
 import type { NearbyStoreLocatorResponse } from "@/types/store";
 import { getNearbyStores } from "@/lib/api/storeApi";
 import {
-  getOffersByOutlet,
+  mapAndFilterVouchers,
   getCurrentCoordinates,
 } from "@/lib/offers/offersService";
 
@@ -37,26 +38,27 @@ export function useLocationOffers() {
   const [selectedOutlet, setSelectedOutlet] = useState<OutletLocation | null>(null);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
   const [nearbyResponse, setNearbyResponse] = useState<NearbyStoreLocatorResponse | null>(null);
-  const [offers, setOffers] = useState<Offer[]>([]);
   const [category, setCategory] = useState<OfferCategory>("all");
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [locationLoading, setLocationLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const initRef = useRef(false);
 
-  useEffect(() => {
-    if (selectedOutlet) {
-      setLoading(true);
-      getOffersByOutlet(selectedOutlet.id, category)
-        .then(setOffers)
-        .catch(() => setOffers([]))
-        .finally(() => setLoading(false));
-    }
-  }, [selectedOutlet, category]);
+  const {
+    data: storeVouchers = [],
+    isLoading: vouchersLoading,
+  } = useStoreVouchers(selectedOutlet?.id);
+
+  const offers = useMemo(
+    () => mapAndFilterVouchers(storeVouchers, selectedOutlet?.id ?? "", category),
+    [storeVouchers, selectedOutlet?.id, category],
+  );
+
+  const loading = locationLoading || vouchersLoading;
 
   const requestLocation = useCallback(async () => {
     setStatus("requesting");
-    setLoading(true);
+    setLocationLoading(true);
 
     try {
       const coords = await getCurrentCoordinates();
@@ -93,6 +95,7 @@ export function useLocationOffers() {
           localStorage.setItem(STORAGE_KEY_OUTLET, JSON.stringify(outlets[0]));
         }
       }
+      setLocationLoading(false);
     } catch (error: unknown) {
       const geoError = error as { code?: number };
       if (geoError?.code === 1) {
@@ -100,7 +103,7 @@ export function useLocationOffers() {
       } else {
         setStatus("unavailable");
       }
-      setLoading(false);
+      setLocationLoading(false);
 
       const cached = tryLoadCachedOutlet();
       if (cached) {
@@ -142,7 +145,7 @@ export function useLocationOffers() {
     if (cached) {
       setSelectedOutlet(cached);
       setStatus("granted");
-      setLoading(false);
+      setLocationLoading(false);
       return;
     }
 

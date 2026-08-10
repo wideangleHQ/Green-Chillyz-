@@ -165,6 +165,14 @@ export class CreateStoreVoucherDto {
   @IsOptional()
   terms?: string[];
 
+  @ApiPropertyOptional({
+    description: 'Initial status (defaults to ACTIVE)',
+    enum: StoreVoucherStatus,
+  })
+  @IsEnum(StoreVoucherStatus)
+  @IsOptional()
+  status?: StoreVoucherStatus;
+
   @ApiPropertyOptional({ description: 'Arbitrary metadata' })
   @IsOptional()
   metadata?: Record<string, unknown>;

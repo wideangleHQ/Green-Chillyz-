@@ -20,7 +20,7 @@ const NAV_LINKS = [
   { href: "/games", label: "Games" },
   { href: "/#rewards", label: "Rewards" },
   { href: "/#locations", label: "Locations" },
-  { href: "/#franchise", label: "Franchise" },
+  { href: "/franchise", label: "Franchise" },
 ];
 
 /* Coins entry point is a core retention hook — visible at every tier

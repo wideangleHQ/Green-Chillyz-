@@ -2,7 +2,7 @@
 
 import { useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, Sparkles, Clock, ArrowUpRight, ShieldCheck, ChevronDown } from "lucide-react";
+import { Copy, Check, Sparkles, Clock, ArrowUpRight, ShieldCheck, ChevronDown, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Offer } from "@/types/offers";
@@ -25,16 +25,22 @@ export const OfferCard = memo(function OfferCard({ offer, outletName }: OfferCar
   };
 
   return (
-    <div className="group relative w-[290px] sm:w-[320px] md:w-[350px] shrink-0 rounded-[28px] bg-white border border-white/80 shadow-soft hover:shadow-hover transition-all duration-500 flex flex-col justify-between overflow-hidden select-none">
+    <div className="group relative w-[290px] sm:w-[320px] md:w-[350px] shrink-0 rounded-[28px] bg-white border border-white/80 shadow-soft hover:shadow-hover transition-[border-color,box-shadow] duration-200 flex flex-col justify-between overflow-hidden select-none">
       {/* Top Media Showcase Container */}
       <div className="relative w-full aspect-[16/10] overflow-hidden bg-stone-100">
-        <Image
-          src={offer.image}
-          alt={offer.title}
-          fill
-          sizes="(max-width: 768px) 80vw, 350px"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-106"
-        />
+        {offer.image ? (
+          <Image
+            src={offer.image}
+            alt={offer.title}
+            fill
+            sizes="(max-width: 768px) 80vw, 350px"
+            className="object-cover transition-transform duration-200 ease-out group-hover:scale-106"
+          />
+        ) : (
+          <div className="size-full flex items-center justify-center bg-gradient-to-br from-brand-green/10 to-brand-green/5">
+            <Tag className="size-10 text-brand-green/30" aria-hidden="true" />
+          </div>
+        )}
 
         {/* Gradient Mask for Readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
@@ -112,7 +118,7 @@ export const OfferCard = memo(function OfferCard({ offer, outletName }: OfferCar
         <div className="flex flex-col gap-2 pt-1">
           <Link
             href="/menu"
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2.5 text-xs font-sans font-bold uppercase tracking-wider text-white shadow-soft transition-all duration-300 hover:scale-102 cursor-pointer"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2.5 text-xs font-sans font-bold uppercase tracking-wider text-white shadow-soft transition-[background-color,transform] duration-200 hover:scale-102 cursor-pointer"
           >
             <span>Redeem Offer</span>
             <ArrowUpRight className="size-4" />

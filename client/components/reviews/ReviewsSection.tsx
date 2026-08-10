@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Star, MessageSquareHeart } from "lucide-react";
+import { Star } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { ReviewCard, ReviewItemData } from "./ReviewCard";
 
@@ -45,9 +45,63 @@ const CURATED_REVIEWS: ReviewItemData[] = [
     avatarColor: "linear-gradient(135deg, #C9A227, #8C6F12)",
     initials: "RM",
   },
+  {
+    id: "rev-dinein-2",
+    author: "Ananya Das",
+    role: "Dine-In Guest",
+    outlet: "Puri Flagship",
+    brand: "GreenChillyz",
+    brandTheme: "green",
+    rating: 5.0,
+    quote:
+      "The biryani is simply magical. YellowChillyz's special paneer rolls are also a fantastic option for vegetarian days!",
+    avatarColor: "linear-gradient(135deg, #006B2A, #C9A227)",
+    initials: "AD",
+  },
+  {
+    id: "rev-family",
+    author: "Subhasish Mohapatra",
+    role: "Family Feast",
+    outlet: "Patia Outlet",
+    brand: "GreenChillyz",
+    brandTheme: "green",
+    rating: 4.8,
+    quote:
+      "Unmatched dining experience. We order Kathi rolls weekly, and they are always perfectly fresh and full of flavour.",
+    avatarColor: "linear-gradient(135deg, #C62828, #006B2A)",
+    initials: "SM",
+  },
+  {
+    id: "rev-premium",
+    author: "Swati Priyadarshini",
+    role: "Premium Dining",
+    outlet: "GoldenChillyz Cuttack",
+    brand: "GreenChillyz",
+    brandTheme: "gold",
+    rating: 5.0,
+    quote:
+      "GoldenChillyz is local luxury dining at its best. The mutton handi and premium dessert spreads were outstanding.",
+    avatarColor: "linear-gradient(135deg, #C9A227, #003615)",
+    initials: "SP",
+  },
 ];
 
 export function ReviewsSection() {
+  // Multiply items to ensure continuous marquee loop without blank gaps
+  const row1 = useMemo(() => [
+    ...CURATED_REVIEWS.slice(0, 3),
+    ...CURATED_REVIEWS.slice(0, 3),
+    ...CURATED_REVIEWS.slice(0, 3),
+    ...CURATED_REVIEWS.slice(0, 3),
+  ], []);
+
+  const row2 = useMemo(() => [
+    ...CURATED_REVIEWS.slice(3, 6),
+    ...CURATED_REVIEWS.slice(3, 6),
+    ...CURATED_REVIEWS.slice(3, 6),
+    ...CURATED_REVIEWS.slice(3, 6),
+  ], []);
+
   return (
     <section
       id="reviews"
@@ -101,15 +155,33 @@ export function ReviewsSection() {
           </Reveal>
         </div>
 
-        {/* 3 Curated Testimonial Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {CURATED_REVIEWS.map((review) => (
-            <Reveal key={review.id}>
-              <div className="w-full h-full flex">
-                <ReviewCard review={review} />
-              </div>
-            </Reveal>
-          ))}
+        {/* 2-Row Marquee Slider */}
+        <div className="relative w-full overflow-hidden py-4 flex flex-col gap-6 select-none">
+          {/* Row 1: Left scrolling marquee */}
+          <div className="flex overflow-hidden w-full whitespace-nowrap">
+            <div className="flex gap-6 animate-marquee-left hover:[animation-play-state:paused] [@media(prefers-reduced-motion:reduce)]:[animation-play-state:paused]">
+              {row1.map((review, idx) => (
+                <div key={`${review.id}-row1-${idx}`} className="shrink-0">
+                  <ReviewCard review={review} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2: Right scrolling marquee */}
+          <div className="flex overflow-hidden w-full whitespace-nowrap">
+            <div className="flex gap-6 animate-marquee-right hover:[animation-play-state:paused] [@media(prefers-reduced-motion:reduce)]:[animation-play-state:paused]">
+              {row2.map((review, idx) => (
+                <div key={`${review.id}-row2-${idx}`} className="shrink-0">
+                  <ReviewCard review={review} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Smooth fading gradients at left & right edges */}
+          <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-[#FFF8F1] via-[#FFF8F1]/85 to-transparent z-20 pointer-events-none" />
+          <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#FFF8F1] via-[#FFF8F1]/85 to-transparent z-20 pointer-events-none" />
         </div>
       </div>
     </section>

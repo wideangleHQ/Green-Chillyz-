@@ -604,10 +604,12 @@ const STORE_VOUCHER_CREATE_FIELDS = [
   'offerImage', 'bannerImage', 'couponCode', 'voucherType',
   'minimumOrderValue', 'maximumDiscount', 'voucherValue', 'itemsIncluded',
   'redeemVenue', 'validDays', 'startDate', 'endDate', 'validTime',
-  'totalLimit', 'isFeatured', 'priority', 'sortOrder', 'terms',
+  'totalLimit', 'isFeatured', 'priority', 'sortOrder', 'terms', 'status',
 ] as const;
 
-const STORE_VOUCHER_UPDATE_FIELDS = STORE_VOUCHER_CREATE_FIELDS;
+const STORE_VOUCHER_UPDATE_FIELDS = STORE_VOUCHER_CREATE_FIELDS.filter(
+  (f) => f !== 'couponCode' && f !== 'status',
+);
 
 export const opsApi = {
   // --- Customers ---

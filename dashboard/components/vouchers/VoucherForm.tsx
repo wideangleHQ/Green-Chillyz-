@@ -139,10 +139,35 @@ export function VoucherForm({ initialData, onClose, onSuccess }: VoucherFormProp
     
     try {
       if (isEditing) {
-        await updateMutation.mutateAsync({ 
-          id: initialData!.id, 
-          dto: { ...formData, adjustmentReason: showQuantityAdjustment ? adjustmentReason : undefined }
-        });
+        const payload: Record<string, unknown> = {
+          name: formData.name,
+          shortTitle: formData.shortTitle,
+          description: formData.description,
+          offerTag: formData.offerTag,
+          discountBadge: formData.discountBadge,
+          offerImage: formData.offerImage,
+          bannerImage: formData.bannerImage,
+          voucherType: formData.voucherType,
+          minimumOrderValue: formData.minimumOrderValue ?? null,
+          maximumDiscount: formData.maximumDiscount ?? null,
+          voucherValue: formData.voucherValue ?? null,
+          itemsIncluded: formData.itemsIncluded,
+          redeemVenue: formData.redeemVenue,
+          validDays: formData.validDays,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          validTime: formData.validTime,
+          totalLimit: formData.totalLimit,
+          isFeatured: formData.isFeatured,
+          priority: formData.priority,
+          sortOrder: formData.sortOrder,
+          terms: formData.terms,
+          metadata: formData.metadata,
+        };
+        if (showQuantityAdjustment) {
+          payload.adjustmentReason = adjustmentReason;
+        }
+        await updateMutation.mutateAsync({ id: initialData!.id, dto: payload });
         showToast('Voucher updated successfully', 'success');
       } else {
         await createMutation.mutateAsync(formData);
@@ -472,17 +497,23 @@ export function VoucherForm({ initialData, onClose, onSuccess }: VoucherFormProp
                 
                 <div className="flex items-center gap-2">
                   <Label htmlFor="status" className="mb-0">Status</Label>
-                  <Select 
-                    id="status"
-                    name="status" 
-                    value={formData.status} 
-                    onChange={handleChange}
-                    className="w-auto min-w-[120px]"
-                  >
-                    <option value="DRAFT">Draft</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="PAUSED">Paused</option>
-                  </Select>
+                  {isEditing ? (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-[var(--surface-hover)] text-[var(--foreground)] border border-[var(--border)]">
+                      {formData.status}
+                    </span>
+                  ) : (
+                    <Select
+                      id="status"
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      className="w-auto min-w-[120px]"
+                    >
+                      <option value="DRAFT">Draft</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="PAUSED">Paused</option>
+                    </Select>
+                  )}
                 </div>
               </div>
             </CardContent>

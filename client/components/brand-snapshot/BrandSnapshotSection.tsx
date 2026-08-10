@@ -48,8 +48,12 @@ export function BrandSnapshotSection() {
     <section
       id="snapshot"
       aria-label="Brand Snapshot"
-      className="relative w-full bg-[#FFF8F1] py-12 md:py-16 overflow-hidden border-b border-on-surface/5"
+      className="relative w-full bg-transparent py-12 md:py-16 overflow-hidden border-b border-on-surface/5"
     >
+      {/* Background Mask to blend Hero with Snapshot beige color */}
+      <div 
+        className="brand-story-bg-mask absolute inset-0 bg-[#FFF8F1] z-0 pointer-events-none"
+      />
       <div className="container-site relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {STATS.map((stat, idx) => {
@@ -57,14 +61,14 @@ export function BrandSnapshotSection() {
             return (
               <Reveal key={stat.id}>
                 <motion.div
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="group relative p-6 md:p-8 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/30 transition-all duration-300 flex flex-col justify-between h-full min-h-[160px]"
+                  whileHover={{ y: -4, transition: { duration: 0.15 } }}
+                  className="group relative p-6 md:p-8 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/30 transition-[border-color,box-shadow] duration-200 flex flex-col justify-between h-full min-h-[160px]"
                 >
                   <div className="flex items-start justify-between">
-                    <span className="text-3xl sm:text-4xl md:text-5xl font-number font-extrabold text-on-surface tracking-tight group-hover:text-brand-green transition-colors duration-300">
+                    <span className="text-3xl sm:text-4xl md:text-5xl font-number font-extrabold text-on-surface tracking-tight group-hover:text-brand-green transition-colors duration-200">
                       {stat.value}
                     </span>
-                    <div className="p-3 rounded-2xl bg-brand-green/10 text-brand-green group-hover:bg-brand-green group-hover:text-white transition-colors duration-300">
+                    <div className="p-3 rounded-2xl bg-brand-green/10 text-brand-green group-hover:bg-brand-green group-hover:text-white transition-colors duration-200">
                       <Icon className="size-5 stroke-[2]" />
                     </div>
                   </div>
@@ -79,7 +83,7 @@ export function BrandSnapshotSection() {
                   </div>
 
                   {/* Accent Bottom Border Line on Hover */}
-                  <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-brand-green rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-brand-green rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                 </motion.div>
               </Reveal>
             );

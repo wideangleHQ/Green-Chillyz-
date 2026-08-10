@@ -87,11 +87,11 @@ export function WhyGreenChillyzSection() {
             return (
               <Reveal key={pillar.id}>
                 <motion.div
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="group relative p-6 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-all duration-300 flex flex-col justify-between h-full min-h-[200px]"
+                  whileHover={{ y: -4, transition: { duration: 0.15 } }}
+                  className="group relative p-6 rounded-[24px] bg-white border border-stone-200/80 shadow-soft hover:shadow-medium hover:border-brand-green/40 transition-[border-color,box-shadow] duration-200 flex flex-col justify-between h-full min-h-[200px]"
                 >
                   <div>
-                    <div className="size-11 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 group-hover:bg-brand-green group-hover:text-white transition-colors duration-300">
+                    <div className="size-11 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-4 group-hover:bg-brand-green group-hover:text-white transition-colors duration-200">
                       <Icon className="size-5 stroke-[1.75]" />
                     </div>
 
@@ -99,7 +99,7 @@ export function WhyGreenChillyzSection() {
                       {pillar.highlight}
                     </span>
 
-                    <h3 className="text-lg font-heading font-extrabold text-on-surface mt-1 mb-2 group-hover:text-brand-green transition-colors duration-300">
+                    <h3 className="text-lg font-heading font-extrabold text-on-surface mt-1 mb-2 group-hover:text-brand-green transition-colors duration-200">
                       {pillar.title}
                     </h3>
                   </div>

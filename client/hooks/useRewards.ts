@@ -17,6 +17,7 @@ import {
   redeemReward,
   getMyVouchers,
   getVoucher,
+  getStoreVouchers,
   trackRewardEvent,
 } from "@/lib/api/rewardsApi";
 import { WALLET_KEYS } from "./useWallet";
@@ -223,6 +224,21 @@ export function useRedeemReward() {
         queryKey: REWARDS_KEYS.eligibility(variables.idOrSlug),
       });
     },
+  });
+}
+
+export const STORE_VOUCHER_KEYS = {
+  all: ["store-vouchers"] as const,
+  list: (storeId: string) => [...STORE_VOUCHER_KEYS.all, storeId] as const,
+};
+
+export function useStoreVouchers(storeId?: string) {
+  return useQuery({
+    queryKey: STORE_VOUCHER_KEYS.list(storeId!),
+    queryFn: () => getStoreVouchers(storeId!),
+    enabled: Boolean(storeId),
+    staleTime: CATALOG_STALE,
+    gcTime: CATALOG_GC,
   });
 }
 

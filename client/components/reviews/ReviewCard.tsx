@@ -45,6 +45,7 @@ export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) 
     const spotX = ((e.clientX - rect.left) / width) * 100;
     const spotY = ((e.clientY - rect.top) / height) * 100;
 
+    cardRef.current.style.transition = "none";
     cardRef.current.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`;
     if (spotlightRef.current) {
       spotlightRef.current.style.background = `radial-gradient(circle at ${spotX}% ${spotY}%, ${themeColor}12 0%, transparent 65%)`;
@@ -53,6 +54,7 @@ export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) 
 
   const handleMouseLeave = () => {
     if (cardRef.current) {
+      cardRef.current.style.transition = "transform 0.2s ease";
       cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)`;
     }
   };
@@ -62,7 +64,7 @@ export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) 
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="group relative w-[280px] sm:w-[330px] md:w-[370px] shrink-0 p-5 md:p-6 rounded-[22px] md:rounded-[26px] bg-white border border-on-surface/[0.07] hover:border-brand-green/30 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,107,42,0.12)] transition-all duration-500 flex flex-col justify-between gap-4 will-change-transform transform-gpu cursor-pointer select-none"
+      className="group relative w-[280px] sm:w-[330px] md:w-[370px] shrink-0 p-5 md:p-6 rounded-[22px] md:rounded-[26px] bg-white border border-on-surface/[0.07] hover:border-brand-green/30 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_32px_rgba(0,107,42,0.12)] transition-[border-color,box-shadow] duration-200 flex flex-col justify-between gap-4 will-change-transform transform-gpu cursor-pointer select-none"
       style={{
         transformStyle: "preserve-3d",
       }}
@@ -70,7 +72,7 @@ export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) 
       {/* Dynamic Cursor-Tracking Spotlight Glow */}
       <div
         ref={spotlightRef}
-        className="absolute inset-0 rounded-[22px] md:rounded-[26px] pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute inset-0 rounded-[22px] md:rounded-[26px] pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
       />
 
       {/* Top Header: Quote Icon Accent & Gold Star Rating */}

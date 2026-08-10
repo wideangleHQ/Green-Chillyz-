@@ -6,6 +6,7 @@ import type {
   EligibilityResult,
   Redemption,
   Voucher,
+  StoreVoucherItem,
   RewardQueryParams,
   VoucherQueryParams,
   PaginatedRewards,
@@ -86,6 +87,15 @@ export async function getMyVouchers(
 
 export async function getVoucher(id: string): Promise<Voucher> {
   const { data } = await api.get<Voucher>(`${BASE}/vouchers/${id}`);
+  return data;
+}
+
+export async function getStoreVouchers(
+  storeId: string,
+): Promise<StoreVoucherItem[]> {
+  const { data } = await api.get<StoreVoucherItem[]>(
+    `${BASE}/store-vouchers/${storeId}`,
+  );
   return data;
 }
 

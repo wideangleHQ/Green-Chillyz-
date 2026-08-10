@@ -103,6 +103,8 @@ export class RewardsController {
         endDate: true,
         validTime: true,
         isFeatured: true,
+        totalLimit: true,
+        remainingCount: true,
         terms: true,
       },
     });
