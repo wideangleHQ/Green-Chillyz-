@@ -8,8 +8,8 @@ export type CachedFrame = {
 };
 
 // Global registries to prevent duplication across React renders/Strict Mode
-const frameRegistry: Record<number, ImageSource> = {};
-const loadingFrames: Record<number, Promise<ImageSource | null>> = {};
+const frameRegistry: Record<number, ImageSource | undefined> = {};
+const loadingFrames: Record<number, Promise<ImageSource | null> | undefined> = {};
 const failedFrames: Set<number> = new Set();
 
 const TOTAL_FRAMES = 566;

@@ -116,6 +116,14 @@ api.interceptors.response.use(
   },
 );
 
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export function extractApiError(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const raw = error.response?.data;

@@ -80,7 +80,7 @@ export function Navbar() {
           className="glass flex w-full max-w-5xl items-center justify-between gap-4 rounded-full py-2 pl-4 pr-2 shadow-floating"
         >
           <Link
-            href="/#top"
+            href="/"
             className="flex min-h-11 items-center gap-2"
             aria-label="GreenChillyz home"
           >

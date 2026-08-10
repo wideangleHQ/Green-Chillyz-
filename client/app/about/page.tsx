@@ -222,7 +222,7 @@ export default function AboutPage() {
         {/* =========================================================
             SECTION 1: HERO (Cinematic Brand Introduction)
         ========================================================= */}
-        <section className="relative w-full min-h-[85vh] flex items-center justify-center pt-28 pb-16 overflow-hidden bg-stone-900 text-white">
+        <section className="relative w-full min-h-[90vh] md:min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden bg-stone-900 text-white">
           <div className="absolute inset-0 z-0">
             <Image
               src="/assets/brand-story/brand_story_green.png"
@@ -322,79 +322,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* =========================================================
-            SECTION 3: FOUNDER & VISION
-        ========================================================= */}
-        <section className="py-16 md:py-24 container-site border-b border-on-surface/5">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-            {/* Founder Image Placeholder */}
-            <div className="lg:col-span-5">
-              <Reveal>
-                <div className="relative w-full h-[380px] sm:h-[450px] rounded-[28px] overflow-hidden border border-stone-200/80 shadow-heavy bg-stone-900">
-                  <Image
-                    src="/assets/brand-story/brand_story_green.png"
-                    alt="GreenChillyz Leadership"
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 40vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-6 left-6 right-6 text-white">
-                    <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#69f0ae]">Leadership Vision</span>
-                    <h4 className="text-xl font-heading font-extrabold text-white uppercase mt-1">GreenChillyz Leadership</h4>
-                    <p className="text-xs font-sans text-white/80">Est. 1999 • Bhubaneswar, Odisha</p>
-                  </div>
-                </div>
-              </Reveal>
-            </div>
 
-            {/* Message & 3 Leadership Principles */}
-            <div className="lg:col-span-7 flex flex-col gap-6">
-              <Reveal>
-                <span className="text-xs font-sans font-bold uppercase tracking-[0.2em] text-brand-green">
-                  Founder Message
-                </span>
-              </Reveal>
-
-              <Reveal>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading text-on-surface font-extrabold uppercase tracking-tight leading-none">
-                  Honest Food. <br />
-                  <span className="text-brand-green">Uncompromised Passion.</span>
-                </h2>
-              </Reveal>
-
-              <Reveal>
-                <p className="text-sm sm:text-base font-sans text-on-surface-variant font-medium leading-relaxed">
-                  &ldquo;Our mission from day one has been simple: serve honest, authentic food with uncompromised quality and genuine warmth. Food isn&apos;t just sustenance—it is what brings families and communities together.&rdquo;
-                </p>
-              </Reveal>
-
-              {/* 3 Principles Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-                <Reveal>
-                  <div className="p-5 rounded-[20px] bg-white/90 border border-stone-200/80 shadow-soft">
-                    <h3 className="text-base font-heading font-extrabold text-on-surface uppercase mb-1">Quality</h3>
-                    <p className="text-xs font-sans text-on-surface-variant leading-relaxed">100% fresh produce &amp; hand-ground spices daily.</p>
-                  </div>
-                </Reveal>
-
-                <Reveal>
-                  <div className="p-5 rounded-[20px] bg-white/90 border border-stone-200/80 shadow-soft">
-                    <h3 className="text-base font-heading font-extrabold text-on-surface uppercase mb-1">Discipline</h3>
-                    <p className="text-xs font-sans text-on-surface-variant leading-relaxed">FSSAI certified multi-point sanitation checks.</p>
-                  </div>
-                </Reveal>
-
-                <Reveal>
-                  <div className="p-5 rounded-[20px] bg-white/90 border border-stone-200/80 shadow-soft">
-                    <h3 className="text-base font-heading font-extrabold text-on-surface uppercase mb-1">Growth</h3>
-                    <p className="text-xs font-sans text-on-surface-variant leading-relaxed">Empowering local talent towards 100+ outlets.</p>
-                  </div>
-                </Reveal>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* =========================================================
             SECTION 4: BRAND SNAPSHOT (Statistics Cards)
@@ -557,78 +485,6 @@ export default function AboutPage() {
                 </Reveal>
               );
             })}
-          </div>
-        </section>
-
-        {/* =========================================================
-            SECTION 7: NETWORK PRESENCE (Odisha Map & Footprint)
-        ========================================================= */}
-        <section className="py-16 md:py-24 container-site border-b border-on-surface/5">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              <Reveal>
-                <span className="text-xs font-sans font-bold uppercase tracking-[0.2em] text-brand-green">
-                  Odisha Network
-                </span>
-              </Reveal>
-
-              <Reveal>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading text-on-surface font-extrabold uppercase tracking-tight leading-none">
-                  Deep Rooted <br />
-                  <span className="text-brand-green">Across Odisha.</span>
-                </h2>
-              </Reveal>
-
-              <Reveal>
-                <p className="text-sm font-sans text-on-surface-variant leading-relaxed font-medium">
-                  With 15+ outlets strategically located in major urban centers including Bhubaneswar, Cuttack, Puri, Rourkela, and Sambalpur, GreenChillyz is expanding rapidly towards 100+ outlets across Eastern India.
-                </p>
-              </Reveal>
-
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center font-number font-bold text-xs">15+</div>
-                  <span className="text-xs font-sans font-bold text-on-surface uppercase tracking-wider">Active Outlets Across Odisha</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center font-number font-bold text-xs">100+</div>
-                  <span className="text-xs font-sans font-bold text-on-surface uppercase tracking-wider">Vision Outlets Target</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Map Interactive Visualization */}
-            <div className="lg:col-span-7">
-              <Reveal>
-                <div className="relative w-full h-[360px] sm:h-[420px] rounded-[28px] bg-white/90 border border-stone-200/80 shadow-soft p-6 flex flex-col justify-between overflow-hidden">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-brand-green flex items-center gap-2">
-                      <MapPin className="size-4 animate-bounce" /> Regional Footprint
-                    </span>
-                    <span className="text-[11px] font-sans font-semibold text-stone-500 bg-stone-100 px-3 py-1 rounded-full border border-stone-200">
-                      Bhubaneswar HQ
-                    </span>
-                  </div>
-
-                  {/* Cities Pills Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 my-auto">
-                    {["Bhubaneswar", "Cuttack", "Puri", "Rourkela", "Sambalpur", "Balasore"].map((city) => (
-                      <div key={city} className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 flex items-center gap-2.5">
-                        <span className="relative flex size-2.5">
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-green opacity-75" />
-                          <span className="relative inline-flex size-2.5 rounded-full bg-brand-green" />
-                        </span>
-                        <span className="text-xs font-sans font-bold text-on-surface">{city}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <p className="text-xs font-sans text-on-surface-variant font-medium">
-                    Note: Central supply chain hubs ensure 100% daily freshness across all locations.
-                  </p>
-                </div>
-              </Reveal>
-            </div>
           </div>
         </section>
 

@@ -20,6 +20,17 @@ export function formatCurrency(value: number, currency: string = 'USD'): string 
 }
 
 /**
+ * Prisma Decimal fields arrive as strings over JSON. Convert to a finite
+ * JS number, returning null for anything unparseable so callers can show
+ * a placeholder instead of crashing.
+ */
+export function normalizeDecimal(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
  * Format date values
  */
 export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {

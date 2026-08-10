@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
 import { DashboardAuthModule } from '../dashboard-auth/dashboard-auth.module';
 import { GameModule } from '../game/game.module';
+import { MenuModule } from '../menu/menu.module';
 import { NotificationModule } from '../notification/notification.module';
 import { RewardsModule } from '../rewards/rewards.module';
 import { StoreModule } from '../store/store.module';
 import { WalletModule } from '../wallet/wallet.module';
 import { DashboardAnalyticsController } from './analytics/dashboard-analytics.controller';
 import { DashboardAnalyticsService } from './analytics/dashboard-analytics.service';
+import {
+  DashboardMenuCategoriesController,
+  DashboardMenuItemsController,
+} from './menu/dashboard-menu.controller';
 import { DashboardPermissionsGuard } from './common/guards/dashboard-permissions.guard';
 import { DashboardCacheListener } from './common/listeners/dashboard-cache.listener';
 import { DashboardCustomerScopeService } from './common/services/dashboard-customer-scope.service';
@@ -41,6 +46,7 @@ import { DashboardWalletService } from './wallet/dashboard-wallet.service';
 @Module({
   imports: [
     DashboardAuthModule,
+    MenuModule,
     WalletModule,
     RewardsModule,
     StoreModule,
@@ -57,6 +63,8 @@ import { DashboardWalletService } from './wallet/dashboard-wallet.service';
     DashboardStoresController,
     DashboardNotificationsController,
     DashboardAnalyticsController,
+    DashboardMenuItemsController,
+    DashboardMenuCategoriesController,
   ],
   providers: [
     DashboardOpsCacheService,
