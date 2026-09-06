@@ -20,7 +20,6 @@ export function HeroSection() {
 
   // Scroll state & frame values
   const scrollState = useRef({ frame: 1 });
-  const isVisibleRef = useRef(true);
   const animationFrameId = useRef<number | null>(null);
   const lastDrawnFrameRef = useRef<number>(-1);
   const scrollProgressRef = useRef<number>(0);
@@ -56,22 +55,9 @@ export function HeroSection() {
     }
   }, []);
 
-  // Monitor visibility to pause render loop on hidden tabs
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      isVisibleRef.current = document.visibilityState === "visible";
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
   // GSAP ScrollTrigger pinning and timeline mapping
   useEffect(() => {
     if (reducedMotion || !heroRef.current) return;
-
-    gsap.registerPlugin(ScrollTrigger);
 
     const nextSection = heroRef.current.nextElementSibling as HTMLElement;
     if (nextSection) {
@@ -202,7 +188,7 @@ export function HeroSection() {
       const height = window.innerHeight;
       // Cap DPR to 1.5 to prevent massive canvas buffers (e.g. 30MB+) on Retina/4K displays
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      
+
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.imageSmoothingEnabled = true;
@@ -210,7 +196,13 @@ export function HeroSection() {
     };
 
     resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    // Debounce resize — firing on every pixel wastes GPU reallocation
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resizeCanvas, 150);
+    };
+    window.addEventListener("resize", handleResize);
 
     // High performance aspect-ratio cover drawing
     const drawImageProp = (img: CanvasImageSource) => {
@@ -248,46 +240,61 @@ export function HeroSection() {
 
     // Frame drawing tick callback (exclusively inside requestAnimationFrame)
     const tick = () => {
-      if (isVisibleRef.current) {
-        // Floating frame value is rounded only immediately before drawing
-        const frameToDraw = Math.min(566, Math.max(1, Math.round(scrollState.current.frame)));
-        
-        if (frameControllerRef.current) {
-          frameControllerRef.current.seek(frameToDraw);
-        }
-        
-        if (frameToDraw !== lastDrawnFrameRef.current) {
-          const img = frameControllerRef.current?.getFrame(frameToDraw);
-          if (img) {
-            drawImageProp(img);
-            lastDrawnFrameRef.current = frameToDraw;
-          }
-        }
+      // Floating frame value is rounded only immediately before drawing
+      const frameToDraw = Math.min(566, Math.max(1, Math.round(scrollState.current.frame)));
 
-        // Apply continuous floating drift during 0% - 20% scroll
-        const progress = scrollProgressRef.current;
-        const baseScale = 1.05; // 5% baseline zoom to prevent edge/corner gaps during breathing
-        if (progress < 0.2) {
-          const time = performance.now() * 0.0012;
-          const driftScale = Math.max(0, 1 - progress / 0.18); // Fades completely to 0 by 18% progress
-          
-          const floatY = Math.sin(time * 1.6) * 8 * driftScale; // ±8px
-          const floatRot = Math.cos(time * 1.2) * 0.4 * driftScale; // ±0.4 degrees
-          
-          canvas.style.transform = `translateY(${floatY}px) rotate(${floatRot}deg) scale(${baseScale})`;
-        } else {
-          canvas.style.transform = `scale(${baseScale})`;
+      if (frameControllerRef.current) {
+        frameControllerRef.current.seek(frameToDraw);
+      }
+
+      if (frameToDraw !== lastDrawnFrameRef.current) {
+        const img = frameControllerRef.current?.getFrame(frameToDraw);
+        if (img) {
+          drawImageProp(img);
+          lastDrawnFrameRef.current = frameToDraw;
         }
       }
-      
+
+      // Apply continuous floating drift during 0% - 20% scroll
+      const progress = scrollProgressRef.current;
+      const baseScale = 1.05; // 5% baseline zoom to prevent edge/corner gaps during breathing
+      if (progress < 0.2) {
+        const time = performance.now() * 0.0012;
+        const driftScale = Math.max(0, 1 - progress / 0.18); // Fades completely to 0 by 18% progress
+
+        const floatY = Math.sin(time * 1.6) * 8 * driftScale; // ±8px
+        const floatRot = Math.cos(time * 1.2) * 0.4 * driftScale; // ±0.4 degrees
+
+        canvas.style.transform = `translateY(${floatY}px) rotate(${floatRot}deg) scale(${baseScale})`;
+      } else {
+        canvas.style.transform = `scale(${baseScale})`;
+      }
+
       animationFrameId.current = requestAnimationFrame(tick);
     };
 
     animationFrameId.current = requestAnimationFrame(tick);
 
+    // Cancel rAF entirely when tab is hidden; restart when visible again
+    const handleVisibility = () => {
+      if (document.hidden) {
+        if (animationFrameId.current !== null) {
+          cancelAnimationFrame(animationFrameId.current);
+          animationFrameId.current = null;
+        }
+      } else {
+        if (animationFrameId.current === null) {
+          animationFrameId.current = requestAnimationFrame(tick);
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
-      if (animationFrameId.current) {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (animationFrameId.current !== null) {
         cancelAnimationFrame(animationFrameId.current);
       }
     };

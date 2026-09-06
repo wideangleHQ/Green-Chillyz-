@@ -14,6 +14,7 @@ vi.mock("@/lib/api/rewardsApi", () => ({
   redeemReward: vi.fn(),
   getMyVouchers: vi.fn(),
   getVoucher: vi.fn(),
+  getStoreVouchers: vi.fn(),
   trackRewardEvent: vi.fn(),
 }));
 

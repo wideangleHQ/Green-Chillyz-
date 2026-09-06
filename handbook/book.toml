@@ -1,0 +1,20 @@
+[book]
+authors = ["WideAngle Media & Technologies"]
+language = "en"
+src = "src"
+title = "GreenChillyz Platform Handbook"
+description = "Complete Technical, Product & Engineering Handbook for the GreenChillyz Digital Experience Platform"
+
+[output.html]
+default-theme = "coal"
+preferred-dark-theme = "coal"
+git-repository-url = ""
+no-section-label = false
+fold.enable = true
+fold.level = 1
+
+[output.html.playground]
+editable = false
+
+[preprocessor.index]
+[preprocessor.links]

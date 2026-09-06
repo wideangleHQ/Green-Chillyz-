@@ -2,18 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, animate, motion, useMotionValue } from "framer-motion";
 import { EASE_STANDARD } from "@/lib/motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-/**
- * Brand-mark preloader (13_Animation_Timeline.md): ring stroke-draws
- * around the mark, then the whole layer fades — under 1.5s total.
- * Skipped entirely under reduced motion.
- */
+
 export function Preloader() {
   const reducedMotion = usePrefersReducedMotion();
-  const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
+  // Motion value drives pathLength directly — no React re-render per frame
+  const pathProgress = useMotionValue(0);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -21,26 +18,14 @@ export function Preloader() {
       return () => clearTimeout(t);
     }
 
-    let start = performance.now();
-    let rAF: number;
-    const duration = 1200; // 1.2s minimum visual time
+    const anim = animate(pathProgress, 1, {
+      duration: 1.2,
+      ease: "easeOut",
+      onComplete: () => setDone(true),
+    });
 
-    const animate = (time: number) => {
-      const elapsed = time - start;
-      const p = Math.min((elapsed / duration) * 100, 100);
-      setProgress(p);
-
-      if (p < 100) {
-        rAF = requestAnimationFrame(animate);
-      } else {
-        setDone(true);
-      }
-    };
-
-    rAF = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(rAF);
-  }, [reducedMotion]);
+    return () => anim.stop();
+  }, [reducedMotion, pathProgress]);
 
   return (
     <AnimatePresence>
@@ -65,9 +50,7 @@ export function Preloader() {
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: progress / 100 }}
-                  transition={{ duration: 0.1, ease: "easeOut" }}
+                  style={{ pathLength: pathProgress }}
                 />
               </motion.svg>
               <motion.div

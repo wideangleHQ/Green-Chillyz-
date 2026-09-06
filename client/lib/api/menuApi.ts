@@ -21,7 +21,7 @@ export async function getMenuCategories(): Promise<MenuCategory[]> {
 
 export async function getMenuItemBySlug(slug: string): Promise<Dish | null> {
   try {
-    const { data } = await api.get<any>(`/menu/items/${slug}`);
+    const { data } = await api.get<Dish>(`/menu/items/${slug}`);
     return data;
   } catch {
     return null;

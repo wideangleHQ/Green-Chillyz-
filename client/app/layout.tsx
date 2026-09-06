@@ -41,6 +41,13 @@ export const metadata: Metadata = {
     description:
       "One family, three flavors: GreenChillyz, YellowChillyz and GoldenChillyz.",
   },
+  icons: {
+    icon: [
+      { url: "/assets/icons/logo.png", type: "image/png" },
+    ],
+    shortcut: "/assets/icons/logo.png",
+    apple: "/assets/icons/logo.png",
+  },
 };
 
 import { AppProviders } from "@/components/providers/AppProviders";

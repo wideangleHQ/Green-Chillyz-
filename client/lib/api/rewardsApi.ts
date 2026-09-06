@@ -18,7 +18,7 @@ const BASE = "/rewards-catalog";
 export async function getRewards(
   params?: RewardQueryParams,
 ): Promise<PaginatedRewards> {
-  const { data } = await api.get<PaginatedRewards>(BASE, { params });
+  const { data } = params ? await api.get<PaginatedRewards>(BASE, { params }) : await api.get<PaginatedRewards>(BASE);
   return data;
 }
 
@@ -30,14 +30,18 @@ export async function getRewardCategories(): Promise<RewardCategory[]> {
 export async function getFeaturedRewards(
   params?: Pick<RewardQueryParams, "storeId">,
 ): Promise<RewardListItem[]> {
-  const { data } = await api.get<RewardListItem[]>(`${BASE}/featured`, { params });
+  const { data } = params
+    ? await api.get<RewardListItem[]>(`${BASE}/featured`, { params })
+    : await api.get<RewardListItem[]>(`${BASE}/featured`);
   return data;
 }
 
 export async function getPopularRewards(
   params?: Pick<RewardQueryParams, "storeId">,
 ): Promise<RewardListItem[]> {
-  const { data } = await api.get<RewardListItem[]>(`${BASE}/popular`, { params });
+  const { data } = params
+    ? await api.get<RewardListItem[]>(`${BASE}/popular`, { params })
+    : await api.get<RewardListItem[]>(`${BASE}/popular`);
   return data;
 }
 
@@ -45,7 +49,9 @@ export async function getReward(
   idOrSlug: string,
   params?: Pick<RewardQueryParams, "storeId">,
 ): Promise<RewardDetail> {
-  const { data } = await api.get<RewardDetail>(`${BASE}/${idOrSlug}`, { params });
+  const { data } = params
+    ? await api.get<RewardDetail>(`${BASE}/${idOrSlug}`, { params })
+    : await api.get<RewardDetail>(`${BASE}/${idOrSlug}`);
   return data;
 }
 
@@ -53,7 +59,9 @@ export async function getRelatedRewards(
   idOrSlug: string,
   params?: Pick<RewardQueryParams, "storeId">,
 ): Promise<RewardListItem[]> {
-  const { data } = await api.get<RewardListItem[]>(`${BASE}/${idOrSlug}/related`, { params });
+  const { data } = params
+    ? await api.get<RewardListItem[]>(`${BASE}/${idOrSlug}/related`, { params })
+    : await api.get<RewardListItem[]>(`${BASE}/${idOrSlug}/related`);
   return data;
 }
 
@@ -61,10 +69,9 @@ export async function getRewardEligibility(
   idOrSlug: string,
   params?: Pick<RewardQueryParams, "storeId">,
 ): Promise<EligibilityResult> {
-  const { data } = await api.get<EligibilityResult>(
-    `${BASE}/${idOrSlug}/eligibility`,
-    { params },
-  );
+  const { data } = params
+    ? await api.get<EligibilityResult>(`${BASE}/${idOrSlug}/eligibility`, { params })
+    : await api.get<EligibilityResult>(`${BASE}/${idOrSlug}/eligibility`);
   return data;
 }
 

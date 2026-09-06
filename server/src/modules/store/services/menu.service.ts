@@ -133,7 +133,7 @@ export class MenuService {
       isChefRecommended: isRecommended,
       rating: 4.5,
       available: true,
-      image: primaryImage?.url || '/assets/menu/placeholder.webp',
+      image: primaryImage?.url || '/assets/food/biryani_signature.png',
       calories: item.calories ?? undefined,
       prepTime: item.preparationTime ?? undefined,
       slug: item.slug,

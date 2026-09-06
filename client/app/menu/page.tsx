@@ -42,6 +42,7 @@ import { useWalletSummary } from "@/hooks/useWallet";
 import { useAuth } from "@/components/auth/AuthContext";
 import type { Dish, MenuQueryParams, MenuCategory } from "@/types/menu";
 import type { Store } from "@/types/store";
+import type { AuthUser } from "@/types/auth";
 import { Footer } from "@/components/footer/Footer";
 
 // Helper function to extract area from store name
@@ -74,7 +75,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
   return debounced;
 }
 
-const CATEGORY_ICON_MAP: Record<string, React.ComponentType<any>> = {
+const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   "Recommended": Award,
   "Meals": Utensils,
   "Starters": Flame,
@@ -742,7 +743,7 @@ export default function MenuPage() {
 }
 
 // 1. HEADER PRIMITIVE
-const Header = memo(({ walletBalance, user }: { walletBalance?: number; user?: any }) => {
+const Header = memo(({ walletBalance, user }: { walletBalance?: number; user?: AuthUser | null }) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -1204,7 +1205,13 @@ interface FeaturedCardProps {
   priority?: boolean;
 }
 
+const DEFAULT_VEG_FALLBACK = "/assets/food/paneer_chilly_dry.png";
+const DEFAULT_NONVEG_FALLBACK = "/assets/food/biryani_signature.png";
+const getFoodFallback = (isVeg?: boolean) => isVeg ? DEFAULT_VEG_FALLBACK : DEFAULT_NONVEG_FALLBACK;
+
 const FeaturedCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, priority }: FeaturedCardProps) => {
+  const [hasError, setHasError] = useState(false);
+
   const handleSelect = () => {
     onSelect(dish.id);
   };
@@ -1214,6 +1221,8 @@ const FeaturedCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, prior
     onWishlistToggle(dish.id);
   };
 
+  const imgSrc = hasError || !dish.image ? getFoodFallback(dish.isVeg) : dish.image;
+
   return (
     <div
       onClick={handleSelect}
@@ -1222,13 +1231,15 @@ const FeaturedCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, prior
       {/* Food Photography */}
       <div className="relative w-full h-[150px] rounded-[18px] overflow-hidden bg-stone-100 shrink-0">
         <Image
-          src={dish.image}
+          key={dish.image}
+          src={imgSrc}
           alt={dish.name}
           fill
           priority={priority}
           sizes="(max-width: 768px) 280px, 280px"
           loading={priority ? undefined : "lazy"}
           className="object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={() => setHasError(true)}
         />
         {/* Wishlist Floating Button */}
         <button
@@ -1278,6 +1289,8 @@ interface MenuCardProps {
 }
 
 const MenuCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, priority }: MenuCardProps) => {
+  const [hasError, setHasError] = useState(false);
+
   const handleSelect = () => {
     onSelect(dish.id);
   };
@@ -1286,6 +1299,8 @@ const MenuCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, priority 
     e.stopPropagation();
     onWishlistToggle(dish.id);
   };
+
+  const imgSrc = hasError || !dish.image ? getFoodFallback(dish.isVeg) : dish.image;
 
   return (
     <div
@@ -1356,13 +1371,15 @@ const MenuCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, priority 
       {/* Right Image Box */}
       <div className="relative size-28 md:size-32 rounded-[20px] overflow-hidden bg-stone-150 shrink-0 shadow-inner">
         <Image
-          src={dish.image}
+          key={dish.image}
+          src={imgSrc}
           alt={dish.name}
           fill
           priority={priority}
           sizes="(max-width: 768px) 112px, 128px"
           loading={priority ? undefined : "lazy"}
           className="object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={() => setHasError(true)}
         />
         {/* Wishlist Button */}
         <button
@@ -1406,9 +1423,13 @@ const DishDetailDrawer = memo(({
   onClose,
   storeMapsLink,
 }: DishDetailDrawerProps) => {
+  const [hasError, setHasError] = useState(false);
+
   const handleWishlist = () => {
     if (dish) onWishlistToggle(dish.id);
   };
+
+  const drawerImg = hasError || !dish?.image ? getFoodFallback(dish?.isVeg) : dish.image;
 
   return (
     <AnimatePresence>
@@ -1452,7 +1473,14 @@ const DishDetailDrawer = memo(({
 
             {/* Food photography hero */}
             <div className="relative w-full h-[260px] sm:h-[300px] bg-stone-100 shrink-0 shadow-inner">
-              <Image src={dish.image} alt={dish.name} fill className="object-cover" />
+              <Image
+                key={dish.image}
+                src={drawerImg}
+                alt={dish.name}
+                fill
+                className="object-cover"
+                onError={() => setHasError(true)}
+              />
               <div className="absolute bottom-4 left-4 bg-white rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-stone-200 shadow-soft">
                 <span className={`size-2.5 rounded-full ${dish.isVeg ? "bg-emerald-500" : "bg-red-500"}`} />
                 <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-stone-700">
