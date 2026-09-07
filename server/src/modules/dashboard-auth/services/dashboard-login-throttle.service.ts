@@ -59,12 +59,16 @@ export class DashboardLoginThrottleService {
     const key = `${DASHBOARD_REDIS_PREFIXES.LOGIN_ATTEMPTS}${ipAddress}`;
     const client = this.redis.getClient();
 
-    const attempts = await client.incr(key);
-    if (attempts === 1) {
-      await client.expire(key, this.windowSeconds);
+    try {
+      const attempts = await client.incr(key);
+      if (attempts === 1) {
+        await client.expire(key, this.windowSeconds);
+      }
+      return attempts <= this.maxWindowAttempts;
+    } catch {
+      // Redis unavailable — fail open so login is not blocked when cache is down
+      return true;
     }
-
-    return attempts <= this.maxWindowAttempts;
   }
 
   async resetAttempts(ipAddress: string): Promise<void> {

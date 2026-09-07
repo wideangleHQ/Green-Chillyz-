@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RedisService } from '../../../providers/redis/redis.service';
 import {
   DASHBOARD_CACHE_TTL,
@@ -15,6 +15,8 @@ import { DashboardSessionData, DashboardStoreContext } from '../interfaces';
  */
 @Injectable()
 export class DashboardCacheService {
+  private readonly logger = new Logger(DashboardCacheService.name);
+
   constructor(private readonly redis: RedisService) {}
 
   async setSession(
@@ -113,10 +115,16 @@ export class DashboardCacheService {
   }
 
   async incrementTokenVersion(storeId: string): Promise<number> {
-    const next = await this.redis
-      .getClient()
-      .incr(`${DASHBOARD_REDIS_PREFIXES.TOKEN_VERSION}${storeId}`);
-    return next;
+    try {
+      return await this.redis
+        .getClient()
+        .incr(`${DASHBOARD_REDIS_PREFIXES.TOKEN_VERSION}${storeId}`);
+    } catch (err) {
+      this.logger.warn(
+        `Redis incrementTokenVersion failed for store "${storeId}": ${(err as Error).message}`,
+      );
+      throw err;
+    }
   }
 
   private async addStoreSession(

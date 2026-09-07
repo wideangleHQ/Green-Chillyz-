@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class QueueService {
+export class QueueService implements OnModuleDestroy {
   private readonly logger = new Logger(QueueService.name);
   private readonly queues = new Map<string, Queue>();
 
@@ -11,11 +11,15 @@ export class QueueService {
 
   getQueue(name: string): Queue {
     if (!this.queues.has(name)) {
+      const tlsEnabled = this.configService.get<boolean>('queue.tls');
       const queue = new Queue(name, {
         connection: {
           host: this.configService.get<string>('queue.host'),
           port: this.configService.get<number>('queue.port'),
           password: this.configService.get<string>('queue.password') || undefined,
+          tls: tlsEnabled ? {} : undefined,
+          enableOfflineQueue: false,
+          maxRetriesPerRequest: 1,
         },
       });
       this.queues.set(name, queue);
@@ -39,5 +43,10 @@ export class QueueService {
       removeOnComplete: { count: 1000 },
       removeOnFail: { count: 5000 },
     });
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await Promise.all([...this.queues.values()].map((q) => q.close()));
+    this.logger.log('All queues closed');
   }
 }
