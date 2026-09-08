@@ -178,7 +178,7 @@ export function BrandStorySection() {
 
             {/* Learn More Button */}
             <Link
-              href="/menu"
+              href="/about"
               id="learn-more-about-btn"
               className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-sans font-bold uppercase tracking-wider transition-[background-color,color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-soft cursor-pointer border"
               style={{

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, CircleDollarSign, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
+import { RupeeCoin } from "@/components/ui/RupeeCoin";
 import Link from "next/link";
 import { Reveal } from "@/components/ui/Reveal";
 import { GameCard } from "./GameCard";
@@ -63,10 +64,10 @@ export function GamesSection() {
 
       {/* Floating Low-Opacity Coin Accents */}
       <div className="absolute top-[6%] lg:top-[12%] left-[2%] lg:left-[4%] pointer-events-none z-0 opacity-15 rotate-12">
-        <CircleDollarSign className="size-16 md:size-20 text-amber-600 stroke-[1]" />
+        <RupeeCoin className="size-16 md:size-20 text-amber-600 stroke-[1]" />
       </div>
       <div className="absolute bottom-[4%] lg:bottom-[10%] right-[3%] lg:right-[5%] pointer-events-none z-0 opacity-15 -rotate-[20deg]">
-        <CircleDollarSign className="size-20 md:size-24 text-amber-600 stroke-[1]" />
+        <RupeeCoin className="size-20 md:size-24 text-amber-600 stroke-[1]" />
       </div>
 
       <div className="container-site relative z-10 w-full h-full flex flex-col lg:flex-row gap-3 sm:gap-8 lg:gap-14 items-center justify-between min-h-0 overflow-x-hidden overflow-y-visible">

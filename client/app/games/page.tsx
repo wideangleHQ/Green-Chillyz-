@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, CircleDollarSign, Gamepad2 } from "lucide-react";
+import { Star, Gamepad2 } from "lucide-react";
+import { RupeeCoin } from "@/components/ui/RupeeCoin";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Navbar } from "@/components/navbar/Navbar";
 import { GameCard } from "@/components/games/GameCard";
@@ -58,10 +59,10 @@ export default function GamesPage() {
 
         {/* Floating Low-Opacity Coin Accents */}
         <div className="absolute top-[15%] left-[5%] pointer-events-none z-0 opacity-10 rotate-12">
-          <CircleDollarSign className="size-16 md:size-24 text-amber-600 stroke-[1]" />
+          <RupeeCoin className="size-16 md:size-24 text-amber-600" strokeWidth={1} />
         </div>
         <div className="absolute bottom-[15%] right-[5%] pointer-events-none z-0 opacity-10 -rotate-[20deg]">
-          <CircleDollarSign className="size-20 md:size-28 text-amber-600 stroke-[1]" />
+          <RupeeCoin className="size-20 md:size-28 text-amber-600" strokeWidth={1} />
         </div>
 
         {/* Main Content Area */}

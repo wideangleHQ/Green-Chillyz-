@@ -356,26 +356,12 @@ export function HeroSection() {
               Explore Menu
               <span className="text-sm">→</span>
             </Link>
-            <a
-              href="#story"
+            <Link
+              href="/games"
               className="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 font-sans font-extrabold uppercase tracking-wider text-sm bg-white text-stone-900 hover:bg-stone-100 transition-colors duration-200 shadow-medium min-h-12"
             >
-              Our Legacy
-            </a>
-          </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs font-sans font-bold text-stone-900">
-            <span className="px-4 py-2 rounded-2xl bg-white border border-stone-200 shadow-medium flex items-center gap-2">
-              <span className="font-number text-[#006b2a] font-extrabold">26+</span>
-              <span className="text-stone-700 font-semibold">Years Legacy</span>
-            </span>
-            <span className="px-4 py-2 rounded-2xl bg-white border border-stone-200 shadow-medium flex items-center gap-2">
-              <span className="font-number text-[#006b2a] font-extrabold">15+</span>
-              <span className="text-stone-700 font-semibold">Outlets</span>
-            </span>
-            <span className="px-4 py-2 rounded-2xl bg-white border border-stone-200 shadow-medium flex items-center gap-2">
-              <span className="font-number text-[#006b2a] font-extrabold">300+</span>
-              <span className="text-stone-700 font-semibold">Team Members</span>
-            </span>
+              Play Games
+            </Link>
           </div>
         </div>
       </section>
@@ -458,35 +444,12 @@ export function HeroSection() {
               </Link>
 
               {/* Solid Secondary White CTA Button */}
-              <a
-                href="#story"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const el = document.getElementById("story");
-                  if (el) {
-                    el.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
+              <Link
+                href="/games"
                 className="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 font-sans font-extrabold uppercase tracking-wider text-sm bg-white text-stone-900 hover:bg-stone-100 transition-colors duration-200 shadow-medium min-h-12"
               >
-                Our Legacy
-              </a>
-            </div>
-
-            {/* Clean Trust Indicators with Space Grotesk Font for Numbers */}
-            <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-sans font-bold text-stone-900">
-              <span className="px-5 py-2.5 rounded-2xl bg-white border border-stone-200 shadow-medium flex items-center gap-2">
-                <span className="font-number text-[#006b2a] text-sm sm:text-base font-extrabold">26+</span>
-                <span className="text-stone-700 font-semibold">Years Legacy</span>
-              </span>
-              <span className="px-5 py-2.5 rounded-2xl bg-white border border-stone-200 shadow-medium flex items-center gap-2">
-                <span className="font-number text-[#006b2a] text-sm sm:text-base font-extrabold">15+</span>
-                <span className="text-stone-700 font-semibold">Outlets</span>
-              </span>
-              <span className="px-5 py-2.5 rounded-2xl bg-white border border-stone-200 shadow-medium flex items-center gap-2">
-                <span className="font-number text-[#006b2a] text-sm sm:text-base font-extrabold">300+</span>
-                <span className="text-stone-700 font-semibold">Team Members</span>
-              </span>
+                Play Games
+              </Link>
             </div>
           </div>
         </div>

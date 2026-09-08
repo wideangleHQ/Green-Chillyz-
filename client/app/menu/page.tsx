@@ -12,7 +12,6 @@ import {
   MapPin,
   ChevronDown,
   ChevronRight,
-  CircleDollarSign,
   X,
   Share2,
   Sparkles,
@@ -44,6 +43,7 @@ import type { Dish, MenuQueryParams, MenuCategory } from "@/types/menu";
 import type { Store } from "@/types/store";
 import type { AuthUser } from "@/types/auth";
 import { Footer } from "@/components/footer/Footer";
+import { RupeeCoin } from "@/components/ui/RupeeCoin";
 
 // Helper function to extract area from store name
 function getStoreArea(store: Store): string {
@@ -790,7 +790,7 @@ const Header = memo(({ walletBalance, user }: { walletBalance?: number; user?: A
             href="/wallet"
             className="flex items-center gap-1.5 bg-brand-green/10 text-brand-green border border-brand-green/20 px-3 py-1.5 rounded-full text-xs font-sans font-extrabold uppercase tracking-wide cursor-pointer transition hover:bg-brand-green/15 shrink-0"
           >
-            <CircleDollarSign className="size-4" />
+            <RupeeCoin className="size-4" strokeWidth={2} />
             <span suppressHydrationWarning>{walletBalance !== undefined ? `${formatCoins(walletBalance)} CC` : "Coins"}</span>
           </Link>
 

@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, CircleDollarSign, AlertCircle, RefreshCw, X } from "lucide-react";
+import { Sparkles, AlertCircle, RefreshCw, X } from "lucide-react";
+import { RupeeCoin } from "@/components/ui/RupeeCoin";
 import type { Game, GameSession } from "@/types/game";
 import { useStartSession, useEndSession } from "@/hooks/useGames";
 
@@ -269,7 +270,7 @@ export function SpinWheelGame({ game, onClose, onSuccess }: SpinWheelGameProps) 
             >
               <div className="size-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
                 {spinResult.rewardDecision?.rewardGranted ? (
-                  <CircleDollarSign className="size-10 animate-bounce" />
+                  <RupeeCoin className="size-10 animate-bounce" strokeWidth={2} />
                 ) : (
                   <Sparkles className="size-10" />
                 )}

@@ -4,7 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { CircleDollarSign, Menu, UserRound, LogOut } from "lucide-react";
+import { Menu, UserRound, LogOut } from "lucide-react";
+import { RupeeCoin } from "@/components/ui/RupeeCoin";
 import { Drawer } from "@/components/ui/Drawer";
 import { DURATION, EASE_STANDARD } from "@/lib/motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
@@ -38,7 +39,7 @@ function CoinsButton({ onClick, balance }: CoinsButtonProps) {
       onClick={onClick}
       className="flex min-h-11 items-center gap-2 rounded-full bg-brand-green hover:bg-brand-green-hover px-5 py-2 text-sm font-sans font-extrabold uppercase tracking-wider text-white shadow-soft transition-all duration-200 hover:shadow-hover cursor-pointer border-none"
     >
-      <CircleDollarSign aria-hidden="true" className="size-5" strokeWidth={2} />
+      <RupeeCoin className="size-5" strokeWidth={2} />
       <span suppressHydrationWarning>{balance !== undefined ? `${formatCoins(balance)} CC` : "Coins"}</span>
     </button>
   );
@@ -77,23 +78,21 @@ export function Navbar() {
       >
         <nav
           aria-label="Main"
-          className="glass flex w-full max-w-5xl items-center justify-between gap-4 rounded-full py-2 pl-4 pr-2 shadow-floating"
+          className="glass flex w-full max-w-5xl items-center justify-between gap-4 rounded-full py-1.5 pl-3.5 pr-2 shadow-floating"
         >
           <Link
             href="/"
-            className="flex min-h-11 items-center gap-2"
+            className="flex min-h-11 items-center"
             aria-label="GreenChillyz home"
           >
             <Image
               src="/assets/icons/logo.png"
-              alt=""
-              width={36}
-              height={36}
-              className="size-9 object-contain"
+              alt="GreenChillyz"
+              width={56}
+              height={56}
+              className="size-11 sm:size-12 object-contain"
+              priority
             />
-            <span className="hidden text-nav-link font-semibold text-primary sm:inline">
-              GreenChillyz
-            </span>
           </Link>
 
           <ul className="hidden items-center gap-6 lg:flex">

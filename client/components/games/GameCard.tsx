@@ -2,7 +2,8 @@
 
 import { useState, useRef, MouseEvent, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, CircleDollarSign, ArrowUpRight, Sparkles } from "lucide-react";
+import { Star, ArrowUpRight, Sparkles } from "lucide-react";
+import { RupeeCoin } from "@/components/ui/RupeeCoin";
 import Image from "next/image";
 import { GameData } from "./gamesData";
 
@@ -20,33 +21,23 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!isActive || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    const mouseX = (e.clientX - rect.left - width / 2) / (width / 2);
-    const mouseY = (e.clientY - rect.top - height / 2) / (height / 2);
-
-    const rotX = -mouseY * 7;
-    const rotY = mouseX * 7;
-    const spotX = ((e.clientX - rect.left) / width) * 100;
-    const spotY = ((e.clientY - rect.top) / height) * 100;
-
-    cardRef.current.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-12px) scale(1.04)`;
     if (spotlightRef.current) {
-      spotlightRef.current.style.background = `radial-gradient(circle at ${spotX}% ${spotY}%, rgba(255,255,255,0.6) 0%, transparent 65%)`;
+      spotlightRef.current.style.opacity = "1";
+      spotlightRef.current.style.background = `radial-gradient(400px circle at ${x}px ${y}px, rgba(255, 255, 255, 0.4), transparent 60%)`;
     }
   };
 
   const handleMouseEnter = () => {
-    if (!isActive) return;
-    setIsHovered(true);
+    if (isActive) setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
-    if (!isActive) return;
     setIsHovered(false);
-    if (cardRef.current) {
-      cardRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)`;
+    if (spotlightRef.current) {
+      spotlightRef.current.style.opacity = "0";
     }
   };
 
@@ -55,37 +46,41 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
   return (
     <div
       ref={cardRef}
-      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative w-[285px] sm:w-[310px] md:w-[350px] flex flex-col gap-3.5 will-change-transform transform-gpu transition-transform duration-300 ease-out ${isActive ? "group" : ""}`}
+      className={`relative w-full h-[380px] sm:h-[460px] md:h-[480px] lg:h-[500px] rounded-[32px] overflow-hidden transition-all duration-300 select-none flex flex-col justify-between border ${
+        isActive
+          ? "border-stone-200/80 shadow-heavy hover:shadow-hover hover:-translate-y-1.5"
+          : "border-stone-200/40 shadow-soft opacity-60 scale-[0.98]"
+      }`}
       style={{
-        transformStyle: "preserve-3d",
-        pointerEvents: isActive ? "auto" : "none",
+        backgroundColor: "#ffffff",
       }}
     >
-      {/* Top Image Container (+10% height on mobile view only) */}
-      <div className={`relative w-full aspect-[4/4.2] sm:aspect-[4/3.8] md:aspect-[4/3.8] rounded-[28px] md:rounded-[36px] overflow-visible bg-stone-100 border border-white/80 shadow-soft transition-all duration-500 ${isActive ? "group-hover:shadow-hover" : ""}`}>
-        <div className="relative w-full h-full rounded-[28px] md:rounded-[36px] overflow-hidden">
-          {/* Dynamic GPU Spotlight on Hover — active card only */}
-          {isActive && (
-            <div
-              ref={spotlightRef}
-              className="absolute inset-0 pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            />
-          )}
+      {/* Interactive Spotlight Effect */}
+      <div
+        ref={spotlightRef}
+        className="pointer-events-none absolute inset-0 z-30 transition-opacity duration-300 opacity-0"
+      />
 
-          {/* Main Artwork Image */}
+      {/* Top Banner & Visual Artwork Container */}
+      <div className="relative w-full h-[52%] sm:h-[55%] overflow-hidden bg-stone-100">
+        {/* Visual Game Image */}
+        <div className="relative w-full h-full">
           <Image
             src={game.image}
             alt={game.name}
             fill
-            sizes="(max-width: 768px) 85vw, 350px"
-            className={`object-cover transition-transform duration-700 ease-out ${isActive ? "group-hover:scale-108" : ""}`}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className={`object-cover transition-transform duration-700 ease-out ${
+              hoverActive ? "scale-108" : "scale-100"
+            }`}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-900/40 via-transparent to-black/10" />
         </div>
 
-        {/* Floating Coin Sparkles — active card hover only */}
+        {/* Ambient Floating Coins on Hover */}
         <AnimatePresence>
           {hoverActive && (
             <div className="absolute inset-0 pointer-events-none z-20 overflow-visible">
@@ -107,7 +102,7 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
                   }}
                   className="absolute"
                 >
-                  <CircleDollarSign className="size-5 text-amber-500 fill-amber-300/40 drop-shadow" />
+                  <RupeeCoin className="size-5 text-amber-500 fill-amber-300/40 drop-shadow" />
                 </motion.div>
               ))}
             </div>
