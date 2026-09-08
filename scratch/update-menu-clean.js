@@ -1,27 +1,19 @@
-import { PrismaClient } from '@prisma/client';
+const fs = require('fs');
+const path = require('path');
 
-const prisma = new PrismaClient();
-
-interface ImageRule {
-  imageFile: string;
-  folder: string;
-  allowedFoodTypes: ('VEG' | 'NON_VEG' | 'EGG')[];
-  itemNames: string[];
-}
-
-const MAPPING_RULES: ImageRule[] = [
+const MAPPING_RULES = [
   // Biryani (6 images)
   {
     imageFile: 'CHICKEN_BIRYANI.jpg',
     folder: 'Biryani',
     allowedFoodTypes: ['NON_VEG'],
-    itemNames: ['Chicken Biryani', 'Chicken Biryani (Full)', 'Chicken Biryani (Half)'],
+    itemNames: ['Chicken Biryani', 'Chicken Biryani (Full)', 'Chicken Biryani (Half)', 'Chicken Dum Biryani'],
   },
   {
     imageFile: 'CHICKEN_LEG_BIRYANI.jpg',
     folder: 'Biryani',
     allowedFoodTypes: ['NON_VEG'],
-    itemNames: ['Chicken Spl Leg Biryani', 'Chicken Tandoor Leg Biryani'],
+    itemNames: ['Chicken Spl Leg Biryani', 'Chicken Tandoor Leg Biryani', 'Chicken Leg Biryani'],
   },
   {
     imageFile: 'Kabab_biryani.jpg',
@@ -45,7 +37,7 @@ const MAPPING_RULES: ImageRule[] = [
     imageFile: 'VEG_BIRYANI.jpg',
     folder: 'Biryani',
     allowedFoodTypes: ['VEG'],
-    itemNames: ['Veg Biryani', 'Special Veg Biryani'],
+    itemNames: ['Veg Biryani', 'Special Veg Biryani', 'Veg Dum Biryani'],
   },
 
   // Chicken (5 images) — strictly NON_VEG
@@ -106,7 +98,7 @@ const MAPPING_RULES: ImageRule[] = [
   {
     imageFile: 'Egg_noodles.jpg',
     folder: 'Noodles',
-    allowedFoodTypes: ['EGG'],
+    allowedFoodTypes: ['NON_VEG', 'EGG'],
     itemNames: ['Egg Noodles', 'Egg Chowmein', 'Egg Hakka Noodles'],
   },
   {
@@ -192,7 +184,7 @@ const MAPPING_RULES: ImageRule[] = [
     imageFile: 'Lachha_paratha.jpg',
     folder: 'Paratha',
     allowedFoodTypes: ['VEG'],
-    itemNames: ['Lachha Paratha', 'Laccha Paratha'],
+    itemNames: ['Lachha Paratha', 'Laccha Paratha', 'Plain Lachha Paratha'],
   },
 
   // Roll (7 images)
@@ -239,7 +231,7 @@ const MAPPING_RULES: ImageRule[] = [
     itemNames: ['Paneer Roll'],
   },
 
-  // Tandoor (7 images) — strictly NON_VEG (Never assign to Veg/Soya Chaap)
+  // Tandoor (7 images) — strictly NON_VEG
   {
     imageFile: 'CHICKEN_TIKKA.jpg',
     folder: 'Tandoor',
@@ -284,91 +276,45 @@ const MAPPING_RULES: ImageRule[] = [
   },
 ];
 
-async function main() {
-  console.log('=== Populating MenuItemImage records with strict Veg / Non-Veg separation ===\n');
+const menuJsonPath = path.join('c:/WideAngle/Green Chillyz', 'server/src/menu.json');
+const menuJson = JSON.parse(fs.readFileSync(menuJsonPath, 'utf8'));
 
-  const items = await prisma.menuItem.findMany({
-    include: {
-      category: { select: { name: true } },
-      brand: { select: { name: true } },
-      images: true,
-    }
-  });
+let totalUpdated = 0;
+let totalKeptEmpty = 0;
 
-  console.log(`Found ${items.length} total menu items in database.`);
-
-  let createdCount = 0;
-  let updatedCount = 0;
-  let removedCount = 0;
-  let matchedItemCount = 0;
-
-  for (const item of items) {
-    let matchedRule: ImageRule | null = null;
-    for (const rule of MAPPING_RULES) {
-      if (
-        rule.allowedFoodTypes.includes(item.foodType as any) &&
-        rule.itemNames.some(n => n.toLowerCase() === item.name.trim().toLowerCase())
-      ) {
-        matchedRule = rule;
-        break;
-      }
-    }
-
-    if (matchedRule) {
-      matchedItemCount++;
-      const url = encodeURI(`/assets/Food Image/${matchedRule.folder}/${matchedRule.imageFile}`);
-      const altText = item.name;
-
-      if (item.images.length === 0) {
-        await prisma.menuItemImage.create({
-          data: {
-            menuItemId: item.id,
-            url,
-            thumbnailUrl: url,
-            altText,
-            isPrimary: true,
-            displayOrder: 0,
-          }
-        });
-        createdCount++;
-      } else {
-        const primaryImg = item.images.find(img => img.isPrimary) || item.images[0];
-        await prisma.menuItemImage.update({
-          where: { id: primaryImg.id },
-          data: {
-            url,
-            thumbnailUrl: url,
-            altText,
-            isPrimary: true,
-          }
-        });
-        updatedCount++;
-      }
-    } else {
-      // If item does not match our strict rules, remove all image records to keep it completely empty
-      if (item.images.length > 0) {
-        for (const img of item.images) {
-          await prisma.menuItemImage.delete({ where: { id: img.id } });
-          removedCount++;
+menuJson.stores.forEach(storeObj => {
+  storeObj.categories.forEach(cat => {
+    cat.items.forEach(item => {
+      let matchedRule = null;
+      for (const rule of MAPPING_RULES) {
+        if (
+          rule.allowedFoodTypes.includes(item.foodType) &&
+          rule.itemNames.some(n => n.toLowerCase() === item.name.trim().toLowerCase())
+        ) {
+          matchedRule = rule;
+          break;
         }
       }
-    }
-  }
 
-  console.log(`\nMapping Summary:`);
-  console.log(`- Total Matched Items: ${matchedItemCount}`);
-  console.log(`- Created Image Records: ${createdCount}`);
-  console.log(`- Updated Image Records: ${updatedCount}`);
-  console.log(`- Removed Incompatible/Mismatched Records: ${removedCount}`);
-  console.log(`- Unmatched Items (Safe default fallback): ${items.length - matchedItemCount}`);
+      if (matchedRule) {
+        const url = encodeURI(`/assets/Food Image/${matchedRule.folder}/${matchedRule.imageFile}`);
+        item.images = [
+          {
+            url,
+            thumbnail: url,
+            isPrimary: true,
+          }
+        ];
+        totalUpdated++;
+      } else {
+        // Items without real original image stay empty!
+        item.images = [];
+        totalKeptEmpty++;
+      }
+    });
+  });
+});
 
-  const totalImagesInDb = await prisma.menuItemImage.count();
-  console.log(`- Total MenuItemImage records in DB now: ${totalImagesInDb}`);
-}
-
-main()
-  .catch(e => {
-    console.error('Error populating menu images:', e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+fs.writeFileSync(menuJsonPath, JSON.stringify(menuJson, null, 2), 'utf8');
+console.log(`Updated ${totalUpdated} items with authentic food images.`);
+console.log(`Kept ${totalKeptEmpty} unmapped items completely empty (no fake placeholders).`);

@@ -1205,10 +1205,6 @@ interface FeaturedCardProps {
   priority?: boolean;
 }
 
-const DEFAULT_VEG_FALLBACK = "/assets/food/paneer_chilly_dry.png";
-const DEFAULT_NONVEG_FALLBACK = "/assets/food/biryani_signature.png";
-const getFoodFallback = (isVeg?: boolean) => isVeg ? DEFAULT_VEG_FALLBACK : DEFAULT_NONVEG_FALLBACK;
-
 const FeaturedCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, priority }: FeaturedCardProps) => {
   const [hasError, setHasError] = useState(false);
 
@@ -1221,26 +1217,36 @@ const FeaturedCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, prior
     onWishlistToggle(dish.id);
   };
 
-  const imgSrc = hasError || !dish.image ? getFoodFallback(dish.isVeg) : dish.image;
+  const hasImage = Boolean(dish.image && !hasError && dish.image.trim() !== "");
 
   return (
     <div
       onClick={handleSelect}
       className="relative shrink-0 w-[280px] bg-white border border-stone-200 rounded-[24px] p-3 shadow-soft hover:shadow-hover hover:scale-[1.01] transition-all duration-300 cursor-pointer overflow-hidden group"
     >
-      {/* Food Photography */}
-      <div className="relative w-full h-[150px] rounded-[18px] overflow-hidden bg-stone-100 shrink-0">
-        <Image
-          key={dish.image}
-          src={imgSrc}
-          alt={dish.name}
-          fill
-          priority={priority}
-          sizes="(max-width: 768px) 280px, 280px"
-          loading={priority ? undefined : "lazy"}
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={() => setHasError(true)}
-        />
+      {/* Food Photography or Empty State */}
+      <div className="relative w-full h-[150px] rounded-[18px] overflow-hidden bg-stone-100 shrink-0 flex items-center justify-center">
+        {hasImage ? (
+          <Image
+            key={dish.image}
+            src={dish.image}
+            alt={dish.name}
+            fill
+            priority={priority}
+            sizes="(max-width: 768px) 280px, 280px"
+            loading={priority ? undefined : "lazy"}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={() => setHasError(true)}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-stone-300 gap-1">
+            {dish.isVeg ? (
+              <Leaf className="size-8 stroke-[1.5]" />
+            ) : (
+              <UtensilsCrossed className="size-8 stroke-[1.5]" />
+            )}
+          </div>
+        )}
         {/* Wishlist Floating Button */}
         <button
           onClick={handleWishlist}
@@ -1300,7 +1306,7 @@ const MenuCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, priority 
     onWishlistToggle(dish.id);
   };
 
-  const imgSrc = hasError || !dish.image ? getFoodFallback(dish.isVeg) : dish.image;
+  const hasImage = Boolean(dish.image && !hasError && dish.image.trim() !== "");
 
   return (
     <div
@@ -1369,18 +1375,28 @@ const MenuCard = memo(({ dish, wishlisted, onWishlistToggle, onSelect, priority 
       </div>
 
       {/* Right Image Box */}
-      <div className="relative size-28 md:size-32 rounded-[20px] overflow-hidden bg-stone-150 shrink-0 shadow-inner">
-        <Image
-          key={dish.image}
-          src={imgSrc}
-          alt={dish.name}
-          fill
-          priority={priority}
-          sizes="(max-width: 768px) 112px, 128px"
-          loading={priority ? undefined : "lazy"}
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={() => setHasError(true)}
-        />
+      <div className="relative size-28 md:size-32 rounded-[20px] overflow-hidden bg-stone-100 shrink-0 shadow-inner flex items-center justify-center">
+        {hasImage ? (
+          <Image
+            key={dish.image}
+            src={dish.image}
+            alt={dish.name}
+            fill
+            priority={priority}
+            sizes="(max-width: 768px) 112px, 128px"
+            loading={priority ? undefined : "lazy"}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={() => setHasError(true)}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-stone-300">
+            {dish.isVeg ? (
+              <Leaf className="size-8 stroke-[1.5]" />
+            ) : (
+              <UtensilsCrossed className="size-8 stroke-[1.5]" />
+            )}
+          </div>
+        )}
         {/* Wishlist Button */}
         <button
           onClick={handleWishlist}
@@ -1429,7 +1445,7 @@ const DishDetailDrawer = memo(({
     if (dish) onWishlistToggle(dish.id);
   };
 
-  const drawerImg = hasError || !dish?.image ? getFoodFallback(dish?.isVeg) : dish.image;
+  const hasImage = Boolean(dish?.image && !hasError && dish.image.trim() !== "");
 
   return (
     <AnimatePresence>
@@ -1471,16 +1487,26 @@ const DishDetailDrawer = memo(({
               </button>
             </div>
 
-            {/* Food photography hero */}
-            <div className="relative w-full h-[260px] sm:h-[300px] bg-stone-100 shrink-0 shadow-inner">
-              <Image
-                key={dish.image}
-                src={drawerImg}
-                alt={dish.name}
-                fill
-                className="object-cover"
-                onError={() => setHasError(true)}
-              />
+            {/* Food photography or clean header hero */}
+            <div className="relative w-full h-[220px] sm:h-[260px] bg-stone-100 shrink-0 shadow-inner flex items-center justify-center">
+              {hasImage ? (
+                <Image
+                  key={dish.image}
+                  src={dish.image}
+                  alt={dish.name}
+                  fill
+                  className="object-cover"
+                  onError={() => setHasError(true)}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-stone-300 gap-2">
+                  {dish.isVeg ? (
+                    <Leaf className="size-14 stroke-[1.2]" />
+                  ) : (
+                    <UtensilsCrossed className="size-14 stroke-[1.2]" />
+                  )}
+                </div>
+              )}
               <div className="absolute bottom-4 left-4 bg-white rounded-lg px-2.5 py-1 flex items-center gap-1.5 border border-stone-200 shadow-soft">
                 <span className={`size-2.5 rounded-full ${dish.isVeg ? "bg-emerald-500" : "bg-red-500"}`} />
                 <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-stone-700">
@@ -1598,8 +1624,14 @@ const DishDetailDrawer = memo(({
                         key={item.id}
                         className="flex items-center gap-3 p-2 rounded-xl hover:bg-stone-50 transition border border-transparent hover:border-stone-150 cursor-pointer"
                       >
-                        <div className="relative size-12 rounded-lg overflow-hidden bg-stone-100 shrink-0">
-                          <Image src={item.image} alt={item.name} fill className="object-cover" />
+                        <div className="relative size-12 rounded-lg overflow-hidden bg-stone-100 shrink-0 flex items-center justify-center text-stone-300">
+                          {item.image && item.image.trim() !== "" ? (
+                            <Image src={item.image} alt={item.name} fill className="object-cover" />
+                          ) : item.isVeg ? (
+                            <Leaf className="size-5 stroke-[1.5]" />
+                          ) : (
+                            <UtensilsCrossed className="size-5 stroke-[1.5]" />
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <h5 className="font-sans text-xs font-extrabold uppercase text-stone-950 truncate">
