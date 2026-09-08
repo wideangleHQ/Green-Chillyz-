@@ -3,16 +3,15 @@ import type { ApiErrorShape } from '@/types/auth';
 
 const getApiBase = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL || '';
-  if (typeof window !== 'undefined' && envUrl) {
+  if (envUrl) {
     try {
-      const parsedEnv = new URL(envUrl);
-      const port = parsedEnv.port ? `:${parsedEnv.port}` : '';
-      return `${window.location.protocol}//${window.location.hostname}${port}`;
+      const parsed = new URL(envUrl);
+      return parsed.origin;
     } catch (e) {
       console.error('Failed to parse NEXT_PUBLIC_API_URL', e);
     }
   }
-  return envUrl || 'http://localhost:5001';
+  return 'http://localhost:5001';
 };
 
 const API_BASE = getApiBase();
