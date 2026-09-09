@@ -11,9 +11,10 @@ interface GameCardProps {
   game: GameData;
   isActive: boolean;
   onPlay?: (gameId: string) => void;
+  size?: "default" | "compact";
 }
 
-export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameCardProps) {
+export const GameCard = memo(function GameCard({ game, isActive, onPlay, size = "default" }: GameCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -42,6 +43,7 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
   };
 
   const hoverActive = isActive && isHovered;
+  const compact = size === "compact";
 
   return (
     <div
@@ -49,7 +51,7 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative w-full h-[380px] sm:h-[460px] md:h-[480px] lg:h-[500px] rounded-[32px] overflow-hidden transition-all duration-300 select-none flex flex-col justify-between border ${
+      className={`relative ${compact ? "w-[260px] sm:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[310px] h-[350px] sm:h-[390px] md:h-[410px] lg:h-[430px]" : "w-full h-[380px] sm:h-[460px] md:h-[480px] lg:h-[500px]"} rounded-[28px] overflow-hidden transition-all duration-300 select-none flex flex-col justify-between border ${
         isActive
           ? "border-stone-200/80 shadow-heavy hover:shadow-hover hover:-translate-y-1.5"
           : "border-stone-200/40 shadow-soft opacity-60 scale-[0.98]"
@@ -143,9 +145,9 @@ export const GameCard = memo(function GameCard({ game, isActive, onPlay }: GameC
       </div>
 
       {/* Bottom Content Card Box */}
-      <div className={`w-full rounded-[22px] bg-white p-5 border border-stone-200/80 shadow-soft flex flex-col gap-2 transition-all duration-300 ${isActive ? "group-hover:shadow-hover" : ""}`}>
+      <div className={`${compact ? "rounded-[18px] p-4" : "rounded-[22px] p-5"} w-full bg-white border border-stone-200/80 shadow-soft flex flex-col gap-2 transition-all duration-300 ${isActive ? "group-hover:shadow-hover" : ""}`}>
         <div className="flex items-center justify-between">
-          <div className="text-lg md:text-xl font-sans font-extrabold text-on-surface uppercase tracking-tight">
+          <div className={`${compact ? "text-base md:text-lg" : "text-lg md:text-xl"} font-sans font-extrabold text-on-surface uppercase tracking-tight`}>
             {game.name}
           </div>
           {/* Rating Badge */}

@@ -58,12 +58,14 @@ const ReviewsSection = dynamic(
 );
 
 export default function Home() {
+  const structuredData = buildStructuredData();
+
   return (
     <SmoothScroll>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildStructuredData()),
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
         }}
       />
       <Preloader />

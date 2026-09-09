@@ -515,6 +515,15 @@ export default function MenuPage() {
 
       {/* Center Container for Desktop Alignment */}
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 mt-[72px] pt-5 pb-16">
+        <header className="mb-6 max-w-3xl">
+          <h1 className="text-3xl md:text-5xl font-heading font-extrabold uppercase tracking-tight text-stone-950">
+            GreenChillyz Indian Food Menu
+          </h1>
+          <p className="mt-3 text-sm md:text-base leading-relaxed text-stone-600">
+            Browse meals, starters, combos, rice, noodles, desserts and beverages by outlet. Select a GreenChillyz, YellowChillyz or GoldenChillyz location to see available dishes.
+          </p>
+        </header>
+
         {/* 2. Outlet Selector & Details */}
         <div className="mb-4">
           <OutletSelector

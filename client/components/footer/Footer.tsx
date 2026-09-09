@@ -1,15 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SiFacebook, SiInstagram, SiYoutube } from "react-icons/si";
-import { FaLinkedin } from "react-icons/fa";
 import { MapPin, Phone, Mail } from "lucide-react";
-
-const SOCIAL_LINKS = [
-  { href: "https://facebook.com", label: "Facebook", Icon: SiFacebook },
-  { href: "https://instagram.com", label: "Instagram", Icon: SiInstagram },
-  { href: "https://linkedin.com", label: "LinkedIn", Icon: FaLinkedin },
-  { href: "https://youtube.com", label: "YouTube", Icon: SiYoutube },
-];
 
 export function Footer() {
   return (
@@ -27,7 +18,7 @@ export function Footer() {
         {/* Main Columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           
-          {/* Column 1: Brand & Socials */}
+          {/* Column 1: Brand */}
           <div className="flex flex-col gap-5">
             <Link href="/" className="flex items-center gap-3 w-fit group">
               <div className="size-10 rounded-full bg-white p-1 flex items-center justify-center">
@@ -46,20 +37,6 @@ export function Footer() {
             <p className="text-sm font-sans text-white/70 max-w-xs leading-relaxed">
               Flavours That Bring People Together. Crafting premium culinary experiences across Eastern India.
             </p>
-            <div className="flex items-center gap-3 pt-2">
-              {SOCIAL_LINKS.map(({ href, label, Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="flex items-center justify-center size-9 rounded-full bg-white/5 text-white/80 hover:text-[#004D1E] hover:bg-gold transition-all duration-200"
-                >
-                  <Icon className="size-4.5" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Column 2: Explore */}

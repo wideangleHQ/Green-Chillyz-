@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo/metadata";
 
 const anton = localFont({
   src: "./fonts/Anton-Regular.ttf",
@@ -22,24 +23,26 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://greenchillyz.com"),
-  title: "GreenChillyz — Taste, Reimagined",
-  description:
-    "One family, three flavors: GreenChillyz, YellowChillyz and GoldenChillyz. Explore the story, earn coins, find your nearest table.",
-  alternates: { canonical: "/" },
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "GreenChillyz | Indian Food, Dining & Catering in Odisha",
+    template: "%s | GreenChillyz",
+  },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
   openGraph: {
-    title: "GreenChillyz — Taste, Reimagined",
-    description:
-      "One family, three flavors: GreenChillyz, YellowChillyz and GoldenChillyz.",
-    url: "/",
-    siteName: "GreenChillyz Group",
+    title: "GreenChillyz | Indian Food, Dining & Catering in Odisha",
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     type: "website",
+    images: [{ url: absoluteUrl("/assets/brand-story/brand_story_green.png") }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "GreenChillyz — Taste, Reimagined",
-    description:
-      "One family, three flavors: GreenChillyz, YellowChillyz and GoldenChillyz.",
+    title: "GreenChillyz | Indian Food, Dining & Catering in Odisha",
+    description: SITE_DESCRIPTION,
+    images: [absoluteUrl("/assets/brand-story/brand_story_green.png")],
   },
   icons: {
     icon: [

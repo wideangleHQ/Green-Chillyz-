@@ -72,7 +72,7 @@ export function GamesSection() {
 
       <div className="container-site relative z-10 w-full h-full flex flex-col lg:flex-row gap-3 sm:gap-8 lg:gap-14 items-center justify-between min-h-0 overflow-x-hidden overflow-y-visible">
         {/* LEFT COLUMN: Editorial Header */}
-        <div className="w-full lg:w-[28%] flex flex-col items-start gap-2.5 sm:gap-4 md:gap-5 shrink-0 z-20">
+        <div className="w-full lg:flex-[0_0_27%] flex flex-col items-start gap-2.5 sm:gap-4 md:gap-5 shrink-0 z-20">
           <Reveal>
             <h2
               id="games-heading"
@@ -110,7 +110,7 @@ export function GamesSection() {
 
         {/* RIGHT COLUMN: Mobile View Vertical Overflow Visible */}
         <div
-          className="w-full lg:w-[72%] relative flex-1 min-h-0 w-full overflow-x-hidden overflow-y-visible flex items-center justify-center -mt-1 lg:mt-0"
+          className="w-full lg:flex-1 lg:min-w-0 relative min-h-0 overflow-x-hidden overflow-y-visible flex items-center justify-center -mt-1 lg:mt-0"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={(e) => {
@@ -136,7 +136,7 @@ export function GamesSection() {
           </button>
 
           {/* Centered Perspective Carousel Container (Vertical Overflow Visible on Mobile) */}
-          <div className="w-full h-full overflow-x-hidden overflow-y-visible py-2 md:py-12 flex items-center justify-center min-h-[380px] sm:min-h-[440px] md:min-h-[520px]">
+          <div className="w-full h-full overflow-x-hidden overflow-y-visible py-2 md:py-8 flex items-center justify-center min-h-[340px] sm:min-h-[390px] md:min-h-[440px]">
             <div className="relative w-full flex items-center justify-center transform-gpu overflow-y-visible">
               {GAMES_DATA.map((game, index) => {
                 let offset = index - activeIndex;
@@ -147,8 +147,9 @@ export function GamesSection() {
                 const isActive = offset === 0;
                 const isAdjacent = Math.abs(offset) === 1;
 
-                const cardWidth = isMobile ? 285 : 320;
-                const translateX = offset * (isMobile ? 195 : cardWidth * 0.75);
+                const cardWidth = isMobile ? 260 : 300;
+                // Keep adjacent cards close without letting the carousel feel crowded.
+                const translateX = offset * (isMobile ? 238 : cardWidth * 0.9);
                 const scale = isActive ? (isMobile ? 1.02 : 1.06) : isAdjacent ? (isMobile ? 0.82 : 0.88) : 0.72;
                 const opacity = isActive ? 1 : isAdjacent ? 0.85 : 0.4;
                 const zIndex = isActive ? 30 : 20 - Math.abs(offset);
@@ -174,6 +175,7 @@ export function GamesSection() {
                     <GameCard
                       game={game}
                       isActive={isActive}
+                      size="compact"
                       onPlay={(id) => setActivePlayGame(id)}
                     />
                   </motion.div>
